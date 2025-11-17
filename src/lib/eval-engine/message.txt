@@ -1,0 +1,100 @@
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08">   
+<FIToFICstmrCdtTrf>     
+    <GrpHdr>       
+        <MsgId>MSG20250601001</MsgId>       
+        <CreDtTm>2025-06-01T10:30:00Z</CreDtTm>       
+        <NbOfTxs>1</NbOfTxs>       
+        <SttlmInf>         
+            <SttlmMtd>CLRG</SttlmMtd>       
+        </SttlmInf>       
+        <InstgAgt>         
+            <FinInstnId>           
+                <BICFI>CITIUK3LXXX</BICFI>         
+            </FinInstnId>       
+        </InstgAgt>       
+        <InstdAgt>         
+            <FinInstnId>           
+                <BICFI>FTBCUS3CXXX</BICFI>         
+            </FinInstnId>       
+        </InstdAgt>    
+    </GrpHdr>     
+    <CdtTrfTxInf>       
+        <PmtId>         
+            <InstrId>PAYREF123456789</InstrId>         
+            <EndToEndId>E2E20250601001</EndToEndId>         
+            <TxId>TX20250601001</TxId>       
+        </PmtId>       
+        <PmtTpInf>         
+            <InstrPrty>NORM</InstrPrty>         
+                <SvcLvl>           
+                    <Cd>SEPA</Cd>         
+                </SvcLvl>       
+        </PmtTpInf>       
+        <IntrBkSttlmAmt Ccy="USD">1000.00</IntrBkSttlmAmt>       
+        <IntrBkSttlmDt>2025-06-01</IntrBkSttlmDt>       
+        <Dbtr>         
+            <Nm>John Doe</Nm>         
+            <PstlAdr>           
+                <StrtNm>London Bridge</StrtNm>           
+                    <PstCd>XC694X</PstCd>           
+                    <TwnNm>London</TwnNm>           
+                    <Ctry>GB</Ctry>         
+                </PstlAdr>       
+        </Dbtr>       
+        <DbtrAcct>         
+            <Id>           
+                <IBAN>BE00000000000001</IBAN>         
+            </Id>         
+            <Ccy>USD</Ccy>       
+        </DbtrAcct>       
+        <DbtrAgt>         
+            <FinInstnId>           
+                <BICFI>CITIUK3LXXX</BICFI>           
+                <Nm>Citibank London Ltd</Nm>           
+                <PstlAdr>             
+                    <TwnNm>London</TwnNm>             
+                    <Ctry>GB</Ctry>           
+                </PstlAdr>         
+            </FinInstnId>       
+        </DbtrAgt>       
+        <IntrmyAgt1>         
+            <FinInstnId>           
+                <BICFI>CITIUS3NXXX</BICFI>           
+                <Nm>Citibank HQ</Nm>           
+                <PstlAdr>             
+                    <TwnNm>New York</TwnNm>             
+                    <Ctry>US</Ctry>           
+                </PstlAdr>         
+                </FinInstnId>       
+        </IntrmyAgt1>       
+        <CdtrAgt>         
+            <FinInstnId>           
+                <BICFI>FTBCUS3CXXX</BICFI>           
+                <Nm>53 Bank</Nm>           
+                <PstlAdr>             
+                    <TwnNm>Cincinnati</TwnNm>             
+                    <Ctry>US</Ctry>           
+                </PstlAdr>         
+            </FinInstnId>       
+        </CdtrAgt>       
+        <Cdtr>         
+            <Nm>Jane Doe</Nm>         
+            <PstlAdr>           
+                <StrtNm>1, Ludlow Street</StrtNm>           
+                <PstCd>83749</PstCd>           
+                <TwnNm>Dayton</TwnNm>           
+                <Ctry>US</Ctry>         
+            </PstlAdr>       
+        </Cdtr>       
+        <CdtrAcct>         
+            <Id>           
+                <IBAN>BE00000000000002</IBAN>         
+            </Id>         
+            <Ccy>USD</Ccy>       
+        </CdtrAcct>       
+        <RmtInf>         
+            <Ustrd>Payment for services</Ustrd>       
+        </RmtInf>     
+    </CdtTrfTxInf>   
+</FIToFICstmrCdtTrf> 
+</Document>
