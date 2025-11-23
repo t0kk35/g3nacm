@@ -16,6 +16,8 @@ VALUES
     ('Admin', 'admin.user', 'User Maintenance (Create/Update/Delete)'),
     ('Admin', 'admin.role', 'Role Maintenance (Create/Update/Delete)'),
     ('Admin', 'admin.team', 'Team Maintenance (Create/Update/Delete)'),
+    ('Admin', 'admin.change_password', 'Change other users passwords'),
+    ('User', 'user.change_password', 'Allows a user to change their own password'),
     ('Data', 'data.alert', 'Base permission for the back-end access to alert data. Needed by end-users as well as as APIs.'),
     ('Data', 'data.attachment', 'Permission needed to read attachments from workflow entities')
 
@@ -27,6 +29,8 @@ JOIN user_permission p ON (
     OR (r.name = 'Admin' AND p.permission = 'admin.user')
     OR (r.name = 'Admin' AND p.permission = 'admin.role')
     OR (r.name = 'Admin' AND p.permission = 'admin.team')
+    OR (r.name = 'Admin' AND p.permission = 'admin.change_password')
+    OR (r.name = 'Admin' AND p.permission = 'user.change_password')
 );
 
 INSERT INTO user_role_link ("user_id", "role_id")

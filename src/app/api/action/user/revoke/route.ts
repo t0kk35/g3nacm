@@ -4,7 +4,7 @@
 import { auth } from "@/auth";
 import * as db from "@/db"
 import { NextRequest, NextResponse } from 'next/server';
-import { UserRevokeRequest } from '../user/user';
+import { UserRevokeRequest } from '../user/types';
 import { ErrorCreators } from '@/lib/api-error-handling';
 import { requirePermissions } from '@/lib/permissions/check';
 

@@ -1,3 +1,5 @@
+import { User } from "@/app/api/data/user/user";
+
 export type UserRequest = {
     name: string;
     first_name: string;
@@ -14,4 +16,11 @@ export type UserRevokeRequest = {
     user_ids: number[];
     role_id?: number;
     team_id?: number;
+}
+
+export type UserAudit = {
+    user: User;
+    org_ids: number[];
+    role_ids: number[];
+    team_ids: number[];
 }

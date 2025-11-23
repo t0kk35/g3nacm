@@ -4,9 +4,12 @@
 import { auth } from "@/auth";
 import * as db from "@/db"
 import { NextRequest, NextResponse } from 'next/server';
-import { UserRequest } from './user';
+import { UserRequest } from './types';
 import { ErrorCreators } from '@/lib/api-error-handling';
 import { requirePermissions } from '@/lib/permissions/check';
+import { AuditData } from "@/lib/audit/types";
+import { createAuditEntry } from "@/lib/audit/audit-log";
+import { UserAudit } from "./types";
 
 const origin = 'api/action/user/user'
 
@@ -86,6 +89,31 @@ export async function POST(request: NextRequest) {
             insert_queries.push(client.query(team_link_query, params));
         };
         if (insert_queries.length > 0) await Promise.all(insert_queries);
+        
+        // Audit the insert
+        const addedUser: UserAudit = {
+            user: {
+                id: newUserId,
+                name: userRequest.name,
+                firstName: userRequest.first_name,
+                lastName: userRequest.last_name,
+                deleted: false
+            },
+            org_ids: userRequest.org_unit_ids,
+            role_ids: userRequest.org_unit_ids,
+            team_ids: userRequest.team_infos.map(ti => ti.team_id)
+        }
+        const auditData: AuditData = {
+            category: 'user',
+            action: 'create-user',
+            target_type: 'user',
+            target_id_string: userRequest.name,
+            after_data: {
+                user: addedUser
+            }
+        }
+        await createAuditEntry(client, user.name, auditData );
+        
         // And Commit
         await client.query('COMMIT');
         return NextResponse.json({ 'success': true });

@@ -38,6 +38,13 @@ SQL schema files are located in the `script/` directory and should be run in dep
 - JWT-based sessions
 - Environment variable: `USER_VALIDATION_SECRET`
 
+**Password Validation** (`src/lib/auth/password-validation.ts`)
+- Configurable password validation system with environment-driven rules
+- Supports variable number of regex-based validation rules
+- Auto-detection of rules through indexed environment variables
+- Secure default rules if not configured
+- User-friendly requirement display for UI components
+
 **API Structure** (`src/app/api/`)
 - RESTful endpoints organized by domain (alert, user, role, team, org_unit)
 - Action-based endpoints for entity operations
@@ -197,10 +204,66 @@ The application uses TypeScript path mapping:
 
 ## Environment Configuration
 
-Required environment variables:
-- Database: `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`
-- Authentication: `USER_VALIDATION_SECRET`, `DATA_URL`
-- NextAuth: Standard NextAuth environment variables
+### Required Variables
+- **Database**: `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`
+- **Authentication**: `USER_VALIDATION_SECRET`, `DATA_URL`
+- **NextAuth**: Standard NextAuth environment variables
+
+### Password Validation Configuration
+The password validation system can be customized via environment variables to meet deployment-specific security requirements.
+
+**Minimum Length**
+- `NEXT_PUBLIC_PASSWORD_MIN_LENGTH` - Minimum password length (default: 8)
+- `NEXT_PUBLIC_PASSWORD_MIN_LENGTH_MESSAGE` - Custom error message for minimum length
+
+**Regex Rules**
+Rules are defined using indexed environment variables. You can define any number of rules (1, 2, 3, or more):
+
+- `NEXT_PUBLIC_PASSWORD_RULE_COUNT` - (Optional) Explicit count of rules; if omitted, rules are auto-detected
+- `NEXT_PUBLIC_PASSWORD_RULE_1_REGEX` - First validation regex pattern
+- `NEXT_PUBLIC_PASSWORD_RULE_1_MESSAGE` - First validation error message
+- `NEXT_PUBLIC_PASSWORD_RULE_2_REGEX` - Second validation regex pattern
+- `NEXT_PUBLIC_PASSWORD_RULE_2_MESSAGE` - Second validation error message
+- ... continue for additional rules (3, 4, 5, etc.)
+
+**Example Configurations**
+
+Basic deployment (default rules if not configured):
+```env
+# Uses secure defaults:
+# - Uppercase letter: [A-Z]
+# - Lowercase letter: [a-z]
+# - Number: [0-9]
+# - Special character: [^A-Za-z0-9]
+```
+
+Custom deployment with 3 rules:
+```env
+NEXT_PUBLIC_PASSWORD_MIN_LENGTH=10
+NEXT_PUBLIC_PASSWORD_MIN_LENGTH_MESSAGE=Password must be at least 10 characters
+NEXT_PUBLIC_PASSWORD_RULE_1_REGEX=[A-Z]
+NEXT_PUBLIC_PASSWORD_RULE_1_MESSAGE=Password must contain at least one uppercase letter
+NEXT_PUBLIC_PASSWORD_RULE_2_REGEX=[0-9]
+NEXT_PUBLIC_PASSWORD_RULE_2_MESSAGE=Password must contain at least one number
+NEXT_PUBLIC_PASSWORD_RULE_3_REGEX=[!@#$%^&*]
+NEXT_PUBLIC_PASSWORD_RULE_3_MESSAGE=Password must contain at least one special character (!@#$%^&*)
+```
+
+High-security deployment with 5 rules:
+```env
+NEXT_PUBLIC_PASSWORD_MIN_LENGTH=12
+NEXT_PUBLIC_PASSWORD_RULE_COUNT=5
+NEXT_PUBLIC_PASSWORD_RULE_1_REGEX=[A-Z]{2,}
+NEXT_PUBLIC_PASSWORD_RULE_1_MESSAGE=Password must contain at least two uppercase letters
+NEXT_PUBLIC_PASSWORD_RULE_2_REGEX=[a-z]{2,}
+NEXT_PUBLIC_PASSWORD_RULE_2_MESSAGE=Password must contain at least two lowercase letters
+NEXT_PUBLIC_PASSWORD_RULE_3_REGEX=[0-9]{2,}
+NEXT_PUBLIC_PASSWORD_RULE_3_MESSAGE=Password must contain at least two numbers
+NEXT_PUBLIC_PASSWORD_RULE_4_REGEX=[!@#$%^&*]
+NEXT_PUBLIC_PASSWORD_RULE_4_MESSAGE=Password must contain a special character
+NEXT_PUBLIC_PASSWORD_RULE_5_REGEX=^(?!.*(.)\1{2})
+NEXT_PUBLIC_PASSWORD_RULE_5_MESSAGE=Password cannot contain the same character three times in a row
+```
 
 ## Testing and Quality
 

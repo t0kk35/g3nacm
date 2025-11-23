@@ -10,15 +10,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
-import { ArrowLeft, Save } from "lucide-react"
+import { ArrowLeft, Save, KeyRound } from "lucide-react"
 import { UserAdmin } from "@/app/api/data/user/user"
 import { UserRole } from "@/app/api/data/user/user"
 import { UserTeam } from "@/app/api/data/user/user"
 import { OrgUnitNode } from "@/app/api/data/org_unit/org_unit"
-import { UserRequest } from "@/app/api/action/user/user/user"
+import { UserRequest } from "@/app/api/action/user/user/types"
 import { UserFormRoleTab } from "./UserFormRoleTab"
 import { UserFormTeamTab } from "./UserFormTeamTab"
 import { UserFormOrgTab } from "./UserFormOrgTab"
+import { ChangePasswordModal } from "../ChangePasswordModal"
 
 // Update the Permission interface
 export type FormUserRoles =  {
@@ -58,6 +59,7 @@ export function UserFormClient({ user, iRoles, iTeams, iOrgs }: UserFormProps) {
 	const [teams, setTeams] = useState<FormUserTeams[]>([]);
 	const [selectedOrgIds, setSelectedOrgIds] = useState<number[]>([]);
   	const [saving, setSaving] = useState(false);
+	const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   	const isEditing = !!user;
 
 	useEffect(() => {
@@ -172,10 +174,21 @@ export function UserFormClient({ user, iRoles, iTeams, iOrgs }: UserFormProps) {
 			<div className="space-y-2">
 				<Card className="pt-5">
 					<CardContent>
-						<Button type="button" variant="outline" onClick={() => router.push("/admin/user")}>
-						<ArrowLeft className="mr-2 h-4 w-4" />
-							Back to Users
-						</Button>
+						<div className="flex justify-between">
+							<Button type="button" variant="outline" onClick={() => router.push("/admin/user")}>
+							<ArrowLeft className="mr-2 h-4 w-4" />
+								Back to Users
+							</Button>
+							<Button type="button" variant="default"  onClick={() => setIsPasswordModalOpen(true)}>
+								<KeyRound className="mr-2 h-4 w-4" />
+								Change Password
+							</Button>
+							<ChangePasswordModal
+								open={isPasswordModalOpen}
+								onOpenChange={setIsPasswordModalOpen}
+								userName={user!.name}
+							/>
+						</div>
 					</CardContent>          
 				</Card>
 				<Card>

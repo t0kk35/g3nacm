@@ -4,6 +4,7 @@ CREATE TABLE users (
     password TEXT,
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
+    last_login_date_time TIMESTAMPTZ,
     deleted BOOLEAN NOT NULL DEFAULT FALSE
 );
 

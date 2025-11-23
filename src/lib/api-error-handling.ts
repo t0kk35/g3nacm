@@ -26,6 +26,8 @@ export enum ErrorCode {
     AUTH_USER_NOT_FOUND = "AUTH_00005",
     /** The provided password does not match the one in the database */
     AUTH_PASSWORD_CHECK_FAIL = "AUTH_00006",
+    /** Could not get the password secret to encode the password */
+    AUT_PASSWORD_SECRET_NOT_FOUND = "AUTH_00007",
 
     // Parameter Validation Errors (400)
     /** Required URL parameter missing. Replacements: {param} */
@@ -103,6 +105,8 @@ export const ErrorCreators = {
         userNotFound: (origin: string, user_name:string) => createErrorResponse(ErrorCode.AUTH_USER_NOT_FOUND, origin, {'user_name': user_name}),
         /** Error code 'AUTH_00006'. Password check failed */
         passwordFail: (origin: string, user_name:string) => createErrorResponse(ErrorCode.AUTH_PASSWORD_CHECK_FAIL, origin, {'user_name': user_name}),
+        /** Error code 'AUTH_00007'. Password secret missing */
+        passwordSecretNotFound: (origin: string) => createErrorResponse(ErrorCode.AUT_PASSWORD_SECRET_NOT_FOUND, origin),
     },
 
     param: {
@@ -173,7 +177,11 @@ const errorDefinition = new Map<ErrorCode, errorParams>([
     [ErrorCode.AUTH_PASSWORD_CHECK_FAIL, {
       httpCode: 401,
       text: "Authentication required - password check fail for user '{user_name}'"
-    }],    
+    }],
+    [ErrorCode.AUT_PASSWORD_SECRET_NOT_FOUND, {
+      httpCode: 500,
+      text: "Could not locate the password secret. Make sure to set-up a 'PASSWORD_SECRET' in the env.local file"
+    }],        
     // Parameter validation - 400
     [ErrorCode.PARAM_URL_MISSING, {
       httpCode: 400,
