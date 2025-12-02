@@ -14,6 +14,7 @@ import { TemplateContext } from "@/lib/ai-tools";
 import { PermissionGuard } from "@/components/ui/custom/permission-guard-server";
 import { NoPermission } from "@/components/ui/custom/no-permission";
 import { EntityAttachments } from "@/components/ui/custom/entity-attachment";
+import { WorkflowSelector } from "@/components/ui/custom/workflow/workflow-selection";
 
 type Props = {params: Promise<{ alertId : string }>}
 
@@ -59,11 +60,11 @@ export default async function AlertDetails({ params }: Props) {
                   entityId={alert.id}
                   orgUnitCode={alert.org_unit_code}
                 />
-                <ChatWindow agent="claude-base" 
+                <ChatWindow agent="claude-45" 
                   context={agentContext} 
                   orgUnitCode={alert.org_unit_code}
                   entityCode={alert.entity_state.entity_code}
-                  entityId={alert.id} 
+                  entityId={alert.id}
                 />
               </div>
             </>

@@ -64,7 +64,7 @@ export function WorkflowSelector({ orgUnitCode, entityCode, entityId, entityIden
     }
   }, [selectedAction])  
 
-  // Function to fetch the actions that are available from the current state.
+  // Function to fetch the actions that are available from the current state and of trigger 'user'
   async function fetchWorkflowActions(orgUnitCode: string, entityCode: string, state: string): Promise<WorkflowAction[]> {
     const workflow = await fetch(`/api/data/workflow?org_unit_code=${orgUnitCode}&entity_code=${entityCode}`)
       .then(res => { 
@@ -73,7 +73,7 @@ export function WorkflowSelector({ orgUnitCode, entityCode, entityId, entityIden
           })
       .then(j => j as WorkflowConfig)
     
-    const actions = workflow.actions.filter((a) => a.from_state_code === state)
+    const actions = workflow.actions.filter((a) => a.from_state_code === state && a.trigger === 'user')
     return actions
   }
 
@@ -174,7 +174,7 @@ export function WorkflowSelector({ orgUnitCode, entityCode, entityId, entityIden
       }
 
       // Call the workflow end-point to execute the workflow
-      const response = await fetch(`/api/workflow/perform_action`, {
+      const response = await fetch(`/api/action/workflow`, {
         method: "POST",
         headers: headers,
         body: requestBody,
@@ -183,15 +183,22 @@ export function WorkflowSelector({ orgUnitCode, entityCode, entityId, entityIden
       if (!response.ok) {
         throw new Error("Failed to execute workflow action")
       }
+
+      // Get redirect URLs from API response
+      const result = await response.json();
+      const redirectUrls = result.redirectUrls || [];
+
       // Handle successful submission
       toast.info(`${new Date().toLocaleString()} Performed action ${selectedAction.name} on ${entityIdentifier}`);
       setFormData({})
-      // Check if we need to redirect
-      if (selectedAction.redirect_url) {
-        router.push(selectedAction.redirect_url)
+
+      // Use first redirect URL if available (we only submit one action at a time here)
+      if (redirectUrls.length > 0 && redirectUrls[0]) {
+        router.push(redirectUrls[0])
       } else {
+        // No redirect - refresh available actions for new state
         const new_actions = await fetchWorkflowActions(orgUnitCode, entityCode, selectedAction.to_state_code);
-        setActions(new_actions);  
+        setActions(new_actions);
         setSelectedAction(null)
       }
     } catch (err) {

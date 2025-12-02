@@ -2,18 +2,19 @@
 
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "../ui/sidebar"
 import { Home } from "lucide-react"
+import Link from "next/link"
 
 export async function AppSideBarHome() {
   return(
     <SidebarMenu>
       <SidebarMenuItem>
         <SidebarMenuButton asChild>
-          <a href="/">
+          <Link href="/">
             <Home/>
             Home
-          </a>
+          </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
-    </SidebarMenu>    
+    </SidebarMenu>
   )
 }

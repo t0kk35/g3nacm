@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect, useRef, useCallback } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "../skeleton"
 import { Card, CardContent } from "@/components/ui/card"
@@ -29,6 +30,7 @@ export function EntityAttachments({
   orgUnitCode,
   className,
 }: EntityAttachmentsProps) {
+  const router = useRouter()
   const [attachments, setAttachments] = useState<EntityAttachment[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isExpanded, setIsExpanded] = useState(false)
@@ -119,10 +121,17 @@ export function EntityAttachments({
         method: "POST",
         body: requestBody,
       });
-    
+
     if (!res.ok) {
       throw new Error(`Could not perform workflow action ${ (await res.json() as APIError).message}`)
     }
+
+    // Get redirect URLs from API response
+    const result = await res.json();
+    const redirectUrls = result.redirectUrls || [];
+
+    // Return first redirect URL if available (for caller to handle navigation)
+    return redirectUrls[0] || null;
   }
 
   const onRefresh = () => {
@@ -166,12 +175,18 @@ export function EntityAttachments({
 
     setIsUploading(true)
     try {
-      await onUpload(selectedFile, uploadDescription)
+      const redirectUrl = await onUpload(selectedFile, uploadDescription)
       setShowUploadDialog(false)
       setSelectedFile(null)
       setUploadDescription("")
-      onRefresh()
       toast.success(`File uploaded successfully ${selectedFile.name} has been attached.`)
+
+      // Navigate to redirect URL if provided, otherwise refresh attachments
+      if (redirectUrl) {
+        router.push(redirectUrl)
+      } else {
+        onRefresh()
+      }
     } catch (error) {
       toast.error("Upload failed. There was an error uploading the file.")
     } finally {

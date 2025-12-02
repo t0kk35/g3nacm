@@ -174,33 +174,29 @@ async function generateAggregationViaSQL(
   // Build LIMIT clause
   const limitClause = limit ? `LIMIT ${limit}` : '';
   
-  const query = {
-    name: 'transaction_aggregation',
-    text: `
-      SELECT 
-        ${selectFields.join(', ')},
-        COUNT(*) as count,
-        COALESCE(SUM(${amountField}), 0) as sum_amount,
-        COALESCE(AVG(${amountField}), 0) as avg_amount,
-        COALESCE(MIN(${amountField}), 0) as min_amount,
-        COALESCE(MAX(${amountField}), 0) as max_amount,
-        COALESCE(STDDEV(${amountField}), 0) as stddev_amount,
-        COALESCE(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY ${amountField}), 0) as median_amount
-      FROM trx_general_ledger tgl
-      JOIN subject_base sb ON tgl.subject_id = sb.id
-      JOIN product_base pb ON tgl.product_id = pb.id
-      JOIN org_unit ou ON ou.code = tgl.org_unit_code
-      JOIN v_user_org_access_path ouap ON ou.path = ouap.path OR ou.path LIKE CONCAT(ouap.path, '/%')
-      JOIN users u ON ouap.user_id = u.id
-      WHERE ${whereClause}
-      GROUP BY ${groupByClause}
-      ${orderByClause}
-      ${limitClause}
-    `,
-    values
-  };
-  
-  const result = await db.pool.query(query);
+  const query = `
+    SELECT
+      ${selectFields.join(', ')},
+      COUNT(*) as count,
+      COALESCE(SUM(${amountField}), 0) as sum_amount,
+      COALESCE(AVG(${amountField}), 0) as avg_amount,
+      COALESCE(MIN(${amountField}), 0) as min_amount,
+      COALESCE(MAX(${amountField}), 0) as max_amount,
+      COALESCE(STDDEV(${amountField}), 0) as stddev_amount,
+      COALESCE(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY ${amountField}), 0) as median_amount
+    FROM trx_general_ledger tgl
+    JOIN subject_base sb ON tgl.subject_id = sb.id
+    JOIN product_base pb ON tgl.product_id = pb.id
+    JOIN org_unit ou ON ou.code = tgl.org_unit_code
+    JOIN v_user_org_access_path ouap ON ou.path = ouap.path OR ou.path LIKE CONCAT(ouap.path, '/%')
+    JOIN users u ON ouap.user_id = u.id
+    WHERE ${whereClause}
+    GROUP BY ${groupByClause}
+    ${orderByClause}
+    ${limitClause}
+  `;
+
+  const result = await db.pool.query(query, values);
   
   return {
     subjectId,

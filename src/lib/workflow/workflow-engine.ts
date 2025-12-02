@@ -14,9 +14,10 @@ const origin = 'workflow-engine'
  * @param workflowConfig - The configuration for the workflow.
  * @param ctx - The workflow context.
  * @param client - A pg Client instance with an active transaction.
+ * @returns The resolved redirect URL (if configured) or null
  */
-export async function executeWorkflowAction(client: PoolClient, workflowConfig: WorkflowConfig, ctx: WorkflowContext): Promise<void> {
-  
+export async function executeWorkflowAction(client: PoolClient, workflowConfig: WorkflowConfig, ctx: WorkflowContext): Promise<string | null> {
+
     // Find the action we need to perform
     const action = workflowConfig.actions.find(a=> a.code === ctx.system.actionCode);
     WorkflowErrorCreators.action.assertActionExists(origin, ctx.system.actionCode, action);
@@ -70,13 +71,16 @@ export async function executeWorkflowAction(client: PoolClient, workflowConfig: 
 
       // Map the outputs back to the context.
       func.output_parameters.forEach((op) => {
-        if (outputs[op.code] === undefined) 
+        if (outputs[op.code] === undefined)
           if (op.code.startsWith('system.')) WorkflowErrorCreators.context.canNotOverWriteSystem(origin, action.code, func.code, op.code, op.context_mapping)
           ctx.data[op.context_mapping] = outputs[op.code]
       })
     }
     // Optionally, write audit logs to a persistent store.
     console.log(`Audit log for entity ${ctx.system.entityId} (${ctx.system.entityCode}):`, ctx.auditLog);
+
+    // Resolve and return the redirect URL using the post-execution context
+    return resolveRedirectUrl(action.redirect_url, ctx);
 }
 
 // Helper to initialize the workflow context.
@@ -94,7 +98,7 @@ export function createWorkflowContext(data: { [key: string]: any }, system: Syst
 
 /* Helper function to resolve a setting. Settings can have replacements values */
 function resolveSetting(value: any, ctx: WorkflowContext ): any {
-  
+
     if (typeof value !== 'string') return value;
     return value.replace(/\$\{([a-zA-Z0-9_.:]+)\}/g, (_match, token) => {
       const [source, ...pathParts] = token.split(':');
@@ -117,6 +121,28 @@ function resolveSetting(value: any, ctx: WorkflowContext ): any {
           WorkflowErrorCreators.context.unknowSettingSource(origin, source, value)
       }
     });
+}
+
+/**
+ * Resolves dynamic variables in a redirect URL using workflow context.
+ * Supports ${ctx:...} and ${env:...} replacements just like settings.
+ * Returns null if redirect_url is empty/null/undefined, or the resolved URL string.
+ *
+ * @param redirectUrl - The redirect URL template with optional ${ctx:...} or ${env:...} variables
+ * @param ctx - The workflow context containing system fields and data
+ * @returns The resolved URL string or null if no redirect should occur
+ */
+export function resolveRedirectUrl(
+  redirectUrl: string | null | undefined,
+  ctx: WorkflowContext
+): string | null {
+  // Return null for empty/null/undefined URLs
+  if (!redirectUrl || redirectUrl.trim() === '') {
+    return null;
+  }
+
+  // Use the same resolution logic as settings
+  return resolveSetting(redirectUrl, ctx);
 }
 
 /* Small Helper function to establish if an action is an any_active function code */

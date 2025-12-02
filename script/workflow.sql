@@ -3,7 +3,7 @@ CREATE TYPE function_parameter_direction as ENUM('Input', 'Output');
 CREATE TYPE form_field_type as ENUM('select', 'textarea', 'checkbox', 'text', 'radio', 'userselect');
 CREATE TYPE workflow_lock_action as ENUM('aquire', 'release');
 CREATE TYPE entity_priority AS ENUM ('High', 'Medium', 'Low');
-CREATE TYPE action_trigger as ENUM ('team', 'auto', 'user');
+CREATE TYPE action_trigger as ENUM ('get', 'auto', 'user', 'system');
 
 CREATE TABLE workflow_config (
   code TEXT PRIMARY KEY,
@@ -112,6 +112,7 @@ CREATE INDEX idx_wafs_action_function on workflow_action_function_setting(action
 CREATE TABLE workflow_entity_state(
   entity_id UUID NOT NULL,
   entity_code TEXT NOT NULL,
+  org_unit_code TEXT NOT NULL,
   date_time TIMESTAMP NOT NULL,
   action_code TEXT NOT NULL,
   action_name TEXT NOT NULL,
@@ -136,11 +137,13 @@ CREATE TABLE workflow_entity_state(
   CONSTRAINT fk_workflow_state_to FOREIGN KEY (to_state_code) REFERENCES workflow_state(code),
   CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id),
   CONSTRAINT fk_assinged_user FOREIGN KEY (assigned_to_user_id) REFERENCES users(id),
-  CONSTRAINT fk_assigned_team FOREIGN KEY (assigned_to_team_id) REFERENCES user_team(id)
+  CONSTRAINT fk_assigned_team FOREIGN KEY (assigned_to_team_id) REFERENCES user_team(id),
+  CONSTRAINT fk_org_unit FOREIGN KEY (org_unit_code) REFERENCES org_unit(code)
 );
 
 CREATE INDEX idx_wes_entity_id on workflow_entity_state(entity_id);
 CREATE INDEX idx_wes_assigned_to_uid on workflow_entity_state(assigned_to_user_id);
+CREATE INDEX idx_wes_assigned_to_uname on workflow_entity_state(assigned_to_user_name);
 CREATE INDEX idx_wes_assigned_to_tid on workflow_entity_state(assigned_to_team_id);
 CREATE INDEX idx_wes_date_time on workflow_entity_state(date_time);
 CREATE INDEX idx_wes_user_id on workflow_entity_state(user_id);
@@ -148,6 +151,7 @@ CREATE INDEX idx_wes_user_id on workflow_entity_state(user_id);
 CREATE TABLE workflow_entity_state_log(
   entity_id UUID NOT NULL,
   entity_code TEXT NOT NULL,
+  org_unit_code TEXT NOT NULL,
   date_time TIMESTAMP NOT NULL,
   action_code TEXT NOT NULL,
   action_name TEXT NOT NULL,
@@ -170,7 +174,8 @@ CREATE TABLE workflow_entity_state_log(
   CONSTRAINT fk_workflow_state_to FOREIGN KEY (to_state_code) REFERENCES workflow_state(code),
   CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id),
   CONSTRAINT fk_assinged_user FOREIGN KEY (assigned_to_user_id) REFERENCES users(id),
-  CONSTRAINT fk_assigned_team FOREIGN KEY (assigned_to_team_id) REFERENCES user_team(id)
+  CONSTRAINT fk_assigned_team FOREIGN KEY (assigned_to_team_id) REFERENCES user_team(id),
+  CONSTRAINT fk_org_unit FOREIGN KEY (org_unit_code) REFERENCES org_unit(code)
 );
 
 CREATE INDEX idx_wesl_entity_id on workflow_entity_state_log(entity_id);

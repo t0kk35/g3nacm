@@ -5,6 +5,7 @@ import { isAnyActive } from "./workflow-engine";
 export type WorkflowEntityState = {
     entity_id: string;
     entity_code: string;
+    org_unit_code: string;
     date_time: string;
     action_code: string;
     from_state_code: string;
@@ -19,6 +20,7 @@ const query_entity_state = `
 SELECT 
   wes.entity_id AS "entity_id",
   wes.entity_code AS "entity_code",
+  wes.org_unit_code AS "org_unit_code",
   wes.date_time AS "date_time",
   wes.action_code AS "action_code",
   wa.from_state as "from_state_code",
@@ -47,9 +49,30 @@ export async function getEntityState(client: PoolClient, entityId: string, entit
 
 const insert_entity_state_log = `
 INSERT INTO workflow_entity_state_log
+( 
+  entity_id,
+  entity_code,
+  org_unit_code,
+  date_time,
+  action_code,
+  action_name,
+  from_state_code,
+  from_state_name,
+  to_state_code,
+  to_state_name,
+  priority,
+  priority_num,
+  assigned_to_user_id,
+  assigned_to_user_name,
+  assigned_to_team_id,
+  assigned_to_team_name,
+  user_id,
+  user_name
+)
 SELECT 
   entity_id,
   entity_code,
+  org_unit_code,
   date_time,
   action_code,
   action_name,

@@ -8,12 +8,23 @@ INSERT INTO workflow_entity
   ('wlm.tf.alert', 'Transaction Filtering Alert');
 
 -- Insert statements for registering functions
-
---- Get function 
+--- Assign to user function
 INSERT INTO workflow_function 
   ("code", "name") 
 VALUES 
-  ('function.entity.change_state.get', 'Get an Entity from a team queue and assign it to a user');
+  ('function.entity.change_state.assign_user', 'Function to assign a workflow entity to a specific user');
+
+INSERT INTO workflow_function_parameter 
+  ("code", "function_code", "name", "parameter_type", "direction") 
+VALUES 
+  -- Input parameters
+  ('function.entity.change_state.assign_user.assign_to_user_name', 'function.entity.change_state.assign_user', 'User Name', 'string', 'Input')
+
+--- Get Next function 
+INSERT INTO workflow_function 
+  ("code", "name") 
+VALUES 
+  ('function.entity.change_state.get_next', 'Function to perform a Get Next from a Team Queue');
 
 --- Eval Engine
 INSERT INTO workflow_function 

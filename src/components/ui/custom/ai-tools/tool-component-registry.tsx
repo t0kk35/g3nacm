@@ -4,6 +4,7 @@ import { TimelineDisplay } from './timeline-display';
 import { TodoListDisplay } from './todo-list-display';
 import { ChartDisplay } from './chart-display';
 import { SubjectDisplay } from './subject-display';
+import { WorkflowActionExecutor } from './workflow-action-executor';
 
 // Registry mapping component names to actual components
 const componentRegistry = {
@@ -12,6 +13,7 @@ const componentRegistry = {
   'TodoListDisplay': TodoListDisplay,
   'ChartDisplay': ChartDisplay,
   'SubjectDisplay': SubjectDisplay,
+  'WorkflowActionExecutor': WorkflowActionExecutor,
 };
 
 interface ToolComponentProps {

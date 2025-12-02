@@ -35,6 +35,16 @@ export const DynamicSelectField = <T extends { name: string }> ({ field, value, 
             });
     }, [field.code]);
 
+    // Set selected option when value is pre-populated
+    useEffect(() => {
+        if (value && options.length > 0 && !selected) {
+            const matchedOption = options.find(option => option.name === value);
+            if (matchedOption) {
+                setSelected(matchedOption);
+            }
+        }
+    }, [value, options, selected]);
+
     const handleSelect = (item: T) => {
         setSelected(item);
         setOpen(false);

@@ -64,6 +64,8 @@ export enum ErrorCode {
     WORKFLOW_NOT_FOUND = "WRKF_00001",
     /** Worflow for entity and org unit not unique */
     WORKFLOW_NOT_UNIQUE = "WRKF_00002",
+    /** Could not find workflow action for get_next operation */
+    WORKFLOW_NO_GET_NEXT_ACTION = "WRKL_00003",
 
     /** Unknown agent */
     AGENT_NOT_FOUND = "AGNT_000001",
@@ -139,7 +141,8 @@ export const ErrorCreators = {
     },
     workflow: {
         notFound: (origin: string, entity_code: string, org_unit_code: string) => createErrorResponse(ErrorCode.WORKFLOW_NOT_FOUND, origin, {'entity_code': entity_code, 'org_unit_code': org_unit_code }),
-        notUnique: (origin: string, entity_code: string, org_unit_code: string) => createErrorResponse(ErrorCode.WORKFLOW_NOT_UNIQUE, origin, {'entity_code': entity_code, 'org_unit_code': org_unit_code })
+        notUnique: (origin: string, entity_code: string, org_unit_code: string) => createErrorResponse(ErrorCode.WORKFLOW_NOT_UNIQUE, origin, {'entity_code': entity_code, 'org_unit_code': org_unit_code }),
+        noGetNextAction: (origin: string, entity_code: string, entity_id: string, org_unit_code: string, to_state_code: string) => createErrorResponse(ErrorCode.WORKFLOW_NO_GET_NEXT_ACTION, origin, {'entity_code': entity_code, 'entity_id': entity_id, 'org_unit_code': org_unit_code, 'to_state_code': to_state_code})
     },
     perm: {
         onlyOwnUser: (origin: string, auth_user: string, req_user: string) => createErrorResponse(ErrorCode.PERM_ONLY_OWN_USER, origin, {'auth_user': auth_user, 'req_user': req_user }),
@@ -248,6 +251,10 @@ const errorDefinition = new Map<ErrorCode, errorParams>([
     [ErrorCode.WORKFLOW_NOT_UNIQUE, {
       httpCode: 400,
       text: "Not unique. Found more than 1 workflow for entity '{entity_code}' and org '{org_unit_code}'"
+    }],
+    [ErrorCode.WORKFLOW_NO_GET_NEXT_ACTION, {
+      httpCode: 400,
+      text: "Could not find an action that fits a get_next operation for code '{entity_code}', id '{entity_id}', org '{org_unit_code}' and state '{to_state}'"
     }],
     [ErrorCode.PERM_INSUFFICIENT_PERMISSION, {
       httpCode: 403,

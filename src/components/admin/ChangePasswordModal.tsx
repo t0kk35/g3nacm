@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
-import { Eye, EyeOff, Lock } from "lucide-react"
+import { Eye, EyeOff, KeyRound } from "lucide-react"
 import { validatePassword, getPasswordRequirements } from "@/lib/auth/password-validation"
 
 interface ChangePasswordModalProps {
@@ -110,7 +110,7 @@ export function ChangePasswordModal({
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Lock className="h-5 w-5" />
+              <KeyRound className="h-5 w-5" />
               Change Password
             </DialogTitle>
             <DialogDescription>

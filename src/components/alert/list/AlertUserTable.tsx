@@ -31,7 +31,7 @@ export function AlertTable({ data }: Props) {
       accessorKey: "priority",
       header: "Priority",
       cell: ({ row }) => (
-        <AlertPriorityBadge priority={row.original.priority} />
+        <AlertPriorityBadge priority={row.original.entity_state.priority} />
       ),
     },
     {

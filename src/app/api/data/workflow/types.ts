@@ -15,9 +15,10 @@ export enum WorkflowParmaterDirection {
 }
 
 export enum WorkflowTrigger {
-    TEAM = "user",
+    GET = "get",
     AUTO = "auto",
-    USER = "user"
+    USER = "user",
+    SYSTEM = "system"
 }
 
 // Entities on which we can perform workflow actions

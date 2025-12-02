@@ -7,6 +7,7 @@ import { FunctionCreateEntity } from "./implementations/create-entity";
 import { FunctionSendMail } from "./implementations/send-mail";
 import { FunctionEvalEngine } from "./implementations/eval-engine";
 import { FunctionUploadDocument } from "./implementations/upload-document";
+import { FunctionChangeEntityStateGetNext } from "./implementations/change-entity-state-get-next";
 
 export interface IWorkflowFunction {
     code: string;
@@ -28,3 +29,4 @@ workflowFunctionRegistry['function.entity.create'] = new FunctionCreateEntity();
 workflowFunctionRegistry['function.mail'] = new FunctionSendMail();
 workflowFunctionRegistry['function.eval_engine'] = new FunctionEvalEngine();
 workflowFunctionRegistry['function.document.upload'] = new FunctionUploadDocument();
+workflowFunctionRegistry['function.entity.change_state.get_next'] = new FunctionChangeEntityStateGetNext();

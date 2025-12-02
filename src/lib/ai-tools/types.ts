@@ -32,8 +32,13 @@ export interface OpenAIModelConfig {
   frequencyPenalty?: number;
   presencePenalty?: number;
   seed?: number;
+  providerOptions?: {
+    openai?: {
+      reasoningEffort?: 'high' | 'medium' | 'low',
+      reasoningSummary?: 'auto' | 'detailed'
+    }
+  }
 }
-
 export interface AnthropicModelConfig {
   provider: 'anthropic';
   model: string;

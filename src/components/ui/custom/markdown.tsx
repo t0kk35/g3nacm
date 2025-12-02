@@ -106,5 +106,11 @@ export function Markdown({ content }: MarkdownProps) {
     return computed;
   }, [content]);
 
-  return <div dangerouslySetInnerHTML={{ __html: htmlContent }} />;
+  return (
+    /* Return a div, with the correct styling, otherwise tailwind pre-flight takes over and removes all list stuff */
+    <div
+      className="markdown-content [&_ul]:list-disc [&_ul]:ml-6 [&_ul]:my-2 [&_ol]:list-decimal [&_ol]:ml-6 [&_ol]:my-2 [&_li]:ml-1 [&_li]:my-1 [&_p]:my-2 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:my-3 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:my-2 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:my-2 [&_pre]:bg-muted [&_pre]:p-3 [&_pre]:rounded [&_pre]:overflow-x-auto [&_pre]:my-2 [&_code]:bg-muted [&_code]:px-1 [&_code]:rounded [&_code]:text-sm [&_a]:text-blue-500 [&_a]:underline"
+      dangerouslySetInnerHTML={{ __html: htmlContent }}
+    />
+  );
 };

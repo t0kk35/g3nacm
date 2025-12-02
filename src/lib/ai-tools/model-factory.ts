@@ -22,9 +22,9 @@ export function createModelInstance(config: ModelConfig): ModelInstance {
 
 function createOpenAIInstance(config: OpenAIModelConfig): ModelInstance {
   const model = openai(config.model);
-  
+
   const baseOptions: Record<string, any> = {};
-  
+
   if (config.temperature !== undefined) {
     baseOptions.temperature = config.temperature;
   }
@@ -43,7 +43,10 @@ function createOpenAIInstance(config: OpenAIModelConfig): ModelInstance {
   if (config.seed !== undefined) {
     baseOptions.seed = config.seed;
   }
-  
+  if (config.providerOptions) {
+    baseOptions.providerOptions = config.providerOptions;
+  }
+
   return {
     model,
     streamTextOptions: { ...baseOptions },

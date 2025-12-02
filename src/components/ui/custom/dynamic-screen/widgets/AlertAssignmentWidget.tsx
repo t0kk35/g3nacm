@@ -5,8 +5,10 @@ import { CardHeader, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { AlertTriangle, User, Users, RefreshCw } from 'lucide-react'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { AlertTriangle, User, Users, RefreshCw, Loader2 } from 'lucide-react'
 import { UserAssignment } from '@/app/api/data/user/user'
+import { useGetNextAlert } from '@/hooks/use-get-next-alert'
 
 interface AlertAssignmentWidgetProps {
   title?: string
@@ -19,6 +21,7 @@ export function AlertAssignmentWidget({ title = 'My Alerts', refreshInterval = 6
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const { getNextAlert, isLoading: isGettingNext } = useGetNextAlert();
 
   const fetchAssignment = async () => {
     try {
@@ -149,7 +152,30 @@ export function AlertAssignmentWidget({ title = 'My Alerts', refreshInterval = 6
                   <Users className="h-4 w-4" />
                   Team Assignments
                 </div>
-                <span className="font-medium">{assignment.alerts.team.total}</span>
+                {assignment.alerts.team.total > 0 ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={getNextAlert}
+                        disabled={isGettingNext}
+                        className="font-medium text-primary hover:underline cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+                        aria-label="Get next team alert"
+                      >
+                        {isGettingNext ? (
+                          <Loader2 className="h-4 w-4 animate-spin inline" />
+                        ) : (
+                          assignment.alerts.team.total
+                        )}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Get Next Alert</p>
+                    </TooltipContent>
+                  </Tooltip>
+
+                ) : (
+                  <span className="font-medium">{assignment.alerts.team.total}</span>
+                )}
               </div>
               {assignment.alerts.team.total > 0 && (
                 <div className="pl-6">

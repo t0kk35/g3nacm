@@ -17,7 +17,13 @@ SELECT
     last_name AS "lastName",
     deleted AS "deleted"
 FROM users u
-WHERE ($1::integer[] IS NULL OR u.id = ANY($1))
+WHERE (
+    $1::integer[] IS NOT NULL AND u.id = ANY($1::integer[]) 
+    OR 
+    $2::text IS NOT NULL AND (name ILIKE $2 OR (first_name || ' ' || last_name ILIKE $2))
+    OR 
+    ($1 IS NULL AND $2 IS NULL)
+)
 `
 
 export async function GET(request: NextRequest) {
@@ -33,17 +39,19 @@ export async function GET(request: NextRequest) {
 
     // See if we have optional parameters
     const searchParams = request.nextUrl.searchParams
-    const user_ids = searchParams.getAll("user_ids")
-    // Can be empty, a single user-id or an array if multiple user ids were fed.
+    const user_ids = searchParams.getAll('user_ids')
+    const searchQuery = searchParams.get('search')
+    const searchQueryPattern = searchQuery ? '%' + searchQuery + '%' : searchQuery
+    // Can be empty or an array if multiple user ids were fed.
     const user_ids_number = 
-        user_ids == null ? null : 
+        user_ids.length === 0 ? null : 
         Array.isArray(user_ids) ? 
         user_ids.map(n=> parseInt(n)) : 
         [parseInt(user_ids)]
     
     if (!useMockData) {
         try {
-            const users = await db.pool.query(query_text, [user_ids_number]);
+            const users = await db.pool.query(query_text, [user_ids_number, searchQueryPattern]);
             const res:User[] = users.rows
             return Response.json(res);
         } catch (error) {

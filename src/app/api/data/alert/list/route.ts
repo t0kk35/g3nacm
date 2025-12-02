@@ -101,7 +101,7 @@ LEFT JOIN LATERAL(
     AND atfdi.alert_id = ab.id
 ) atfd on TRUE
 WHERE u.name=$1
-AND ($2::text IS NULL OR $2 = wes.user_name)
+AND ($2::text IS NULL OR $2 = wes.assigned_to_user_name)
 AND ($3::UUID IS NULL OR ($3 = ai.item_id AND ai.item_type = 'SUB'))
 ORDER BY ab.create_date_time ASC
 `

@@ -26,7 +26,7 @@ SELECT jsonb_build_object(
 ) AS alerts
 FROM (
   SELECT 
-    COALESCE(SUM(CASE WHEN a.assignment_type = 'user' THEN 1 END), 0) AS overall, 
+    COALESCE(SUM(1), 0) AS overall, 
     COALESCE(SUM(CASE WHEN a.assignment_type = 'user' THEN 1 END), 0) AS user_all,    
     COALESCE(SUM(CASE WHEN a.assignment_type = 'user' AND a.priority = 'High' THEN 1 END), 0) AS user_high,
     COALESCE(SUM(CASE WHEN a.assignment_type = 'user' AND a.priority = 'Medium' THEN 1 END), 0) AS user_medium,
@@ -55,7 +55,6 @@ FROM (
       'team' AS assignment_type
     FROM alert_base ab
     JOIN workflow_entity_state wes ON wes.entity_code = ab.entity_code AND wes.entity_id = ab.id
-    JOIN users u ON wes.assigned_to_user_id = u.id
     WHERE ab.alert_type = 'TM'
     AND wes.assigned_to_team_id is NOT null
     AND wes.assigned_to_team_id in (

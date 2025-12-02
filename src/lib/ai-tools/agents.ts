@@ -4,14 +4,15 @@ import { z } from 'zod';
 // Agent configurations
 export const agentConfigs: Record<string, AgentConfig> = {
 
-  'claude-base': {
+  'claude-45': {
     name: 'Advanced Analyst',
-    description: 'Advanced analysis agent with Claude 4 thinking capabilities',
+    description: 'Advanced analysis agent with advanced thinking capabilities',
     tools: [
       'fetch-subject-detail', 'fetch-subject-history', 'fetch-subject-events', 'todo-list', 'chart-display',
-      'transaction-overview', 'transaction-aggregation', 'transaction-list', 'subject-display', 'fetch-attachment-list'
+      'transaction-overview', 'transaction-aggregation', 'transaction-list', 'subject-display', 'fetch-attachment-list',
+      'fetch-next-workflow-action', 'execute-workflow-action', 'search-user'
     ],
-    maxSteps: 10,
+    maxSteps: 15,
     systemPrompt: `You are an advanced analyst with deep reasoning capabilities for {{applicationName}}. Your main task is to help the end-users understand the
       potential compliance risk from a Transaction Monitoring perspective for a specific alert and the client in general.
 
@@ -24,10 +25,17 @@ export const agentConfigs: Record<string, AgentConfig> = {
 
       For more complex tasks it is generally a good idea to make a visual todo list and work down the items of that list one by one.
 
-      Some tools will return a 'ui:...' property. The data in the ui field will be rendered in the chat window.`,
+      Some tools will return a 'ui:...' property. The data in the ui field will be rendered in the chat window.
+
+      The system has a configurable workflow, it controls the lifecylcle of an alert, investigators need to move the alerts 
+      through the workflow to finalise their work. You can check which actions are possible using the fetch-next-workflow-action tool.
+
+      Some actions have form-fields. These are fields that need to be populated. You can help the user by pre-populating these fields. You
+      can use execute-workflow-action to display a form with the formfields and allow the user to execute the workflow actions.
+    `,
     modelConfig: {
       provider: 'anthropic',
-      model: 'claude-4-sonnet-20250514',
+      model: 'claude-sonnet-4-5-20250929',
       providerOptions: {
         anthropic: {
           thinking: { 
@@ -35,90 +43,23 @@ export const agentConfigs: Record<string, AgentConfig> = {
             budgetTokens: 25000 
           },
         }
-      }
-    },
-    agentType: 'streaming'
-  },
-
-  'claude-test-noit': {
-    name: 'Advanced Analyst',
-    description: 'Advanced analysis agent with Claude 4 thinking capabilities',
-    tools: [
-      'fetch-subject-detail', 'fetch-subject-history', 'todo-list', 'chart-display',
-      'transaction-overview', 'transaction-aggregation', 'transaction-list'
-    ],
-    maxSteps: 5,
-    systemPrompt: `You are an advanced analyst with deep reasoning capabilities for {{applicationName}}. Your main task is to help the end-users understand the
-      potential compliance risk from a Transaction Monitoring perspective for a specific alert and the client in general.
-
-      Current user: {{userName}}
-      Current date/time: {{currentDateTime}}
-
-      {{alert}}
-
-      Use your thinking process to analyze complex scenarios thoroughly before providing responses. Consider all available context and data when making your analysis.
-
-      For more complex tasks it is generally a good idea to make a visual todo list and work down the items of that list one by one.
-
-      Some tools will return a 'ui:...' property. The data in the ui field will be rendered in the chat window.`,
-    modelConfig: {
-      provider: 'anthropic',
-      model: 'claude-4-sonnet-20250514',
-      maxTokens: 8000,
-      providerOptions: {
-        anthropic: {
-          thinking: { 
-            type: 'enabled', 
-            budgetTokens: 15000 
-          },
-        }
-      }
-    },
-    agentType: 'streaming'
-  },
-
-  'claude-test': {
-    name: 'Advanced Analyst',
-    description: 'Advanced analysis agent with Claude 4 thinking capabilities',
-    tools: [
-      'fetch-subject-detail', 'fetch-subject-history', 'todo-list', 
-      'transaction-overview', 'transaction-aggregation', 'transaction-list'
-    ],
-    maxSteps: 15,
-    systemPrompt: `You are an advanced analyst with deep reasoning capabilities for {{applicationName}}.
-
-      Current user: {{userName}}
-      Current date/time: {{currentDateTime}}
-
-      {{alert}}
-
-      Use your thinking process to analyze complex scenarios thoroughly before providing responses. Consider all available context and data when making your analysis.`,
-    modelConfig: {
-      provider: 'anthropic',
-      model: 'claude-4-sonnet-20250514',
-      maxTokens: 20000,
+      },
       headers: {
         'anthropic-beta': 'interleaved-thinking-2025-05-14',
-      },
-      providerOptions: {
-        anthropic: {
-          thinking: { 
-            type: 'enabled', 
-            budgetTokens: 15000 
-          },
-        }
-      }
+      },      
     },
     agentType: 'streaming'
   },
 
-  'gpt-test': {
+  'gpt-5' : {
     name: 'Advanced Analyst',
-    description: 'Advanced analysis agent',
+    description: 'Advanced analysis agent with thinking capabilities',
     tools: [
       'fetch-subject-detail', 'fetch-subject-history', 'fetch-subject-events', 'todo-list', 'chart-display',
-      'transaction-overview', 'transaction-aggregation', 'transaction-list'
+      'transaction-overview', 'transaction-aggregation', 'transaction-list', 'subject-display', 'fetch-attachment-list',
+      'fetch-next-workflow-action', 'execute-workflow-action', 'search-user'
     ],
+    maxSteps: 15,
     systemPrompt: `You are an advanced analyst with deep reasoning capabilities for {{applicationName}}. Your main task is to help the end-users understand the
       potential compliance risk from a Transaction Monitoring perspective for a specific alert and the client in general.
 
@@ -128,14 +69,25 @@ export const agentConfigs: Record<string, AgentConfig> = {
       {{alert}}
 
       Use your thinking process to analyze complex scenarios thoroughly before providing responses. Consider all available context and data when making your analysis.
-      
+
       For more complex tasks it is generally a good idea to make a visual todo list and work down the items of that list one by one.
 
-      Some tools will return a 'ui:...' field beside the 'data:....' field. The data in the ui field will be rendered in the chat window.
-      `,
+      Some tools will return a 'ui:...' property. The data in the ui field will be rendered in the chat window.
+
+      The system has a configurable workflow, it controls the lifecylcle of an alert, investigators need to move the alerts 
+      through the workflow to finalise their work. You can check which actions are possible using the fetch-next-workflow-action tool.
+
+      Some actions have form-fields. These are fields that need to be populated. You can help the user by pre-populating these fields. You
+      can use execute-workflow-action to display a form with the formfields and allow the user to execute the workflow actions.
+    `,
     modelConfig: {
       provider: 'openai',
-      model: 'gpt-4.1'
+      model: 'gpt-5',
+      providerOptions: {
+        openai: {
+          reasoningEffort: 'medium'
+        }
+      },
     },
     agentType: 'streaming'
   },

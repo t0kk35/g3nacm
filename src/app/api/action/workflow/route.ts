@@ -84,12 +84,13 @@ export async function POST(req: NextRequest) {
     // Set up a connection and start main logic
     let client;
     let transactionStarted = false;
+    let redirectUrls: string[] = [];
 
     try {
-        client = await db.pool.connect();     
+        client = await db.pool.connect();
         await client.query('BEGIN');
         transactionStarted = true;
-        await executeActions(client, user.name, workflowConfig, actions, files);
+        redirectUrls = await executeActions(client, user.name, workflowConfig, actions, files);
         await client.query('COMMIT');
     } catch (error) {
         if (client && transactionStarted) await client.query('ROLLBACK');
@@ -98,11 +99,13 @@ export async function POST(req: NextRequest) {
     } finally {
         if (client) client.release();
     }
-    return NextResponse.json({ Message:'Workflow Action Performed' });
+    return NextResponse.json({ message: 'Workflow Action Performed', redirectUrls });
 }
 
-async function executeActions(client: PoolClient, userName: string, workflowConfig: WorkflowConfig, actions: PerformWorkflowAction[], files: Map<string, File>) {
-    
+async function executeActions(client: PoolClient, userName: string, workflowConfig: WorkflowConfig, actions: PerformWorkflowAction[], files: Map<string, File>): Promise<string[]> {
+
+    const redirectUrls: string[] = [];
+
     for (const a of actions) {
         const systemFields = {
             userName: userName,
@@ -113,16 +116,21 @@ async function executeActions(client: PoolClient, userName: string, workflowConf
             toStateCode: '',
             entityData: a.entityData || {}
         };
-        
+
         // Merge files into the data context using their field names
         const actionData = { ...(a.data || {}) };
         for (const [fieldName, file] of files.entries()) {
             actionData[fieldName] = file;
         }
-        
+
         // Create a workflow context to store data needed by the functions
         const ctx = createWorkflowContext(actionData, systemFields);
-        // Execute the action.
-        await executeWorkflowAction(client, workflowConfig, ctx);
+        // Execute the action and collect redirect URL
+        const redirectUrl = await executeWorkflowAction(client, workflowConfig, ctx);
+        if (redirectUrl) {
+            redirectUrls.push(redirectUrl);
+        }
     }
+
+    return redirectUrls;
 }
