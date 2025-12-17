@@ -34,7 +34,8 @@ SELECT
         'priority_num', wes.priority_num,   
         'assigned_to_user_name', COALESCE(wes.assigned_to_user_name, ''),
         'assigned_to_user_team', COALESCE(wes.assigned_to_team_name, ''),
-        'user_name', wes.user_name
+        'user_name', wes.user_name,
+        'comment', wes.comment
     ) as "entity_state",
     CASE 
         WHEN ab.alert_type = 'TM' THEN COALESCE(atd.tm_detections, '[]'::jsonb)

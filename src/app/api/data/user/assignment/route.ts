@@ -84,8 +84,8 @@ export async function GET(_request: NextRequest) {
         };
         try {
             const alert_stats = await db.pool.query(query);
-            if (alert_stats.rows.length === 0) return ErrorCreators.db.entityNotFound(origin, 'user_assignmets', user.name);
-            if (alert_stats.rows.length > 1) return ErrorCreators.db.entityNotUnique(origin, 'user_assignmets', user.name);
+            if (alert_stats.rows.length === 0) return ErrorCreators.db.entityNotFound(origin, 'user_assignments', user.name);
+            if (alert_stats.rows.length > 1) return ErrorCreators.db.entityNotUnique(origin, 'user_assignments', user.name);
             const res:UserAssignment = alert_stats.rows[0];
             return NextResponse.json(res);
         } catch (error) {

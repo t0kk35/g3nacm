@@ -5,9 +5,10 @@ import { Responsive, WidthProvider, Layout } from 'react-grid-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Settings, Plus, Lock, Unlock } from 'lucide-react'
-import { DynamicScreenWidget, createLayoutWithConstraints } from './widget-registry'
+import { DynamicScreenWidget } from './widget-registry'
 import { AddWidgetDialog } from './AddWidgetDialog'
 import { createDynamicScreenWidget } from './widget-registry'
+import { DynamicScreenWidgetSizeObserver } from './DynamicScreenWidgetSizeObserver'
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
@@ -271,11 +272,17 @@ export function DynamicScreenGrid({
                   </Button>
                 </div>
               )}
-              
+
               {/* Widget Content */}
+              <DynamicScreenWidgetSizeObserver>
+                {({ width, height }) => (
+                  <widget.component {...widget.config} width={width} height={height} />
+                )}
+              </DynamicScreenWidgetSizeObserver>
+              {/* Widget Content 
               <div className="h-full">
                 <widget.component {...widget.config} />
-              </div>
+              </div> */}
             </Card>
           </div>
         ))}

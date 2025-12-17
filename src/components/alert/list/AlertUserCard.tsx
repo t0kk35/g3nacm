@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { AlertPriorityBadgeAndText } from "../AlertPriority"
 import { AlertUserStatus } from "@/components/alert/list/AlertUserStatus"
 import { AlertUserDetection } from "@/components/alert/list/AlertUserDetection"
+import { AlertUserComment } from "./AlertUserComment"
 import { Separator } from "@/components/ui/separator"
 import { getTypeIcon } from "../AlertTypeIcon"
 import { Alert } from "@/app/api/data/alert/alert"
@@ -24,7 +25,7 @@ export function AlertUserCard({ alert }: Props) {
             <Separator className="my-2" />
             <p className="text-sm text-muted-foreground mb-2">{alert.description}</p>
             <Separator className="my-2" />
-            <div className="flex-grow">
+            <div className="grow">
                 <p className="text-sm mb-2">
                     <strong>Data Item:</strong>{" "}
                     { alert.alert_item.type === "SUB" && 
@@ -47,6 +48,16 @@ export function AlertUserCard({ alert }: Props) {
             </div>
 
             <div className="flex justify-end mt-2 space-x-2">
+                <HoverCard>
+                    <HoverCardTrigger asChild>
+                        <Button variant="outline" size="sm">
+                            Comment
+                        </Button>
+                    </HoverCardTrigger>
+                    <HoverCardContent className="w-auto">
+                        <AlertUserComment alert={alert} />
+                    </HoverCardContent>
+                </HoverCard>
                 <HoverCard>
                     <HoverCardTrigger asChild>
                         <Button variant="outline" size="sm">

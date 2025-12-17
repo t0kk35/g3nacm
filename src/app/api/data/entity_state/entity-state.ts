@@ -9,9 +9,10 @@ export type EntityState = {
     priority_num: number;
     to_state_code: string;
     to_state_name: string;
-    assigned_to_user_name: string;
-    assigned_to_team_name: string;
+    assigned_to_user_name?: string;
+    assigned_to_team_name?: string;
     user_name: string;
+    comment?: string;
 }
 
 export enum EntityPriority {

@@ -21,7 +21,9 @@ type CustomToolUIPart = {
   output?: {
     ui?: {
       component: string;
-      props: Record<string, any>;
+      props?: Record<string, any>;        // Optional: explicit props (legacy/backward compatible)
+      propsSource?: string;               // Optional: path to data property (e.g., "data" or "data.todos")
+      propsTransform?: (data: any) => any; // Optional: transform function for complex cases
     };
     [key: string]: any;
   };
@@ -214,7 +216,7 @@ export function ChatWindow({ agent, context, entityCode, entityId, orgUnitCode }
   return (
     <ErrorBoundary>
       <Card className={cn("w-full flex flex-col")}>
-        <CardHeader className="flex-shrink-0">
+        <CardHeader className="shrink-0">
           <CardTitle className="flex items-center gap-2 justify-between">
             <div className="flex items-center gap-2">
               <Bot className="h-5 w-5" />
@@ -283,7 +285,7 @@ export function ChatWindow({ agent, context, entityCode, entityId, orgUnitCode }
                     </Badge>
                   </div>
 
-                  <div className={cn("rounded-lg px-3 py-2 text-sm break-words", message.role === "user" ? "bg-muted/60" : "bg-muted")}>
+                  <div className={cn("rounded-lg px-3 py-2 text-sm wrap-break-words", message.role === "user" ? "bg-muted/60" : "bg-muted")}>
                     <ErrorBoundary fallback={<p className="text-red-500">Error rendering message</p>}>
                       { message.parts.map((part, index) => {
                         const partKey = `${message.id}-${index}`;
@@ -366,7 +368,7 @@ export function ChatWindow({ agent, context, entityCode, entityId, orgUnitCode }
       )}
 
       {/* Input Area */}
-      <div className="p-4 border-t flex-shrink-0">
+      <div className="p-4 border-t shrink-0">
         <form onSubmit={handleSubmit} className="flex gap-2">
           <input
             ref={inputRef}
@@ -412,11 +414,35 @@ function ToolInvocationPart({ toolName, part, partKey }: ToolInvocationPartProps
   
   // Check for completed tool with UI result
   if (part.state === 'output-available' && part.output && part.output?.ui) {
+    const ui = part.output.ui;
+
+    // Resolve props: explicit props > propsSource reference > fallback to data
+    let resolvedProps: Record<string, any> | undefined = ui.props;
+
+    if (!resolvedProps && ui.propsSource) {
+      // Navigate the propsSource path (e.g., "data" or "data.todos")
+      const path = ui.propsSource.split('.');
+      resolvedProps = path.reduce((obj: any, key: string) => obj?.[key], part.output);
+
+      // Apply transform if provided
+      if (ui.propsTransform && resolvedProps) {
+        resolvedProps = ui.propsTransform(resolvedProps);
+      }
+    }
+
+    // Fallback to entire data object if no props specified
+    if (!resolvedProps) {
+      resolvedProps = part.output.data;
+    }
+
+    // Final safety check - provide empty object if still undefined
+    const finalProps = resolvedProps || {};
+
     return (
       <div key={partKey} className="mt-2">
-        <ToolComponent 
-          componentName={part.output.ui.component} 
-          props={part.output.ui.props} 
+        <ToolComponent
+          componentName={ui.component}
+          props={finalProps}
         />
       </div>
     );
@@ -545,7 +571,7 @@ function ReasoningPart({ part, partKey, isStreaming }: ReasoningPartProps) {
   }
   
   return (
-    <div key={partKey} className="border-l-1 border-blue-500 pl-3 py-2">
+    <div key={partKey} className="border-l border-blue-500 pl-3 py-2">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"

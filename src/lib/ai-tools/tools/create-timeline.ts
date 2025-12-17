@@ -56,11 +56,11 @@ export const createTimelineTool: AIToolDefinition = {
       },
       ui: {
         component: 'TimelineDisplay',
-        props: {
-          entityId,
-          entityType,
-          events: mockEvents
-        }
+        propsTransform: (data) => ({
+          entityId: data.entityId,
+          entityType: data.entityType,
+          events: data.events
+        })
       }
     };
   },

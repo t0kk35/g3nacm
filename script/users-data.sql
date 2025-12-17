@@ -16,10 +16,11 @@ VALUES
     ('Admin', 'admin.user', 'User Maintenance (Create/Update/Delete)'),
     ('Admin', 'admin.role', 'Role Maintenance (Create/Update/Delete)'),
     ('Admin', 'admin.team', 'Team Maintenance (Create/Update/Delete)'),
+    ('Admin', 'admin.team_rules', 'Allows setting Team assignment rules'),
     ('Admin', 'admin.change_password', 'Change other users passwords'),
     ('User', 'user.change_password', 'Allows a user to change their own password'),
     ('Data', 'data.alert', 'Base permission for the back-end access to alert data. Needed by end-users as well as as APIs.'),
-    ('Data', 'data.attachment', 'Permission needed to read attachments from workflow entities')
+    ('Data', 'data.attachment', 'Permission needed to read attachments from workflow entities');
 
 INSERT INTO user_role_permission_link ("role_id", "permission_id")
 SELECT r.id, p.id

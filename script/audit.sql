@@ -1,22 +1,22 @@
 -- Main audit log: append-only, immutable via trigger
 CREATE TABLE audit_log (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  recorded_date_time timestamptz NOT NULL DEFAULT now(),
+  recorded_date_time TIMESTAMPTZ NOT NULL DEFAULT now(),
   correlation_id UUID NULL,     -- For grouping events triggered by a single action.
-  category text NOT NULL,
-  action text NOT NULL,
-  user_id integer NOT NULL,
-  user_name text NOT NULL,
-  target_type text NULL,        -- Type of data that was audit logged
-  target_id_num integer NULL,   -- A unique numerical id for the record that was logged
-  target_id_string text NULL,   -- A unique string id for the record that was logged
-  metadata jsonb,               -- extra event info (e.g. login failure reason)
-  before_data jsonb,           -- snapshot before update (optional)
-  after_data jsonb,            -- snapshot after update (optional)
-  source text NULL,             -- e.g. "api-server-1"
-  prev_hash text NULL,          -- hex SHA256 of previous audit_log row
-  hash text NOT NULL,           -- hex SHA256 of this row's canonical data
-  hmac text NULL                -- optional HMAC/signature computed with server key
+  category TEXT NOT NULL,
+  action TEXT NOT NULL,
+  user_id INTEGER NOT NULL,
+  user_name TEXT NOT NULL,
+  target_type TEXT NULL,        -- Type of data that was audit logged
+  target_id_num INTEGER NULL,   -- A unique numerical id for the record that was logged
+  target_id_string TEXT NULL,   -- A unique string id for the record that was logged
+  metadata JSONB,               -- extra event info (e.g. login failure reason)
+  before_data JSONB,           -- snapshot before update (optional)
+  after_data JSONB,            -- snapshot after update (optional)
+  source TEXT NULL,             -- e.g. "api-server-1"
+  prev_hash TEXT NULL,          -- hex SHA256 of previous audit_log row
+  hash TEXT NOT NULL,           -- hex SHA256 of this row's canonical data
+  hmac TEXT NULL                -- optional HMAC/signature computed with server key
 );
 
 -- Index for Rate limiting check
@@ -24,9 +24,9 @@ CREATE INDEX idx_audit_log_rl ON audit_log(category, action, user_name, recorded
 
 -- Minimal meta row for chain locking
 CREATE TABLE audit_meta (
-  id boolean PRIMARY KEY DEFAULT true CHECK (id),
-  last_hash text NULL,
-  last_created_date_time timestamptz NULL
+  id BOOLEAN PRIMARY KEY DEFAULT true CHECK (id),
+  last_hash TEXT NULL,
+  last_created_date_time TIMESTAMPTZ NULL
 );
 
 INSERT INTO audit_meta (id, last_hash, last_created_date_time) VALUES (true, 'start', now())

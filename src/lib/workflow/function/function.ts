@@ -8,6 +8,8 @@ import { FunctionSendMail } from "./implementations/send-mail";
 import { FunctionEvalEngine } from "./implementations/eval-engine";
 import { FunctionUploadDocument } from "./implementations/upload-document";
 import { FunctionChangeEntityStateGetNext } from "./implementations/change-entity-state-get-next";
+import { FunctionNotificationCreate } from "./implementations/notification-create";
+import { FunctionNotificationMarkRead } from "./implementations/notification-mark-read";
 
 export interface IWorkflowFunction {
     code: string;
@@ -30,3 +32,5 @@ workflowFunctionRegistry['function.mail'] = new FunctionSendMail();
 workflowFunctionRegistry['function.eval_engine'] = new FunctionEvalEngine();
 workflowFunctionRegistry['function.document.upload'] = new FunctionUploadDocument();
 workflowFunctionRegistry['function.entity.change_state.get_next'] = new FunctionChangeEntityStateGetNext();
+workflowFunctionRegistry['function.notification.create'] = new FunctionNotificationCreate();
+workflowFunctionRegistry['function.notification.mark_read'] = new FunctionNotificationMarkRead();

@@ -47,6 +47,7 @@ export type WorkflowFunctionParameter = {
 export type WorkflowFunctionSetting = {
     code: string,
     name: string,
+    mapping: string;
     value: any;
 }
 
@@ -81,6 +82,7 @@ export type WorkflowAction = {
     trigger: WorkflowTrigger;
     from_state_code: string;
     to_state_code: string;
+    comment_required: boolean;
     redirect_url: string;
     permission: string;
     form_fields: WorkflowFormField[];

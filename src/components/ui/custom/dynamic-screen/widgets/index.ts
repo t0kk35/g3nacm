@@ -5,6 +5,8 @@ import { widgetRegistry, WIDGET_CATEGORIES, CommonWidgetSchemas } from '../widge
 import { AlertSummaryWidget } from './AlertSummaryWidget'
 import { AlertAssignmentWidget } from './AlertAssignmentWidget'
 import { AlertHandledChartWidget } from './AlertHandledChartWidget'
+import { NotificationWidget } from './NotificationWidget'
+import { TeamAssignmentChartWidget } from './TeamAssignmentChartWigdet'
 
 widgetRegistry.register({
   code: 'alert-assignment',
@@ -32,7 +34,7 @@ widgetRegistry.register({
 
 widgetRegistry.register({
   code: 'alert-handled',
-  name: 'Alert Handled',
+  name: 'Alerts Handled',
   description: 'Displays a chart showing the alerts handled by a user over time', 
   component: AlertHandledChartWidget,
   defaultConfig: {
@@ -76,7 +78,7 @@ widgetRegistry.register({
   }),
   responsiveConstraints: {
     lg: {minW: 3, minH: 5, maxW: 5, maxH: 7},
-    md: {minW: 3, minH: 4, maxW: 5, maxH: 6}, 
+    md: {minW: 3, minH: 4, maxW: 5, maxH: 6},
     sm: {minW: 2, minH: 3, maxW: 4, maxH: 5},
     xs: {minW: 2, minH: 3, maxW: 4, maxH: 4}
   },
@@ -85,15 +87,67 @@ widgetRegistry.register({
   tags: ['alerts', 'summary', 'statistics']
 })
 
+// Register Notification Widget
+widgetRegistry.register({
+  code: 'notifications',
+  name: 'My Notifications',
+  description: 'Displays user notifications with read/unread status and details on hover',
+  component: NotificationWidget,
+  defaultConfig: {
+    timeRange: '7d',
+    title: 'My Notifications',
+    refreshInterval: 300000
+  },
+  configSchema: z.object({
+    timeRange: z.enum(['1h', '24h', '7d', '30d', '90d']).default('7d'),
+    title: CommonWidgetSchemas.title.default('My Notifications'),
+    refreshInterval: CommonWidgetSchemas.refreshInterval.default(300000)
+  }),
+  responsiveConstraints: {
+    lg: {minW: 4, minH: 4, maxW: 7, maxH: 10},
+    md: {minW: 4, minH: 4, maxW: 6, maxH: 9},
+    sm: {minW: 4, minH: 3, maxW: 4, maxH: 8},
+    xs: {minW: 3, minH: 3, maxW: 4, maxH: 6}
+  },
+  permissions: ['data.notification'],
+  category: WIDGET_CATEGORIES.COMMUNICATION,
+  tags: ['notifications', 'messages', 'alerts']
+})
+
+widgetRegistry.register({
+  code: 'team-assignment-chart',
+  name: 'Team Assignment Chart',
+  description: 'Displays a chart of the alerts assigned to each time and their priority', 
+  component: TeamAssignmentChartWidget,
+  defaultConfig: {
+    title: 'Team Assignment Chart',
+    refreshInterval: 300000
+  },
+  configSchema: z.object({
+    title: CommonWidgetSchemas.title.default('Team Assignment Chart'),
+    refreshInterval: CommonWidgetSchemas.refreshInterval.default(300000),
+  }),
+  responsiveConstraints: {
+    lg: {minW: 4, minH: 6, maxW: 12, maxH: 8},
+    md: {minW: 4, minH: 6, maxW: 8, maxH: 7}, 
+    sm: {minW: 3, minH: 4, maxW: 6, maxH: 6},
+    xs: {minW: 3, minH: 3, maxW: 4, maxH: 4}
+  },
+  permissions: ['data.alert'],
+  category: WIDGET_CATEGORIES.ANALYTICS,
+  tags: ['teams', 'chart', 'statistics']
+})
 
 // Export widget registry for use in other components
 export { widgetRegistry } from '../widget-registry'
 
 // Export all widgets for individual use
-export { 
+export {
   AlertSummaryWidget,
   AlertHandledChartWidget,
-  AlertAssignmentWidget
+  AlertAssignmentWidget,
+  NotificationWidget,
+  TeamAssignmentChartWidget
 }
 
 // Utility function to get all available widgets

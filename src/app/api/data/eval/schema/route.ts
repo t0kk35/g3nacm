@@ -4,9 +4,7 @@ import { auth } from "@/auth";
 import * as db from '@/db';
 import { NextRequest, NextResponse } from "next/server";
 import { ErrorCreators } from '@/lib/api-error-handling';
-import { buildSchemas } from '@/lib/eval-engine/eval-cache';
-import { RawSchemaRow } from "@/lib/eval-engine/types";
-
+import { RawSchemaRow, EvalInputSchema, EvalSchemaField } from "@/lib/eval-engine/types";
 const origin = 'api/data/eval/schema'
 
 const query_text = `
@@ -31,7 +29,7 @@ ORDER BY esf.id
 `;
 
 /**
- * This function is mainly used for the admin screens under /admin. For internal/workflow access we will use the cache.
+ * This function is mainly used for the admin screens under /admin
  */
 export async function GET(request: NextRequest) {
     const useMockData = process.env.USE_MOCK_DATA === "true";
@@ -68,4 +66,58 @@ export async function GET(request: NextRequest) {
         updated_at: new Date(),
         fields: []
     });
+}
+
+function buildSchemas(rows: RawSchemaRow[]): EvalInputSchema[] {
+  
+    const grouped: Record<string, RawSchemaRow[]> = {};
+  
+    // Step 1: Group rows by `id`
+    for (const row of rows) {
+        if (!grouped[row.id]) grouped[row.id] = [];
+        grouped[row.id].push(row);
+    }
+
+    const schemas: EvalInputSchema[] = [];
+
+    // Step 2: Build schema for each group
+    for (const id in grouped) {
+        const schema = buildSchema(grouped[id]);
+        if (schema !== null) schemas.push(schema);
+    }
+  
+    return schemas;
+}
+
+// Helper function to build schema from raw database rows
+function buildSchema(rows: RawSchemaRow[]): EvalInputSchema | null {
+    if (rows.length === 0) return null;
+  
+    const firstRow = rows[0];
+    const fields: EvalSchemaField[] = [];
+  
+    for (const row of rows) {
+        if (row.field_id && row.field_path && row.field_type) {
+        fields.push({
+            id: row.field_id,
+            schema_id: row.id,
+            field_path: row.field_path,
+            field_type: row.field_type as any,
+            description: row.field_description || undefined,
+            required: row.required || false,
+            array_item_type: row.array_item_type as any || undefined,
+            validation_config: row.validation_config || undefined,
+        });
+        }
+    }
+  
+    return {
+        id: firstRow.id,
+        name: firstRow.name,
+        version: firstRow.version,
+        description: firstRow.description || undefined,
+        created_at: firstRow.created_at,
+        updated_at: firstRow.updated_at,
+        fields,
+    };
 }

@@ -6,10 +6,12 @@ import { TemplateContext } from './template-utils';
 export interface ToolResult {
   id: string;
   toolName: string;
-  data: Record<string, any>;
+  data: Record<string, any>;  // Primary data for AI reasoning
   ui?: {
     component: string;
-    props: Record<string, any>;
+    props?: Record<string, any>;        // Optional: explicit props (legacy/backward compatible)
+    propsSource?: string;               // Optional: path to data property (e.g., "data" or "data.todos")
+    propsTransform?: (data: any) => any; // Optional: transform function for complex cases
   };
 }
 

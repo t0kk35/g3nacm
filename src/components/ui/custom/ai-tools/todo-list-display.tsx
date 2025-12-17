@@ -130,7 +130,7 @@ export function TodoListDisplay({ name, todos, stats, lastAction, error }: TodoL
                   todo.status === 'completed' && "opacity-75"
                 )}
               >
-                <div className="flex-shrink-0 mt-0.5">
+                <div className="shrink-0 mt-0.5">
                   {getStatusIcon(todo.status)}
                 </div>
                 
@@ -142,7 +142,7 @@ export function TodoListDisplay({ name, todos, stats, lastAction, error }: TodoL
                     )}>
                       {todo.title}
                     </h4>
-                    <div className="flex items-center gap-1 flex-shrink-0">
+                    <div className="flex items-center gap-1 shrink-0">
                       <Badge className="text-xs">
                         {getStatusText(todo.status)}
                       </Badge>
@@ -157,13 +157,6 @@ export function TodoListDisplay({ name, todos, stats, lastAction, error }: TodoL
                       {todo.description}
                     </p>
                   )}
-                  
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span>Created: {new Date(todo.createdAt).toLocaleString()}</span>
-                    {todo.completedAt && (
-                      <span>• Completed: {new Date(todo.completedAt).toLocaleString()}</span>
-                    )}
-                  </div>
                 </div>
               </div>
             ))}

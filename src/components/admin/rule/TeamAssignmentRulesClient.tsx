@@ -168,7 +168,7 @@ export function TeamAssignmentRulesClient( { teams, orgUnits, schemas }: Props) 
         {currentGroup && (
           <div className="mt-4 p-3 bg-muted rounded-lg">
             <p className="text-sm">
-              Managing rules for group: <Badge variant="secondary">{currentGroup}</Badge>
+              Managing rules for group: <Badge className="bg-chart-1 text-white" variant="secondary">{currentGroup}</Badge>
             </p>
           </div>
         )}
@@ -247,7 +247,8 @@ export function TeamAssignmentRulesClient( { teams, orgUnits, schemas }: Props) 
                               </span>
                             </p>
                             <p>
-                              <span className="font-medium">Team:</span> {rule.output}
+                              <span className="font-medium">Team:</span> 
+                              <span className="font-semibold text-chart-1"> {rule.output} </span> 
                             </p>
                           </div>
                         </div>

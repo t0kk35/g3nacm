@@ -9,12 +9,10 @@ export class FunctionChangeEntityStateAssignUser implements IWorkflowFunction {
 
     async run(inputs: { [key:string]: any }, ctx: WorkflowContext, client: PoolClient): Promise<{ [key: string]: any }> {
         const assingToUserName = getInput(this.code, inputs, 'function.entity.change_state.assign_user.assign_to_user_name', isString);
+        const comment = (ctx.system.commentRequired) ? getInput(this.code, inputs, 'function.entity.change_state.assign_user.comment', isString) : null
         copyToEntityStateLog(client, ctx.system.entityId, ctx.system.entityCode);
-        updateEntityState(client, ctx.system.entityId, ctx.system.entityCode, ctx.system.actionCode, ctx.system.fromStateCode, ctx.system.userName);
+        updateEntityState(client, ctx.system.entityId, ctx.system.entityCode, ctx.system.actionCode, ctx.system.fromStateCode, ctx.system.userName, comment);
         updateEntityAssignUser(client, ctx.system.entityId, ctx.system.entityCode, assingToUserName);
-        ctx.auditLog.push(
-          `Entity ${ctx.system.entityId} (${ctx.system.entityCode}) changed to status ${ctx.system.toStateCode}`
-        );
         return {};
     }
 }

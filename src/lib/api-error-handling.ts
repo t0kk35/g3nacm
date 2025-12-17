@@ -66,6 +66,8 @@ export enum ErrorCode {
     WORKFLOW_NOT_UNIQUE = "WRKF_00002",
     /** Could not find workflow action for get_next operation */
     WORKFLOW_NO_GET_NEXT_ACTION = "WRKL_00003",
+    /** Error in workflow cache */
+    WORKFLOW_CACHE_ERROR = "WRKL_00004",
 
     /** Unknown agent */
     AGENT_NOT_FOUND = "AGNT_000001",
@@ -74,6 +76,9 @@ export enum ErrorCode {
 
     /** Schema Not Found */
     SCHEMA_NOT_FOUND = "SCHM_00001",
+
+    /** Rules cache Error */
+    RULE_CACHE_ERROR = "EVRL_00001",
 
     VALID_SCHEMA_FAILED = "VALID_00001",
     VALID_BUSINESS_RULE = "VALID_00002",
@@ -110,7 +115,9 @@ export const ErrorCreators = {
         /** Error code 'AUTH_00007'. Password secret missing */
         passwordSecretNotFound: (origin: string) => createErrorResponse(ErrorCode.AUT_PASSWORD_SECRET_NOT_FOUND, origin),
     },
-
+    rule : {
+        cacheError: (origin: string, error: Error) => createErrorResponse(ErrorCode.RULE_CACHE_ERROR, origin, {'error_message': error.message }, error),        
+    },
     param: {
         /** Error code 'PARAM_00001'. Required URL parameter missing. {param} is the parameter we looked for */
         urlMissing: (origin: string, param: string) => createErrorResponse(ErrorCode.PARAM_URL_MISSING, origin, { 'param': param }),
@@ -140,6 +147,7 @@ export const ErrorCreators = {
         notFound: (origin: string, name: string, version: string) => createErrorResponse(ErrorCode.SCHEMA_NOT_FOUND, origin, {'name': name, 'version': version }),
     },
     workflow: {
+        cacheError: (origin: string, error: Error) => createErrorResponse(ErrorCode.WORKFLOW_CACHE_ERROR, origin, {'error_message': error.message }, error),
         notFound: (origin: string, entity_code: string, org_unit_code: string) => createErrorResponse(ErrorCode.WORKFLOW_NOT_FOUND, origin, {'entity_code': entity_code, 'org_unit_code': org_unit_code }),
         notUnique: (origin: string, entity_code: string, org_unit_code: string) => createErrorResponse(ErrorCode.WORKFLOW_NOT_UNIQUE, origin, {'entity_code': entity_code, 'org_unit_code': org_unit_code }),
         noGetNextAction: (origin: string, entity_code: string, entity_id: string, org_unit_code: string, to_state_code: string) => createErrorResponse(ErrorCode.WORKFLOW_NO_GET_NEXT_ACTION, origin, {'entity_code': entity_code, 'entity_id': entity_id, 'org_unit_code': org_unit_code, 'to_state_code': to_state_code})
@@ -244,6 +252,10 @@ const errorDefinition = new Map<ErrorCode, errorParams>([
       httpCode: 404,
       text: "Schema not found for name: '{name}', version: '{version}'"
     }],
+    [ErrorCode.RULE_CACHE_ERROR, {
+      httpCode: 400,
+      text: "Error in Rule Cache. Message: '{error_message}'"
+    }],
     [ErrorCode.WORKFLOW_NOT_FOUND, {
       httpCode: 404,
       text: "Could not find workflow for entity '{entity_code}' and org '{org_unit_code}'"
@@ -255,6 +267,10 @@ const errorDefinition = new Map<ErrorCode, errorParams>([
     [ErrorCode.WORKFLOW_NO_GET_NEXT_ACTION, {
       httpCode: 400,
       text: "Could not find an action that fits a get_next operation for code '{entity_code}', id '{entity_id}', org '{org_unit_code}' and state '{to_state}'"
+    }],
+    [ErrorCode.WORKFLOW_CACHE_ERROR, {
+      httpCode: 400,
+      text: "Error in Workflow Cache Message '{error_message}'"
     }],
     [ErrorCode.PERM_INSUFFICIENT_PERMISSION, {
       httpCode: 403,

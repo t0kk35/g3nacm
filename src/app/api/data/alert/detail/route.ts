@@ -35,7 +35,8 @@ SELECT
         'priority_num', wes.priority_num,   
         'assigned_to_user_name', COALESCE(wes.assigned_to_user_name, ''),
         'assigned_to_team_name', COALESCE(wes.assigned_to_team_name, ''),
-        'user_name', wes.user_name 
+        'user_name', wes.user_name,
+        'comment', wes.comment 
     ) as "entity_state",
     COALESCE(wesl.entity_state_history, '[]'::jsonb) as "entity_state_history", 
     CASE 
@@ -66,7 +67,8 @@ LEFT JOIN LATERAL (
         wes.priority_num,   
         wes.assigned_to_user_name,
         wes.assigned_to_team_name,
-        wes.user_name
+        wes.user_name,
+        wes.comment
     FROM workflow_entity_state wes
     WHERE wes.entity_id = ab.id
     AND wes.entity_code = ab.entity_code
@@ -86,7 +88,8 @@ LEFT JOIN LATERAL (
             'to_state_name', wesli.to_state_name,
             'assigned_to_user_name', COALESCE(wesli.assigned_to_user_name, ''),
             'assigned_to_team_name', COALESCE(wesli.assigned_to_team_name, ''),
-            'user_name', wesli.user_name 
+            'user_name', wesli.user_name,
+            'comment', wesli.comment
     )) AS "entity_state_history"
     FROM workflow_entity_state_log wesli
     WHERE wesli.entity_id = ab.id

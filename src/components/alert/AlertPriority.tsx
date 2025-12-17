@@ -19,10 +19,10 @@ export function AlertPriorityBadge({ priority }: Props) {
   return (
     <Badge className={
       cn((priority === "High") 
-        ? "bg-red-500" 
+        ? "bg-priority-high" 
         : (priority === "Medium") 
-          ? "bg-amber-500" 
-          : "bg-green-600", "text-white")}>
+          ? "bg-priority-medium" 
+          : "bg-priority-low", "text-muted")}>
       {priority}
     </Badge>
   ) 

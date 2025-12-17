@@ -42,10 +42,14 @@ export const fetchCustomerHistoryTool: AIToolDefinition = {
       data: mockData,
       ui: {
         component: 'CustomerHistoryDisplay',
-        props: {
-          customer: mockData,
-          interactions: mockData.interactions
-        }
+        propsTransform: (data) => ({
+          customer: {
+            customerId: data.customerId,
+            customerName: data.customerName,
+            accountType: data.accountType
+          },
+          interactions: data.interactions
+        })
       }
     };
   },

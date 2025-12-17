@@ -11,7 +11,8 @@ type Props = {
   userName: string | undefined | null;
 }
 
-const admin_permissions = ['admin.role', 'admin.org_unit', 'admin.user', 'admin.team']
+const admin_permissions = ['admin.role', 'admin.org_unit', 'admin.user', 'admin.team', 'admin.team_rules']
+const SIDEBAR_KEYBOARD_SHORTCUT = "b"
 
 export async function AppSidebar({ userName } : Props) {
 

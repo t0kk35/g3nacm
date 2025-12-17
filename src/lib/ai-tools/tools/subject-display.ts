@@ -58,9 +58,7 @@ export const subjectDisplayTool: AIToolDefinition = {
         },
         ui: {
           component: 'SubjectDisplay',
-          props: {
-            ...subjectData
-          }
+          propsSource: 'data'  // Reference entire data object to avoid duplication
         }
       };
     } catch (error) {
@@ -68,8 +66,7 @@ export const subjectDisplayTool: AIToolDefinition = {
         id: crypto.randomUUID(),
         toolName: 'subject-display',
         data: {
-          error: true,
-          errorMessage: error instanceof Error ? error.message : 'Unknown error occurred',
+          error: error instanceof Error ? error.message : 'Unknown error occurred',
           name: subjectData.name || 'Unknown',
           identifier: subjectData.identifier || 'N/A',
           type: subjectData.type || 'Unknown',
@@ -78,14 +75,7 @@ export const subjectDisplayTool: AIToolDefinition = {
         },
         ui: {
           component: 'SubjectDisplay',
-          props: {
-            name: subjectData.name || 'Unknown',
-            identifier: subjectData.identifier || 'N/A', 
-            type: subjectData.type || 'Unknown',
-            gridColumns: 2,
-            variableFields: [],
-            error: error instanceof Error ? error.message : 'Unknown error occurred'
-          }
+          propsSource: 'data'  // Reference entire data object to avoid duplication
         }
       };
     }

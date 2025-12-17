@@ -47,6 +47,8 @@ CREATE TABLE eval_input_schema (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
+CREATE INDEX idx_eis_name ON eval_input_schema(name);
+
 CREATE TABLE eval_schema_field (
     id SERIAL PRIMARY KEY,
     schema_id TEXT NOT NULL,

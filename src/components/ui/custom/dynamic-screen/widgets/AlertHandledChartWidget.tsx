@@ -7,9 +7,10 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { TrendingUp, TrendingDown, RefreshCw, AlertTriangle } from 'lucide-react'
+import { TrendingUp, TrendingDown, RefreshCw } from 'lucide-react'
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { UserHandled } from '@/app/api/data/user/user'
+import { DynamicScreenError } from '../DynamicScreenError'
 
 interface AlertHandledChartWidgetProps {
   timeRange?: '24h' | '7d' | '30d' | '90d' | '6w' | '12w' | '6m' 
@@ -88,25 +89,7 @@ export function AlertHandledChartWidget({
     }   
   }
 
-  if (error) {
-    return (
-      <>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-destructive">{title} - Error</h3>
-            <AlertTriangle className="h-5 w-5 text-destructive" />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground mb-4">{error}</p>
-          <Button onClick={fetchData} variant="outline" size="sm">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Retry
-          </Button>
-        </CardContent>
-      </>
-    )
-  }
+  if (error) return <DynamicScreenError title={title} error={error} onClick={fetchData} />
 
   return (
     <>

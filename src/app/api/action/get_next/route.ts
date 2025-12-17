@@ -4,7 +4,7 @@ import { auth } from '@/auth';
 import * as db from '@/db'
 import { NextRequest, NextResponse } from 'next/server';
 import { createWorkflowContext, executeWorkflowAction } from '@/lib/workflow/workflow-engine';
-import { workflowConfigCache } from '@/lib/workflow/workflow-cache';
+import { getCachedWorkflowConfig } from "@/lib/cache/workflow-cache";
 import { ErrorCreators } from '@/lib/api-error-handling';
 import { GetNextResponse } from './types';
 
@@ -128,10 +128,7 @@ export async function POST(_req: NextRequest) {
     }
 
     // Get the workflow config (with caching)
-    const workflowConfig = await workflowConfigCache.getWorkflowConfig(
-      leased_entity_code, // entityCode
-      leased_org_unit_code  // orgUnitCode
-    );
+    const workflowConfig = await getCachedWorkflowConfig(leased_entity_code, leased_org_unit_code);    
 
     // Now find the action that is of type 'get' and had the correct from_state. The from state of the action 
     // should be the to_state of the current entity. 
@@ -141,6 +138,7 @@ export async function POST(_req: NextRequest) {
     // Now call the workflow
     const systemFields = {
       userName: user.name,
+      orgUnitCode: workflowConfig.org_unit_code,
       actionCode: action.code,
       entityCode: leased_entity_code,
       entityId: leased_entity_id,

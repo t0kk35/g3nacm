@@ -2,6 +2,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/colla
 import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "../ui/sidebar";
 import { SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem } from "../ui/sidebar";
 import { ChevronRight, UserRoundCog } from "lucide-react";
+import Link from "next/link"
 
 export function AppSideBarAdmin() {
   return(
@@ -21,33 +22,40 @@ export function AppSideBarAdmin() {
               <SidebarMenuSub>
                 <SidebarMenuSubItem>
                   <SidebarMenuSubButton asChild>
-                    <a href="/admin/orgunit">
+                    <Link href="/admin/orgunit">
                       <span>Organisational Units</span>
-                    </a>
+                    </Link>
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>                
                 <SidebarMenuSubItem></SidebarMenuSubItem>
                 <SidebarMenuSubItem>
                   <SidebarMenuSubButton asChild>
-                    <a href="/admin/user">
+                    <Link href="/admin/user">
                       <span>Users</span>
-                    </a>
+                    </Link>
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>                
                 <SidebarMenuSubItem>
                   <SidebarMenuSubButton asChild>
-                    <a href="/admin/role">
+                    <Link href="/admin/role">
                       <span>Roles</span>
-                    </a>
+                    </Link>
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>
                 <SidebarMenuSubItem>
                   <SidebarMenuSubButton asChild>
-                    <a href="/admin/team">
+                    <Link href="/admin/team">
                       <span>Teams</span>
-                    </a>
+                    </Link>
                   </SidebarMenuSubButton>
-                </SidebarMenuSubItem>                                
+                </SidebarMenuSubItem>
+                <SidebarMenuSubItem>
+                  <SidebarMenuSubButton asChild>
+                    <Link href="/admin/rule">
+                      <span>Team Assigment Rules</span>
+                    </Link>
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>                                                 
               </SidebarMenuSub>
             </CollapsibleContent>
           </SidebarMenuItem>

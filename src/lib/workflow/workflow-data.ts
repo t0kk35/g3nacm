@@ -14,6 +14,7 @@ export type WorkflowEntityState = {
     assigned_to_user_name: string;
     user_id: number;
     user_name: string;
+    comment: string;
 }
 
 const query_entity_state = `
@@ -28,7 +29,8 @@ SELECT
   wes.assigned_to_user_id AS "assinged_to_user_id",
   wes.assigned_to_user_name AS "assigned_to_user_name",
   wes.user_id AS "user_id",
-  wes.user_name as "user_name"
+  wes.user_name AS "user_name",
+  wes.comment AS "comment"
 FROM workflow_entity_state wes
 JOIN workflow_action wa on wa.code = wes.action_code
 WHERE entity_id = $1 and entity_code = $2
@@ -67,7 +69,8 @@ INSERT INTO workflow_entity_state_log
   assigned_to_team_id,
   assigned_to_team_name,
   user_id,
-  user_name
+  user_name,
+  comment
 )
 SELECT 
   entity_id,
@@ -87,7 +90,8 @@ SELECT
   assigned_to_team_id,
   assigned_to_team_name,
   user_id,
-  user_name
+  user_name,
+  comment
 FROM workflow_entity_state
 WHERE entity_id = $1 and entity_code = $2
 `
@@ -132,16 +136,17 @@ SET
     to_state_code = CASE WHEN $5 THEN wes.to_state_code ELSE ad.to_state_code END,
     to_state_name = CASE WHEN $5 THEN wes.to_state_name ELSE ad.to_state_name END,
     user_id = ud.user_id,
-    user_name = $4
+    user_name = $4,
+    comment = $6
 FROM action_details ad, user_details ud
 WHERE entity_id = $1 AND entity_code = $2
 `
 
-export async function updateEntityState(client: PoolClient, entityId: string, entityCode: string, actionCode: string, fromStateCode: string, userName: string) {
+export async function updateEntityState(client: PoolClient, entityId: string, entityCode: string, actionCode: string, fromStateCode: string, userName: string, comment: string | null) {
     const query = {
         name: 'workflow_update_entity_state',
         text: update_entity_state_log,
-        values:[entityId, entityCode, actionCode, userName, isAnyActive(fromStateCode)]
+        values:[entityId, entityCode, actionCode, userName, isAnyActive(fromStateCode), comment]
     }
     client.query(query).catch((err) => {
         throw new Error(`Error Updating workflow_entity_state for entityId ${entityId} and entityCode ${entityCode}. Err=${err}`)    
@@ -181,7 +186,7 @@ WITH team_details AS (
 UPDATE workflow_entity_state SET 
     assigned_to_user_id = NULL,
     assigned_to_user_name = NULL,
-    assigned_to_team_id = team.id,
+    assigned_to_team_id = td.team_id,
     assigned_to_team_name = $3
 FROM team_details td 
 WHERE entity_id = $1 and entity_code = $2

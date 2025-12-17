@@ -6,9 +6,10 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { AlertTriangle, User, Users, RefreshCw, Loader2 } from 'lucide-react'
+import { User, Users, RefreshCw, Loader2 } from 'lucide-react'
 import { UserAssignment } from '@/app/api/data/user/user'
 import { useGetNextAlert } from '@/hooks/use-get-next-alert'
+import { DynamicScreenError } from '../DynamicScreenError'
 
 interface AlertAssignmentWidgetProps {
   title?: string
@@ -45,38 +46,7 @@ export function AlertAssignmentWidget({ title = 'My Alerts', refreshInterval = 6
     return () => clearInterval(interval);
   }, [refreshInterval])
 
-  if (error) {
-    return (
-      <>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-destructive">{title} - Error</h3>
-            <AlertTriangle className="h-5 w-5 text-destructive" />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground mb-4">{error}</p>
-          <Button onClick={fetchAssignment} variant="outline" size="sm">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Retry
-          </Button>
-        </CardContent>
-      </>
-    )
-  }
-
-  const getPriorityColor = (priority: "high" | "medium" | "low") => {
-    switch (priority) {
-      case "high":
-        return "bg-red-500 text-white"
-      case "medium":
-        return "bg-amber-500 text-white"
-      case "low":
-        return "bg-green-600 text-white"
-      default:
-        return "bg-gray-100 text-gray-800"
-    }
-  }
+  if (error) return <DynamicScreenError title={title} error={error} onClick={fetchAssignment} />
 
   return (
     <>
@@ -84,9 +54,6 @@ export function AlertAssignmentWidget({ title = 'My Alerts', refreshInterval = 6
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold">{title}</h3>
           <div className="flex items-center space-x-2">
-            { /*<Badge variant="outline" className="text-xs">
-              {getTimeRangeLabel(timeRange)}
-            </Badge> */ }
             <Button
               variant="ghost"
               size="sm"
@@ -126,17 +93,17 @@ export function AlertAssignmentWidget({ title = 'My Alerts', refreshInterval = 6
                 <div className="pl-6">
                   <div className="flex flex-wrap gap-1">
                     {assignment.alerts.user.high_priority > 0 && (
-                      <Badge variant="secondary" className={getPriorityColor("high")}>
+                      <Badge variant="secondary" className="bg-priority-high text-muted">
                         High: {assignment.alerts.user.high_priority}
                       </Badge>
                     )}
                     {assignment.alerts.user.medium_priority > 0 && (
-                      <Badge variant="secondary" className={getPriorityColor("medium")}>
+                      <Badge variant="secondary" className="bg-priority-medium text-muted">
                         Med: {assignment.alerts.user.medium_priority}
                       </Badge>
                     )}
                     {assignment.alerts.user.low_priority > 0 && (
-                      <Badge variant="secondary" className={getPriorityColor("low")}>
+                      <Badge variant="secondary" className="bg-priority-low text-muted">
                         Low: {assignment.alerts.user.low_priority}
                       </Badge>
                     )}
@@ -181,17 +148,17 @@ export function AlertAssignmentWidget({ title = 'My Alerts', refreshInterval = 6
                 <div className="pl-6">
                   <div className="flex flex-wrap gap-1">
                     {assignment.alerts.team.high_priority > 0 && (
-                      <Badge variant="secondary" className={getPriorityColor("high")}>
+                      <Badge variant="secondary" className="bg-priority-high text-muted">
                         High: {assignment.alerts.team.high_priority}
                       </Badge>
                     )}
                     {assignment.alerts.team.medium_priority > 0 && (
-                      <Badge variant="secondary" className={getPriorityColor("medium")}>
+                      <Badge variant="secondary" className="bg-priority-medium text-muted">
                         Med: {assignment.alerts.team.medium_priority}
                       </Badge>
                     )}
                     {assignment.alerts.team.low_priority > 0 && (
-                      <Badge variant="secondary" className={getPriorityColor("low")}>
+                      <Badge variant="secondary" className="bg-priority-low text-muted">
                         Low: {assignment.alerts.team.low_priority}
                       </Badge>
                     )}

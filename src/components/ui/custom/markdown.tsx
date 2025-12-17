@@ -49,6 +49,39 @@ export function Markdown({ content }: MarkdownProps) {
       return `<ol>\n${items}\n</ol>`;
     });
 
+    // --- Tables ---
+    // Matches markdown tables with pipe separators
+    html = html.replace(/((?:^\|.+\|\s*$\n?)+)/gm, (match) => {
+      const lines = match.trim().split('\n');
+      if (lines.length < 2) return match;
+
+      // Check if second line is a separator line (e.g., |---|---|)
+      const hasSeparator = /^\|[\s\-:|]+\|$/.test(lines[1]);
+      if (!hasSeparator) return match;
+
+      // Parse header row
+      const headers = lines[0]
+        .split('|')
+        .slice(1, -1)
+        .map((cell) => cell.trim());
+
+      // Parse body rows (skip separator line)
+      const rows = lines.slice(2).map((line) =>
+        line
+          .split('|')
+          .slice(1, -1)
+          .map((cell) => cell.trim())
+      );
+
+      // Build HTML table
+      const headerHtml = `<thead><tr>${headers.map((h) => `<th>${h}</th>`).join('')}</tr></thead>`;
+      const bodyHtml = `<tbody>${rows
+        .map((row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join('')}</tr>`)
+        .join('')}</tbody>`;
+
+      return `<table>${headerHtml}${bodyHtml}</table>`;
+    });
+
     // --- Headings ---
     // Convert markdown headings (#, ##, …, ######) to HTML headings.
     html = html.replace(/^######\s+(.*)$/gm, '<h6>$1</h6>');
@@ -82,11 +115,11 @@ export function Markdown({ content }: MarkdownProps) {
     );
 
     // --- Paragraphs ---
-    // Split text on two or more newlines and wrap blocks that aren’t already block-level HTML.
+    // Split text on two or more newlines and wrap blocks that aren't already block-level HTML.
     html = html
       .split(/\n{2,}/)
       .map((block) => {
-        if (/^\s*(<(h[1-6]|ul|ol|pre|blockquote|p|code))/.test(block)) {
+        if (/^\s*(<(h[1-6]|ul|ol|pre|blockquote|p|code|table))/.test(block)) {
           return block;
         }
         return `<p>${block}</p>`;
@@ -109,7 +142,7 @@ export function Markdown({ content }: MarkdownProps) {
   return (
     /* Return a div, with the correct styling, otherwise tailwind pre-flight takes over and removes all list stuff */
     <div
-      className="markdown-content [&_ul]:list-disc [&_ul]:ml-6 [&_ul]:my-2 [&_ol]:list-decimal [&_ol]:ml-6 [&_ol]:my-2 [&_li]:ml-1 [&_li]:my-1 [&_p]:my-2 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:my-3 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:my-2 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:my-2 [&_pre]:bg-muted [&_pre]:p-3 [&_pre]:rounded [&_pre]:overflow-x-auto [&_pre]:my-2 [&_code]:bg-muted [&_code]:px-1 [&_code]:rounded [&_code]:text-sm [&_a]:text-blue-500 [&_a]:underline"
+      className="markdown-content [&_ul]:list-disc [&_ul]:ml-6 [&_ul]:my-2 [&_ol]:list-decimal [&_ol]:ml-6 [&_ol]:my-2 [&_li]:ml-1 [&_li]:my-1 [&_p]:my-2 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:my-3 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:my-2 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:my-2 [&_pre]:bg-muted [&_pre]:p-3 [&_pre]:rounded [&_pre]:overflow-x-auto [&_pre]:my-2 [&_code]:bg-muted [&_code]:px-1 [&_code]:rounded [&_code]:text-sm [&_a]:text-blue-500 [&_a]:underline [&_table]:border-collapse [&_table]:w-full [&_table]:my-4 [&_th]:border [&_th]:border-border [&_th]:bg-muted [&_th]:px-4 [&_th]:py-2 [&_th]:text-left [&_th]:font-semibold [&_td]:border [&_td]:border-border [&_td]:px-4 [&_td]:py-2"
       dangerouslySetInnerHTML={{ __html: htmlContent }}
     />
   );

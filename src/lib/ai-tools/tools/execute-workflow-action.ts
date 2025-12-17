@@ -67,14 +67,11 @@ export const executeWorkflowActionTool: AIToolDefinition = {
           id: crypto.randomUUID(),
           toolName: TOOL_NAME,
           data: {
-            error: true,
-            errorMessage: `Action '${actionCode}' not found in workflow configuration for entity '${entityCode}'.`
+            error: `Action '${actionCode}' not found in workflow configuration.`
           },
           ui: {
             component: 'WorkflowActionExecutor',
-            props: {
-              error: `Action '${actionCode}' not found in workflow configuration.`
-            }
+            propsSource: 'data'
           }
         };
       }
@@ -85,14 +82,11 @@ export const executeWorkflowActionTool: AIToolDefinition = {
           id: crypto.randomUUID(),
           toolName: TOOL_NAME,
           data: {
-            error: true,
-            errorMessage: `Action '${action.name}' cannot be executed via chat. Only user-triggered actions are supported. This action has trigger='${action.trigger}'.`
+            error: `Action '${action.name}' cannot be executed via chat. Only user-triggered actions are supported.`
           },
           ui: {
             component: 'WorkflowActionExecutor',
-            props: {
-              error: `Action '${action.name}' cannot be executed via chat. Only user-triggered actions are supported.`
-            }
+            propsSource: 'data'
           }
         };
       }
@@ -108,14 +102,11 @@ export const executeWorkflowActionTool: AIToolDefinition = {
           id: crypto.randomUUID(),
           toolName: TOOL_NAME,
           data: {
-            error: true,
-            errorMessage: `Action '${action.name}' is not available from state '${currentStateCode}'. Available actions: ${availableActions.join(', ') || 'none'}.`
+            error: `Action '${action.name}' is not available from state '${currentStateCode}'. Available actions: ${availableActions.join(', ') || 'none'}.`
           },
           ui: {
             component: 'WorkflowActionExecutor',
-            props: {
-              error: `Action '${action.name}' is not available from state '${currentStateCode}'. Available actions: ${availableActions.join(', ') || 'none'}.`
-            }
+            propsSource: 'data'
           }
         };
       }
@@ -131,19 +122,12 @@ export const executeWorkflowActionTool: AIToolDefinition = {
           currentStateCode,
           action,
           suggestedValues: suggestedValues || {},
-          reasoning
+          reasoning,
+          entityData
         },
         ui: {
           component: 'WorkflowActionExecutor',
-          props: {
-            orgUnitCode,
-            entityCode,
-            entityId,
-            action,
-            suggestedValues: suggestedValues || {},
-            reasoning,
-            entityData
-          }
+          propsSource: 'data'
         }
       };
     } catch (error) {
@@ -152,19 +136,11 @@ export const executeWorkflowActionTool: AIToolDefinition = {
         id: crypto.randomUUID(),
         toolName: TOOL_NAME,
         data: {
-          orgUnitCode,
-          entityCode,
-          entityId,
-          actionCode,
-          currentStateCode,
-          error: true,
-          errorMessage: error instanceof Error ? error.message : 'Unknown error occurred while fetching workflow action'
+          error: error instanceof Error ? error.message : 'Unknown error occurred while fetching workflow action'
         },
         ui: {
           component: 'WorkflowActionExecutor',
-          props: {
-            error: error instanceof Error ? error.message : 'Unknown error occurred while fetching workflow action'
-          }
+          propsSource: 'data'
         }
       };
     }

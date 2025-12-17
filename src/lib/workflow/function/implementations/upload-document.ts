@@ -48,7 +48,6 @@ export class FunctionUploadDocument implements IWorkflowFunction {
         // Validate against allowed types
         if (!this.ALLOWED_MIME_TYPES.includes(detectedMimeType)) {
             const errorMessage = `File type not allowed: ${detectedMimeType} for file "${filename}". Allowed types: ${this.ALLOWED_MIME_TYPES.join(', ')}`
-            ctx.auditLog.push(errorMessage)
             throw new Error(errorMessage)
         }
         
@@ -101,10 +100,6 @@ export class FunctionUploadDocument implements IWorkflowFunction {
             const mimeTypeInfo = clientMimeType !== serverMimeType ? 
                 `MIME type: ${mimeType} (client: ${clientMimeType}, server: ${serverMimeType})` : 
                 `MIME type: ${mimeType}`
-            
-            ctx.auditLog.push(
-                `Document "${originalFilename}" (${(fileSize / 1024).toFixed(2)} KB, ${mimeTypeInfo}) uploaded to entity ${ctx.system.entityId} (${ctx.system.entityCode}) by ${userName}`
-            );
 
             // Return document information
             return {
@@ -120,7 +115,6 @@ export class FunctionUploadDocument implements IWorkflowFunction {
 
         } catch (error) {
             const errorMessage = `Failed to upload document "${originalFilename}": ${error instanceof Error ? error.message : 'Unknown error'}`;
-            ctx.auditLog.push(errorMessage);
             throw new Error(errorMessage);
         }
     }

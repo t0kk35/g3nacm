@@ -12,8 +12,8 @@ function getNestedValue(obj:any, path:string): any {
 };
 
 // Evaluate an Atomic Condition
-function evaluateAtomicCondition(entity: any, cond: EvalAtomicCondition, options: EvalOptions): boolean {
-    const fieldValue = getNestedValue(entity, cond.field);
+function evaluateAtomicCondition(data: any, cond: EvalAtomicCondition, options: EvalOptions): boolean {
+    const fieldValue = getNestedValue(data, cond.field);
     
     // Check if field is missing or undefined
     if (fieldValue === undefined) {
@@ -61,18 +61,18 @@ function evaluateAtomicCondition(entity: any, cond: EvalAtomicCondition, options
 }
 
 // Recursively evaluate a possibly nested condition
-function evaluateRuleCondition(entity: any, condition: EvalRuleCondition, options: EvalOptions): boolean {
+function evaluateRuleCondition(data: any, condition: EvalRuleCondition, options: EvalOptions): boolean {
     let result: boolean;
 
     // Base case: single check
     if (condition.type === 'atomic') {
-        result = evaluateAtomicCondition(entity, condition, options);
+        result = evaluateAtomicCondition(data, condition, options);
     } 
     // Group case: combine child conditions with AND/OR
     else {
-        if (condition.operator === 'AND') result = condition.conditions.every(child => evaluateRuleCondition(entity, child, options));
+        if (condition.operator === 'AND') result = condition.conditions.every(child => evaluateRuleCondition(data, child, options));
         // Conditiond === 'OR'
-        else result = condition.conditions.some((child) => evaluateRuleCondition(entity, child, options));
+        else result = condition.conditions.some((child) => evaluateRuleCondition(data, child, options));
     }
 
     // Negate if needed
@@ -83,20 +83,28 @@ function evaluateRuleCondition(entity: any, condition: EvalRuleCondition, option
 }
 
 // Evaluate Single rule
-function evaluateRule(entity: any, rule: EvalRule, options: EvalOptions): string | boolean | undefined {
-    if (evaluateRuleCondition(entity, rule.condition, options)) return rule.output;
+function evaluateRule(data: any, rule: EvalRule, options: EvalOptions): string | boolean | undefined {
+    if (evaluateRuleCondition(data, rule.condition, options)) return rule.output;
     return undefined
 }
 
+/**
+ * Run the internal evaluation engine for a set of rules.
+ * @param data The input data which must conform to the specifications of the 'schema'
+ * @param rules A set of rules to evaluate
+ * @param options Potential options
+ * @param schema A schema specification of the input data, so the eval engine knows which fields there are
+ * @returns The return will be a boolean or string depending on the rules specification.
+ */
 export function evaluateRules(
-    entity: any, 
+    data: any, 
     rules: EvalRule[], 
     options: EvalOptions,
     schema?: EvalInputSchema
 ): string | boolean | undefined {
     // Optional schema validation
     if (options.validateInput && schema) {
-        validateEntityStrict(entity, schema);
+        validateEntityStrict(data, schema);
     }
     
     // Sort rules
@@ -104,7 +112,7 @@ export function evaluateRules(
 
     // Run rules
     for (const r of sortedRules) {
-        const result = evaluateRule(entity, r, options);
+        const result = evaluateRule(data, r, options);
         if (result !== undefined) return result;
     }
     return undefined;

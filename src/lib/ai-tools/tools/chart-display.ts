@@ -94,17 +94,7 @@ export const chartDisplayTool: AIToolDefinition = {
         },
         ui: {
           component: 'ChartDisplay',
-          props: {
-            title,
-            subtitle,
-            description,
-            chartType,
-            data,
-            chartConfig,
-            xAxisKey,
-            valueKey,
-            nameKey
-          }
+          propsSource: 'data'  // Reference entire data object to avoid duplication
         }
       };
     } catch (error) {
@@ -113,15 +103,11 @@ export const chartDisplayTool: AIToolDefinition = {
         toolName: 'chart-display',
         data: {
           title,
-          error: true,
-          errorMessage: error instanceof Error ? error.message : 'Unknown error occurred'
+          error: error instanceof Error ? error.message : 'Unknown error occurred'
         },
         ui: {
           component: 'ChartDisplay',
-          props: {
-            title,
-            error: error instanceof Error ? error.message : 'Unknown error occurred'
-          }
+          propsSource: 'data'  // Reference entire data object to avoid duplication
         }
       };
     }

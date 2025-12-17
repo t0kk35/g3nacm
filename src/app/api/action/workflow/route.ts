@@ -4,7 +4,7 @@ import { auth } from '@/auth';
 import * as db from '@/db'
 import { NextRequest, NextResponse } from 'next/server';
 import { createWorkflowContext, executeWorkflowAction } from '@/lib/workflow/workflow-engine';
-import { workflowConfigCache } from '@/lib/workflow/workflow-cache';
+import { getCachedWorkflowConfig } from "@/lib/cache/workflow-cache";
 import { WorkflowConfig } from '../../data/workflow/types';
 import { PerformWorkflowAction } from './workflow';
 import { PoolClient } from 'pg';
@@ -70,13 +70,10 @@ export async function POST(req: NextRequest) {
     }
 
     const unique = [... new Set(actions.map((a)=> [a.entityCode, a.orgUnitCode]))]
-    if (unique.length > 1) return new Response(JSON.stringify({Error:`Entity code and Org unit should be unique ${unique}`}), { 
-      headers: { "Content-Type": "application/json" },
-      status: 500 
-    });
-
+    if (unique.length > 1) return ErrorCreators.workflow.notUnique(origin, actions[0].actionCode, actions[0].orgUnitCode)
+    
     // Get the workflow config (with caching)
-    const workflowConfig = await workflowConfigCache.getWorkflowConfig(
+    const workflowConfig = await getCachedWorkflowConfig(
       unique[0][0], // entityCode
       unique[0][1]  // orgUnitCode
     );
@@ -109,6 +106,7 @@ async function executeActions(client: PoolClient, userName: string, workflowConf
     for (const a of actions) {
         const systemFields = {
             userName: userName,
+            orgUnitCode: workflowConfig.org_unit_code,
             actionCode: a.actionCode,
             entityCode: a.entityCode,
             entityId: a.entityId,

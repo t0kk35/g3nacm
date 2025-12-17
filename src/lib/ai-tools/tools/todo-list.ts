@@ -69,11 +69,7 @@ export const todoListTool: AIToolDefinition = {
         },
         ui: {
           component: 'TodoListDisplay',
-          props: {
-            name: name,
-            todos: sortedTodos,
-            stats
-          }
+          propsSource: 'data'  // Reference entire data object to avoid duplication
         }
       };
     } catch (error) {
@@ -89,19 +85,13 @@ export const todoListTool: AIToolDefinition = {
         toolName: 'manage-todo-list',
         data: {
           name: name,
-          error: true,
-          errorMessage: error instanceof Error ? error.message : 'Unknown error occurred',
+          error: error instanceof Error ? error.message : 'Unknown error occurred',
           todos: [],
           stats: errorStats
         },
         ui: {
           component: 'TodoListDisplay',
-          props: {
-            name: name,
-            todos: [],
-            stats: errorStats,
-            error: error instanceof Error ? error.message : 'Unknown error occurred'
-          }
+          propsSource: 'data'  // Reference entire data object to avoid duplication
         }
       };
     }

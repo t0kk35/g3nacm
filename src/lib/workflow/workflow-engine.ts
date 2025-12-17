@@ -1,8 +1,8 @@
 import { PoolClient } from "pg";
 import { SystemFields, WorkflowContext } from "./types";
-import { WorkflowAction, WorkflowConfig } from "@/app/api/data/workflow/types";
+import { WorkflowConfig } from "@/app/api/data/workflow/types";
 import { workflowFunctionRegistry } from "./function/function";
-import { getEntityState, WorkflowEntityState } from "./workflow-data";
+import { getEntityState } from "./workflow-data";
 import { hasPermissions } from "../permissions/core";
 import { WorkflowErrorCreators } from "./workflow-error-handling";
 
@@ -43,6 +43,7 @@ export async function executeWorkflowAction(client: PoolClient, workflowConfig: 
     // Set system fields for this execution.
     ctx.system.fromStateCode = entityState.to_state_code;
     ctx.system.toStateCode = action.to_state_code;
+    ctx.system.commentRequired = action.comment_required;
   
     // Execute each workflow function in order.
     action.functions.sort((a, b) => { return a.order - b.order })    
@@ -57,7 +58,7 @@ export async function executeWorkflowAction(client: PoolClient, workflowConfig: 
       // Insert the settings into inputs.
       if (func.settings) {
         func.settings.forEach((s) => {
-          inputs[s.name] = resolveSetting(s.value, ctx);
+          inputs[s.mapping] = resolveSetting(s.value, ctx);
         })
       };
     
@@ -71,13 +72,14 @@ export async function executeWorkflowAction(client: PoolClient, workflowConfig: 
 
       // Map the outputs back to the context.
       func.output_parameters.forEach((op) => {
-        if (outputs[op.code] === undefined)
-          if (op.code.startsWith('system.')) WorkflowErrorCreators.context.canNotOverWriteSystem(origin, action.code, func.code, op.code, op.context_mapping)
-          ctx.data[op.context_mapping] = outputs[op.code]
+        const opValue = getByPath(outputs,op.code);
+        if (opValue) {
+          if (op.context_mapping.startsWith('system.')) WorkflowErrorCreators.context.canNotOverWriteSystem(origin, action.code, func.code, op.code, op.context_mapping)
+          // Consider properly doing this by path. What would happen if I have '.' in the mapping?
+          ctx.data[op.context_mapping] = opValue
+        }
       })
     }
-    // Optionally, write audit logs to a persistent store.
-    console.log(`Audit log for entity ${ctx.system.entityId} (${ctx.system.entityCode}):`, ctx.auditLog);
 
     // Resolve and return the redirect URL using the post-execution context
     return resolveRedirectUrl(action.redirect_url, ctx);
@@ -88,7 +90,6 @@ export function createWorkflowContext(data: { [key: string]: any }, system: Syst
     return {
         data,
         system,
-        auditLog: [],
         updateData(newData) {
         // Only update non-system fields.
         this.data = { ...this.data, ...newData };
@@ -149,3 +150,20 @@ export function resolveRedirectUrl(
 export function isAnyActive(fromStateCode: string): Boolean {
   return fromStateCode.toLowerCase().endsWith('any_active')
 }
+
+/* Helper function to get an object by path */
+function getByPath(obj: any, path: string) {
+  return path.split('.').reduce((o, key) => (o ? o[key] : undefined), obj);
+}
+
+/*function setByPath(obj: any, path: string, value: any) {
+  const parts = path.split('.');
+  const last = parts.pop();
+  
+  const target = parts.reduce((o, key) => {
+    if (!(key in o)) o[key] = {};
+    return o[key];
+  }, obj);
+
+  target[last] = value;
+}*/

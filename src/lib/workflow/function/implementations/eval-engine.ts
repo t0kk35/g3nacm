@@ -2,7 +2,7 @@ import { PoolClient } from "pg";
 import { WorkflowContext } from "../../types";
 import { IWorkflowFunction } from "../function";
 import { getInput, isString } from "../function-helpers";
-import { evalRulesCache } from "@/lib/eval-engine/eval-cache";
+import { getCachedEvalEngineRuleConfig } from "@/lib/cache/eval-engine-rule-cache";
 import { evaluateRules } from "@/lib/eval-engine/engine";
 import { EvalOptions } from "@/lib/eval-engine/types";
 
@@ -25,21 +25,29 @@ export class FunctionEvalEngine implements IWorkflowFunction {
         };
         
         // Get the eval rules for the group
-        const evalRules = await evalRulesCache.getEvalRules(evalGroup);
+        const evalRules = await getCachedEvalEngineRuleConfig(evalGroup);
         
         // Get the entity data from system context
-        const entityData = ctx.system.entityData;
+        const data = {
+            entity: ctx.system.entityData,
+            action: {
+                code: ctx.system.actionCode,
+                from_state_code: ctx.system.fromStateCode,
+                to_state_code: ctx.system.toStateCode
+            }
+        }
         
         // Execute the eval engine
-        const evalResult = evaluateRules(entityData, evalRules, evalOptions);
+        const evalResult = evaluateRules(data, evalRules, evalOptions);
         
-        // Log the evaluation for audit
-        ctx.auditLog.push(`Eval Engine executed for group '${evalGroup}' with result: ${JSON.stringify(evalResult)}`);
-        
-        return { 
-            evalResult: evalResult,
-            evalGroup: evalGroup,
-            evalRulesCount: evalRules.length
+        return {
+            function: {
+                eval_engine : {
+                    evalResult: evalResult,
+                    evalGroup: evalGroup,
+                    evalRulesCount: evalRules.length
+                }
+            }
         };
     }
 }
