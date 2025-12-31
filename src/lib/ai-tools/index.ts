@@ -37,8 +37,6 @@ toolRegistry.registerTool(searchUser);
 
 // Export main interfaces
 export { toolRegistry } from './registry';
-export { getAgentConfig } from './agents';
-export { createModelInstance } from './model-factory';
 export { substituteTemplate, getDefaultContext, mergeContexts } from './template-utils';
 export { executeAgent } from './agent-executors';
 export type { AIToolDefinition, ToolResult, AgentConfig, AgentConfigWithContext, ModelConfig, AgentType, StreamingAgentConfig, TextAgentConfig, ObjectAgentConfig } from './types';

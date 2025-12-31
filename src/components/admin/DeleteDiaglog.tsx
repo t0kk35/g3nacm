@@ -3,21 +3,24 @@
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
-interface RoleDeleteDialogProps {
+type DeleteDialogProps = {
+  title: string
   message: string | null
   open: boolean
   onOpenChange: (open: boolean) => void
   onConfirm: () => void
 }
 
-export function DeleteDialog({ message, open, onOpenChange, onConfirm }: RoleDeleteDialogProps) {
+export function DeleteDialog({ title, message, open, onOpenChange, onConfirm }: DeleteDialogProps) {
   if (!message) return null
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete Role</DialogTitle>
+          <DialogTitle>
+            {title}
+          </DialogTitle>
           <DialogDescription>
             {message}
           </DialogDescription>

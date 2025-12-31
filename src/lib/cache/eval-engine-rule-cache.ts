@@ -1,6 +1,6 @@
 import * as db from "@/db"
 import { evalEngineRuleConfigCache } from "./cache";
-import { EvalRule, EvalRuleCondition, EvalLogicalOperator, EvalComparisonOperator, RawRuleRow } from "../eval-engine/types";;
+import { EvalRule, EvalRuleCondition, EvalLogicalOperator, EvalComparisonOperator, RawRuleRow } from "../eval-engine/types";
 
 const rules_query_text = `
 SELECT 

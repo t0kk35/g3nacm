@@ -17,7 +17,7 @@ const schema = z.object({
 
 export const chartDisplayTool: AIToolDefinition = {
   name: 'chart-display',
-  description: 'Displays interactive charts using Recharts. Supports multiple data series in bar, line, area, and scatter charts. Series are defined by chartConfig keys. Perfect for visualizing data insights for users. This tool will create a chart in the users chat. There is no need to send a chart in the text',
+  description: 'Displays interactive charts using Recharts. Supports multiple data series in bar, line, area, and radar charts. Series are defined by chartConfig keys. Perfect for visualizing data insights for users. This tool will create a chart in the users chat. There is no need to send a chart in the text',
   inputSchema: schema,
   handler: async (params): Promise<ToolResult> => {
     const { 

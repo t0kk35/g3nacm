@@ -144,3 +144,27 @@ export function normalizeJSONValue(value: AllowedValue): AllowedValue {
   return value;
 }
 
+/**
+ * Shallow remove of null, undefinded and empty {} object keys from an object. 
+ * ! Careful, make sure only optional element are null. Otherwise the returing object might not be valid !
+ * 
+ * @param obj The object from which to remove nulls and undefined.
+ * @returns An object, cleaned of null and '{}' 
+ */
+export function removeNullsAndEmptyObjects<T extends Record<string, any>>(obj: T): T {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([_, value]) => {
+      if (value === null) return false;
+
+      if (
+        typeof value === "object" &&
+        !Array.isArray(value) &&
+        Object.keys(value).length === 0
+      ) {
+        return false;
+      }
+
+      return true;
+    })
+  ) as T;
+}

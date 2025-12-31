@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
-import { ArrowLeft, Save, Search, Check } from "lucide-react"
+import { ArrowLeft, Save } from "lucide-react"
 import { UserTeam } from "@/app/api/data/user/user"
 import { UserTeamRequest } from "@/app/api/action/team/user-team"
 import { UserRevokeEntityTable } from "../UserRevokeEntityTable"

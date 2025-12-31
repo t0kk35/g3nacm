@@ -1,8 +1,8 @@
-import { AgentConfig, ObjectAgentConfig } from './types';
-import { z } from 'zod';
+//import { AgentConfig, ObjectAgentConfig } from './types';
+// import { z } from 'zod';
 
 // Agent configurations
-export const agentConfigs: Record<string, AgentConfig> = {
+/* export const agentConfigs: Record<string, AgentConfig> = {
 
   'claude-45': {
     name: 'Advanced Analyst',
@@ -33,21 +33,7 @@ export const agentConfigs: Record<string, AgentConfig> = {
       Some actions have form-fields. These are fields that need to be populated. You can help the user by pre-populating these fields. You
       can use execute-workflow-action to display a form with the formfields and allow the user to execute the workflow actions.
     `,
-    modelConfig: {
-      provider: 'anthropic',
-      model: 'claude-sonnet-4-5-20250929',
-      providerOptions: {
-        anthropic: {
-          thinking: { 
-            type: 'enabled', 
-            budgetTokens: 25000 
-          },
-        }
-      },
-      headers: {
-        'anthropic-beta': 'interleaved-thinking-2025-05-14',
-      },      
-    },
+    modelConfigCode: 'claude-45-reasoning',
     agentType: 'streaming'
   },
 
@@ -80,15 +66,7 @@ export const agentConfigs: Record<string, AgentConfig> = {
       Some actions have form-fields. These are fields that need to be populated. You can help the user by pre-populating these fields. You
       can use execute-workflow-action to display a form with the formfields and allow the user to execute the workflow actions.
     `,
-    modelConfig: {
-      provider: 'openai',
-      model: 'gpt-5',
-      providerOptions: {
-        openai: {
-          reasoningEffort: 'medium'
-        }
-      },
-    },
+    modelConfigCode: 'gpt-5-reasoning',
     agentType: 'streaming'
   },
 
@@ -240,9 +218,9 @@ export const agentConfigs: Record<string, AgentConfig> = {
       confidence: z.number().min(0).max(1),
       summary: z.string()
     })
-  } as ObjectAgentConfig
-};
+  } as ObjectAgentConfig 
+}; */
 
-export function getAgentConfig(agentName: string): AgentConfig | undefined {
+/*export function getAgentConfig(agentName: string): AgentConfig | undefined {
   return agentConfigs[agentName];
-}
+} */

@@ -110,6 +110,7 @@ export function UserListClient({ users }: Props) {
         </div>
       )}
       <DeleteDialog
+        title="User Delete"
         message={`Are you sure you want to delete the user "${userToDelete?.name}"?`}
         open={userToDelete !== null}
         onOpenChange={() => setUserToDelete(null)}

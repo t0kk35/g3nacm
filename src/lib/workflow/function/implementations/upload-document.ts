@@ -28,7 +28,7 @@ export class FunctionUploadDocument implements IWorkflowFunction {
     async run(inputs: { [key:string]: any }, ctx: WorkflowContext, client: PoolClient): Promise<{ [key: string]: any }> {
         // Update entity state audit trail
         copyToEntityStateLog(client, ctx.system.entityId, ctx.system.entityCode);
-        updateEntityState(client, ctx.system.entityId, ctx.system.entityCode, ctx.system.actionCode, ctx.system.fromStateCode, ctx.system.userName);
+        updateEntityState(client, ctx.system.entityId, ctx.system.entityCode, ctx.system.actionCode, ctx.system.fromStateCode, ctx.system.userName, null);
         
         // Extract required inputs
         const orgUnitCode = getInput<string>(this.code, inputs, 'function.document.upload.org_unit_code', isString);

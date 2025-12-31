@@ -1,0 +1,14 @@
+INSERT INTO agent_tool 
+  ("code", "agent_group", "description") 
+VALUES 
+  ('chart-display', 'General', 'Displays interactive charts using Recharts. Supports multiple data series in bar, line, area, and radar charts.'), 
+  ('execute-workflow-action', 'Workflow', 'Displays an interactive form for executing a workflow action on a investigation entity with AI-suggested field values.'), 
+  ('fetch-subject-detail', 'Subject', 'Fetches detailed information about a subject (individual or corporate entity) including personal details, address, and type-specific information'), 
+  ('fetch-subject-events', 'Subject', 'Fetches events for a subject (individual or corporate entity) this includes change to their data, products that were linked to the subject, alerts, cases and potential SAR''s raised on the subject'), 
+  ('fetch-subject-history', 'Subject', 'Fetches historical changes in the subject reference data over time. Supports optional date range filtering.'), 
+  ('search-user', 'Workflow', 'Search for a user. Returns a list of users that have a user-name, first name or last name that is included in the search criteria'), 
+  ('subject-display', 'Subject', 'Display subject information with fixed header fields and variable detail fields. Fixed fields include name, identifier, type, optional KYC risk badge, address, and contact info. Variable fields are displayed as customizable label-value pairs.'), 
+  ('todo-list', 'General', 'Displays a todo list for agent planning and progress tracking. Takes a list of todos and displays them with calculated progress statistics.'), 
+  ('transaction-aggregation', 'Transactions', 'Performs flexible aggregations on GL transactions. Group by entity fields (counterparty, country, booking type, etc.) and/or time dimensions (day, week, month, etc.).'), 
+  ('transaction-list', 'Transactions', 'Retrieve detailed GL transactions with advanced filtering options. Supports filtering by date range, amounts, counterparties, countries, booking types, and more.'), 
+  ('transaction-overview', 'Transactions', 'Get a comprehensive multi-frequency analysis of a customer''s transaction patterns for AML risk assessment. Provides daily, weekly, and monthly behavioral analysis including volume patterns, risk indicators, and geographic distribution.');

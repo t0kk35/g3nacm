@@ -10,6 +10,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Plus, Edit, Trash2, GripVertical } from "lucide-react"
 import { InlineRuleForm } from "./InLineRuleForm"
 import { InlineAddRuleForm } from "./InLineAddRuleForm"
+import { DeleteDialog } from "../DeleteDiaglog"
 import { UserTeam } from "@/app/api/data/user/user"
 import { OrgUnit } from "@/app/api/data/org_unit/org_unit"
 import { EvalInputSchema, EvalRule } from "@/lib/eval-engine/types"
@@ -284,7 +285,7 @@ export function TeamAssignmentRulesClient( { teams, orgUnits, schemas }: Props) 
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                                 <AlertDialogAction
                                   onClick={() => handleDeleteRule(rule)}
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  className="bg-destructive dark: text-white hover:bg-destructive/90"
                                 >
                                   Delete
                                 </AlertDialogAction>

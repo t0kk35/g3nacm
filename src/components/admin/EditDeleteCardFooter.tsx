@@ -24,7 +24,7 @@ export function EditDeleteCardFooter({ editHref, onDelete, deleteDisabled, delet
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <span>
-                            <Button variant="destructive" size="sm" onClick={onDelete} disabled={deleteDisabled}>
+                            <Button className="hoover: cursor-pointer" variant="destructive" size="sm" onClick={onDelete} disabled={deleteDisabled}>
                                 <Trash2 className="mr-2 h-3 w-3" />
                                 Delete
                             </Button>                            

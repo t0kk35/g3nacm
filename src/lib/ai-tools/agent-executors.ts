@@ -1,6 +1,6 @@
 import { streamText, generateText, generateObject } from 'ai';
 import { AgentConfig, ToolResult } from './types';
-import { createModelInstance } from './model-factory';
+import { getCachedAgentModelConfig } from '../cache/agent-model-config-cache';
 import { toolRegistry } from './registry';
 import { substituteTemplate } from './template-utils';
 
@@ -41,7 +41,7 @@ export async function executeAgent(
     : undefined;
 
   // Create model instance
-  const modelInstance = createModelInstance(config.modelConfig);
+  const modelInstance = getCachedAgentModelConfig(config.modelConfigCode)
   
   // Execute based on agent type
   switch (config.agentType) {

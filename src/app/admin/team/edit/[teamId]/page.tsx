@@ -18,9 +18,9 @@ export default async function RoleEdit({ params } : Props) {
     return (
 			<PermissionGuard userName={user?.name} permissions={['admin.team']} fallback={<NoPermission />}>
         <div className="container p-4">
-          <div className="space-y-2">
-            <h1 className="text-xl font-bold tracking-tight">User Roles</h1>
-            <p className="text-muted-foreground pb-2">Change Role Permissions</p>
+          <div className="space-y-1">
+            <h1 className="text-xl font-bold tracking-tight">User Teams</h1>
+            <p className="text-muted-foreground pb-2">Change a team</p>
           </div>
           <Suspense fallback={<TeamFormSkeleton />}>
             <TeamForm teamId={teamId} />

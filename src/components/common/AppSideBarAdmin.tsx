@@ -27,7 +27,6 @@ export function AppSideBarAdmin() {
                     </Link>
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>                
-                <SidebarMenuSubItem></SidebarMenuSubItem>
                 <SidebarMenuSubItem>
                   <SidebarMenuSubButton asChild>
                     <Link href="/admin/user">

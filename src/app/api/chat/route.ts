@@ -2,13 +2,14 @@
 
 import { streamText, convertToModelMessages, stepCountIs, NoSuchToolError, InvalidToolInputError } from 'ai';
 import { ChatUIMessage } from './types';
-import { toolRegistry, getAgentConfig } from '@/lib/ai-tools';
-import { createModelInstance } from '@/lib/ai-tools/model-factory';
+import { toolRegistry } from '@/lib/ai-tools';
+import { getCachedAgentModelConfig } from '@/lib/cache/agent-model-config-cache';
 import { substituteTemplate, getDefaultContext, mergeContexts, TemplateContext } from '@/lib/ai-tools/template-utils';
 import { ErrorCreators } from '@/lib/api-error-handling';
 import { StreamingAgentConfig } from '@/lib/ai-tools/types';
 import { auth } from '@/auth';
 import { findOrCreateChatSession, addChatMessage, getChatSession, isAPIError, isChatSession } from '@/lib/chat-audit';
+import { getCachedAgentConfig } from '@/lib/cache/agent-config-cache';
 
 const origin = '/api/chat'
 
@@ -42,7 +43,7 @@ export async function POST(req: Request) {
   if (!user?.name) return ErrorCreators.auth.missingUser(origin);
 
   // Get agent configuration
-  const agentConfig = getAgentConfig(agent);
+  const agentConfig = await getCachedAgentConfig(agent);
   if (!agentConfig) return ErrorCreators.agent.notFound(origin, agent)
 
   // Validate that this is a streaming agent
@@ -110,7 +111,7 @@ export async function POST(req: Request) {
   const tools = toolRegistry.getTools(streamingAgentConfig.tools);
 
   // Create model instance based on streaming agent configuration
-  const { model, streamTextOptions } = createModelInstance(streamingAgentConfig.modelConfig);
+  const { model, streamTextOptions } = await getCachedAgentModelConfig(streamingAgentConfig.modelConfigCode);
 
   // Process system prompt with template variables
   const templateContext: TemplateContext = mergeContexts(

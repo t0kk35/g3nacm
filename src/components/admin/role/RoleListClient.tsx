@@ -128,6 +128,7 @@ export function RoleListClient({ roles }: Props) {
       )}
 
       <DeleteDialog
+        title="Role Delete"
         message={`Are you sure you want to delete the role "${roleToDelete?.name}"? This action cannot be undone.`}
         open={roleToDelete !== null}
         onOpenChange={() => setRoleToDelete(null)}

@@ -56,14 +56,7 @@ export function ConditionBuilder({ condition, onChange, fields, level = 0 }: Con
       const newGroupCondition: EvalConditionGroup = {
         type: "group",
         operator: "AND",
-        conditions: [
-          {
-            type: "atomic",
-            field: fields[0]?.field_path || "",
-            operator: "equals",
-            value: "",
-          },
-        ],
+        conditions: [],
       }
       onChange({
         ...groupCondition,
@@ -112,13 +105,104 @@ export function ConditionBuilder({ condition, onChange, fields, level = 0 }: Con
   }
 
   if (isGroup) {
+    // Root level (level 0) gets special prominent styling
+    if (level === 0) {
+      return (
+        <div className="space-y-4">
+          {/* Prominent root operator section */}
+          <div className="bg-primary/5 border-2 border-primary/20 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-semibold text-primary">Root Logic:</span>
+                <span className="text-xs text-muted-foreground">Combine all groups/conditions with</span>
+                <Badge variant="default" className="text-sm px-3 py-1">
+                  {groupCondition.operator}
+                </Badge>
+              </div>
+              <div className="flex gap-2">
+                <Select
+                  value={groupCondition.operator}
+                  onValueChange={(value: "AND" | "OR") => onChange({ ...groupCondition, operator: value })}
+                >
+                  <SelectTrigger className="w-24 h-9 font-semibold">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="AND">AND</SelectItem>
+                    <SelectItem value="OR">OR</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button type="button" size="sm" variant="outline">
+                      <Plus className="h-3 w-3 mr-1" />
+                      Add
+                      <ChevronDown className="h-3 w-3 ml-1" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onClick={addAtomicCondition}>
+                      <Plus className="h-3 w-3 mr-2" />
+                      Add Condition
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={addGroupCondition}>
+                      <Plus className="h-3 w-3 mr-2" />
+                      Add Group
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <Button type="button" size="sm" variant="outline" onClick={convertToAtomic}>
+                  Convert to Simple
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Child conditions/groups */}
+          <div className="space-y-3">
+            {groupCondition.conditions.map((subCondition, index) => (
+              <div key={index} className="flex items-start gap-2">
+                <div className="flex-1">
+                  <ConditionBuilder
+                    condition={subCondition}
+                    onChange={(newCondition) => updateCondition(index, newCondition)}
+                    fields={fields}
+                    level={level + 1}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => removeCondition(index)}
+                  className="text-destructive hover:text-destructive mt-2"
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              </div>
+            ))}
+            {groupCondition.conditions.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground text-sm border-2 border-dashed rounded-lg">
+                No conditions added. Click the + button above to add a condition or group.
+              </div>
+            )}
+          </div>
+        </div>
+      )
+    }
+
+    // Nested groups (level 1+) keep card styling with enhanced operator visibility
     return (
-      <Card className={`${level > 0 ? "ml-4" : ""}`}>
-        <CardHeader className="pb-2">
+      <Card className="ml-4 border-2">
+        <CardHeader className="pb-2 bg-muted/30">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <CardTitle className="text-sm">Group Condition</CardTitle>
-              <Badge variant="outline">{groupCondition.operator}</Badge>
+              <CardTitle className="text-sm font-semibold">Group Condition</CardTitle>
+              <Badge variant="secondary" className="text-xs px-2 py-1 font-semibold">
+                {groupCondition.operator}
+              </Badge>
             </div>
             <div className="flex gap-2">
               <Select
@@ -153,12 +237,6 @@ export function ConditionBuilder({ condition, onChange, fields, level = 0 }: Con
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-
-              {level === 0 && (
-                <Button type="button" size="sm" variant="outline" onClick={convertToAtomic}>
-                  Convert to Simple
-                </Button>
-              )}
             </div>
           </div>
         </CardHeader>

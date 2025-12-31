@@ -17,7 +17,7 @@ export default async function TeamNew() {
       <div className="container p-4">
         <div className="space-y-1">
           <h1 className="text-xl font-bold tracking-tight">User Teams</h1>
-          <p className="text-muted-foreground">Create a new team.</p>
+          <p className="text-muted-foreground">Create a new team</p>
         </div>
         <Suspense fallback={<TeamFormSkeleton />}>
           <TeamForm />

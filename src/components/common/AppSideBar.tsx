@@ -5,6 +5,7 @@ import { AppSideBarHome } from "./AppSideBarHome";
 import { AppSideBarTheme } from "./AppSideBarTheme";
 import { AppSideBarAdmin } from "./AppSideBarAdmin";
 import { AppSideBarUser } from "./AppSideBarUser";
+import { AppSideBarAI } from "./AppSideBarAI";
 import { PermissionGuard } from "../ui/custom/permission-guard-server";
 
 type Props = {
@@ -12,6 +13,7 @@ type Props = {
 }
 
 const admin_permissions = ['admin.role', 'admin.org_unit', 'admin.user', 'admin.team', 'admin.team_rules']
+const ai_permissions = ['admin.agent.config', 'admin.agent.model.config']
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
 
 export async function AppSidebar({ userName } : Props) {
@@ -29,6 +31,9 @@ export async function AppSidebar({ userName } : Props) {
             </SidebarGroup>
             <PermissionGuard permissions={admin_permissions} requireAll={false} userName={userName}>
               <AppSideBarAdmin />          
+            </PermissionGuard>
+            <PermissionGuard permissions={ai_permissions} requireAll={false} userName={userName}>
+              <AppSideBarAI />
             </PermissionGuard>
             <SidebarGroup>
               <SidebarGroupLabel>Apearance</SidebarGroupLabel>

@@ -1,56 +1,73 @@
 'use client'
 
-import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table"
 import Link from "next/link"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 import { Button } from "@/components/ui/button"
 import { AlertUserStatus } from "@/components/alert/list/AlertUserStatus"
 import { AlertUserDetection } from "@/components/alert/list/AlertUserDetection"
-import { AlertPriorityBadge } from "../AlertPriority"
 import { Alert } from "@/app/api/data/alert/alert"
+import { TanStackTable, tanStackColumnHelper } from "@/components/ui/custom/tanstack-table"
 
 type Props = { data: Alert[] }
 
+type TMAlertTable = {
+  id: string;
+  identifier: string;
+  description: string;
+  type: string;
+  priority: string;
+  alert_item_id: string
+  alert_item_subject_name: string;
+  status: string;
+  orginal_alert: Alert;
+}
+
 export function AlertTable({ data }: Props) {
-  const columns: ColumnDef<any>[] = [
-    {
-      accessorKey: "alert_identifier",
-      header: "Alert Identifier",
-      cell: ({ row }) => (
+  
+  // Create a column helper
+  const colHelper = tanStackColumnHelper<TMAlertTable>();
+  // Remap the alert data, flatten it out, that is easier to handle.
+  const alertData = data.map(a=> {
+    const at: TMAlertTable = {
+      id: a.id,
+      identifier: a.alert_identifier,
+      description: a.description,
+      type: a.alert_type,
+      priority: a.entity_state.priority,
+      alert_item_id: a.alert_item.id,
+      alert_item_subject_name: a.alert_item.details.subject_name,
+      status: a.entity_state.to_state_name,
+      orginal_alert: a
+    }
+    return at
+  })
+  // Set up the columns.
+  const cols = [
+    colHelper.custom(
+      "alert_identifier", 
+      () => (<div className="font-semibold">Identifier</div>),
+      ({ row }) => (
         <Link href={`/alert/${row.original.id}`} className="hover:underline">
-          {row.original.alert_identifier}
+          {row.original.identifier}
         </Link>
       ),
-    },
-    {
-      accessorKey: "description",
-      header: "Description",
-    },
-    {
-      accessorKey: "priority",
-      header: "Priority",
-      cell: ({ row }) => (
-        <AlertPriorityBadge priority={row.original.entity_state.priority} />
-      ),
-    },
-    {
-      accessorKey: "alert_item",
-      header: "Alert Item",
-      cell: ({ row }) => (
-        <Link href={`/subject/${row.original.alert_item.id}`} className="hover:underline">
-          {row.original.alert_item.details.subject_name}
+    ),
+    colHelper.accessor("description", "Description", "left", false),
+    colHelper.priority("priority", true),
+    colHelper.accessor("type", "Type", "left", true),
+    colHelper.custom(
+      "alert_item",
+      () => (<div className="font-semibold">Alert Item</div>),
+      ({ row }) => (
+        <Link href={`/subject/${row.original.alert_item_id}`} className="hover:underline">
+          {row.original.alert_item_subject_name}
         </Link>
-      ),
-    },
-    {
-      accessorKey: "alert_type",
-      header: "Alert Type",
-    },
-    {
-      accessorKey: "entity_state.to_state",
-      header: "Status",
-      cell: ({ row }) => (
+      )      
+    ),
+    colHelper.custom(
+      "status",
+      () => (<div className="font-semibold">Status</div>),
+      ({ row }) => (
         <div className="flex space-x-2">
           <HoverCard>
             <HoverCardTrigger asChild>
@@ -59,16 +76,16 @@ export function AlertTable({ data }: Props) {
               </Button>
             </HoverCardTrigger>
             <HoverCardContent className="w-80">
-              <AlertUserStatus alert={row.original} />
+              <AlertUserStatus alert={row.original.orginal_alert} />
             </HoverCardContent>
           </HoverCard>
         </div>
-      ),
-    },
-    {
-      id: "detections",
-      header: "Detections",
-      cell: ({ row }) => (
+      )
+    ),
+    colHelper.custom(
+      "detections",
+      () => (<div className="font-semibold">Detections</div>),
+      ({ row }) => (
         <div className="flex space-x-2">
           <HoverCard>
             <HoverCardTrigger asChild>
@@ -77,52 +94,17 @@ export function AlertTable({ data }: Props) {
               </Button>
             </HoverCardTrigger>
             <HoverCardContent className="w-80">
-              <AlertUserDetection alert={row.original} />
+              <AlertUserDetection alert={row.original.orginal_alert} />
             </HoverCardContent>
           </HoverCard>
         </div>
       ),
-    },
+    )
   ]
 
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-  })
-
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
-                  {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                ))}
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+    <div className="ontainer mx-auto">
+      <TanStackTable columns={cols} data={alertData} visibilityChange={true} />
     </div>
   )
 }

@@ -14,7 +14,6 @@ import { TemplateContext } from "@/lib/ai-tools";
 import { PermissionGuard } from "@/components/ui/custom/permission-guard-server";
 import { NoPermission } from "@/components/ui/custom/no-permission";
 import { EntityAttachments } from "@/components/ui/custom/entity-attachment";
-import { WorkflowSelector } from "@/components/ui/custom/workflow/workflow-selection";
 
 type Props = {params: Promise<{ alertId : string }>}
 

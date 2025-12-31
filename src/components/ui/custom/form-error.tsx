@@ -1,7 +1,7 @@
 import { AlertTriangle } from "lucide-react"
 
 type Props = {
-    error: string
+    error?: string
 }
 
 export function FormError({ error } : Props) {

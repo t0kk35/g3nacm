@@ -11,7 +11,7 @@ const schema = z.object({
 
 export const fetchSubjectHistoryTool: AIToolDefinition = {
   name: 'fetch-subject-history',
-  description: 'Fetches historical changes for a subject over time. Returns data in CSV format for efficient processing of large datasets. Supports optional date range filtering.',
+  description: 'Fetches historical changes in the subject reference data over time. Supports optional date range filtering.',
   inputSchema: schema,
   handler: async (params): Promise<ToolResult> => {
     const { subjectId, fromDate, toDate } = params;

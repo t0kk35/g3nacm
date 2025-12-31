@@ -179,15 +179,20 @@ export function UserFormClient({ user, iRoles, iTeams, iOrgs }: UserFormProps) {
 							<ArrowLeft className="mr-2 h-4 w-4" />
 								Back to Users
 							</Button>
-							<Button type="button" variant="default"  onClick={() => setIsPasswordModalOpen(true)}>
-								<KeyRound className="mr-2 h-4 w-4" />
-								Change Password
-							</Button>
-							<ChangePasswordModal
-								open={isPasswordModalOpen}
-								onOpenChange={setIsPasswordModalOpen}
-								userName={user!.name}
-							/>
+							{ /* Only show if not editing, the user only exists if in editing mode */ } 
+							{ (isEditing) && (
+								<>
+									<Button type="button" variant="default"  onClick={() => setIsPasswordModalOpen(true)}>
+										<KeyRound className="mr-2 h-4 w-4" />
+										Change Password
+									</Button>
+									<ChangePasswordModal
+										open={isPasswordModalOpen}
+										onOpenChange={setIsPasswordModalOpen}
+										userName={user!.name}
+									/>
+								</>)  
+							}
 						</div>
 					</CardContent>          
 				</Card>

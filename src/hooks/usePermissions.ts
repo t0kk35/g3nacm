@@ -31,7 +31,7 @@ export function usePermissions(permissions: string[], requireAll: boolean = true
       }
 
       try {
-        const response = await fetch('/api/permissions/check', {
+        const response = await fetch('/api/action/permissions/check', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

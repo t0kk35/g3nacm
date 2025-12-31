@@ -17,7 +17,9 @@ VALUES
     ('Admin', 'admin.role', 'Role Maintenance (Create/Update/Delete)'),
     ('Admin', 'admin.team', 'Team Maintenance (Create/Update/Delete)'),
     ('Admin', 'admin.team_rules', 'Allows setting Team assignment rules'),
-    ('Admin', 'admin.change_password', 'Change other users passwords'),
+    ('Admin', 'admin.change_password', 'Change other user passwords'),
+    ('Admin', 'admin.agent.model.config', 'Access to the model config for AI Agents'),
+    ('Admin', 'admin.agent.config', 'Access to the agent config for AI Agents'),
     ('User', 'user.change_password', 'Allows a user to change their own password'),
     ('Data', 'data.alert', 'Base permission for the back-end access to alert data. Needed by end-users as well as as APIs.'),
     ('Data', 'data.attachment', 'Permission needed to read attachments from workflow entities');
@@ -32,6 +34,8 @@ JOIN user_permission p ON (
     OR (r.name = 'Admin' AND p.permission = 'admin.team')
     OR (r.name = 'Admin' AND p.permission = 'admin.change_password')
     OR (r.name = 'Admin' AND p.permission = 'user.change_password')
+    OR (r.name = 'Admin' AND p.permission = 'admin.agent.model.config')
+    OR (r.name = 'Admin' AND p.permission = 'admin.agent.config')
 );
 
 INSERT INTO user_role_link ("user_id", "role_id")

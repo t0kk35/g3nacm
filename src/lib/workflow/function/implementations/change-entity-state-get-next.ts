@@ -1,6 +1,7 @@
 import { PoolClient } from "pg";
 import { WorkflowContext } from "../../types";
 import { IWorkflowFunction } from "../function";
+import { getInput, isString } from "../function-helpers";
 import { updateEntityState, updateEntityAssignUser, copyToEntityStateLog } from "../../workflow-data";
 import { WorkflowErrorCreators } from "../../workflow-error-handling";
 
@@ -20,11 +21,12 @@ const workflow_code = 'function.entity.change_state.get_next'
 export class FunctionChangeEntityStateGetNext implements IWorkflowFunction {
     code = workflow_code;
 
-    async run(_inputs: { [key:string]: any }, ctx: WorkflowContext, client: PoolClient): Promise<{ [key: string]: any }> {
+    async run(inputs: { [key:string]: any }, ctx: WorkflowContext, client: PoolClient): Promise<{ [key: string]: any }> {
         // The user that does the get will be the current user
+        const comment = (ctx.system.commentRequired) ? getInput(this.code, inputs, 'function.entity.change_state.assign_user.comment', isString) : null
         await checkLease(client, ctx.system.entityId, ctx.system.entityCode, ctx.system.userName);
         await copyToEntityStateLog(client, ctx.system.entityId, ctx.system.entityCode);
-        await updateEntityState(client, ctx.system.entityId, ctx.system.entityCode, ctx.system.actionCode, ctx.system.fromStateCode, ctx.system.userName);
+        await updateEntityState(client, ctx.system.entityId, ctx.system.entityCode, ctx.system.actionCode, ctx.system.fromStateCode, ctx.system.userName, comment);
         await updateEntityAssignUser(client, ctx.system.entityId, ctx.system.entityCode, ctx.system.userName);
         return {};
     }

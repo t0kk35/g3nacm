@@ -24,44 +24,61 @@ export interface AIToolDefinition {
   uiComponent?: string;
 }
 
-// Provider-specific configuration interfaces
-export interface OpenAIModelConfig {
-  provider: 'openai';
+export type ModelBaseConfig = {
+  provider: 'openai' | 'anthropic' | string;
   model: string;
   temperature?: number;
   maxTokens?: number;
   topP?: number;
-  frequencyPenalty?: number;
-  presencePenalty?: number;
-  seed?: number;
-  providerOptions?: {
-    openai?: {
-      reasoningEffort?: 'high' | 'medium' | 'low',
-      reasoningSummary?: 'auto' | 'detailed'
-    }
-  }
+  providerOptions?: Record<string, unknown>;
 }
-export interface AnthropicModelConfig {
-  provider: 'anthropic';
-  model: string;
-  temperature?: number;
-  maxTokens?: number;
-  topP?: number;
-  topK?: number;
+
+export type OpenAIProviderOptions = {
+  reasoningEffort?: 'high' | 'medium' | 'low';
+  reasoningSummary?: 'auto' | 'detailed';
+}
+
+export type AnthropicProviderOptions = {
   headers?: Record<string, string>;
-  providerOptions?: {
-    anthropic?: {
-      thinking?: {
-        type: 'enabled' | 'disabled';
-        budgetTokens?: number;
-      };
-      [key: string]: any;
-    };
+  thinking?: {
+    type: 'enabled' | 'disabled';
+    budgetTokens?: number;
   };
 }
 
+export type OpenAIModelConfig = ModelBaseConfig & OpenAIProviderOptions;
+export type AnthropicModelConfig = ModelBaseConfig & AnthropicProviderOptions;
+
 // Union type for all model configurations
 export type ModelConfig = OpenAIModelConfig | AnthropicModelConfig;
+
+export const modelProviders = [
+    {
+    id: 0,
+    name: 'Anthropic',
+    description: 'Anthropic (Claude) provider'
+  },
+  {
+    id: 1,
+    name: 'OpenAI',
+    description: 'Open AI provider'
+  },
+]
+
+export const modelProviderModels = [
+  {
+    providerId: 0,
+    name: 'claude-sonnet-4-5-20250929'
+  },
+  {
+    providerId: 1,
+    name: 'gpt-5'
+  },
+  {
+    providerId: 1,
+    name: 'gpt-4o'
+  }
+]
 
 // Agent types
 export type AgentType = 'streaming' | 'text' | 'object';
@@ -71,7 +88,7 @@ export interface BaseAgentConfig {
   name: string;
   description: string;
   systemPrompt?: string;
-  modelConfig: ModelConfig;
+  modelConfigCode: string;
 }
 
 // Streaming and text agents support tools

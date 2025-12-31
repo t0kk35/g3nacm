@@ -158,7 +158,7 @@ export const ErrorCreators = {
         resourceAccessDenied: (origin: string, resource: string) => createErrorResponse(ErrorCode.PERM_RESOURCE_ACCESS_DENIED, origin, {'resource': resource }),
     },
     agent: {
-        notFound: (origin: string, name: string) => createErrorResponse(ErrorCode.AGENT_NOT_FOUND, origin, { 'name': name }),
+        notFound: (origin: string, code: string) => createErrorResponse(ErrorCode.AGENT_NOT_FOUND, origin, { 'code': code }),
         invalidType: (origin: string, name: string, expectedType: string, actualType: string) => createErrorResponse(ErrorCode.AGENT_INVALID_TYPE, origin, { 'name': name, 'expected_type': expectedType, 'actual_type': actualType }),
     }
 } as const;
@@ -286,7 +286,7 @@ const errorDefinition = new Map<ErrorCode, errorParams>([
     }],
     [ErrorCode.AGENT_NOT_FOUND, {
       httpCode: 400,
-      text: "Request to use an unknow/undefined agent : '{name}'"
+      text: "Request to use an unknow/undefined agent : '{code}'"
     }],
     [ErrorCode.AGENT_INVALID_TYPE, {
       httpCode: 400,

@@ -13,7 +13,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "sonner"
 import { ArrowLeft, Save, Search, Check } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { BulkPermissionManager } from "./BulkPermissionManager"
 import { UserRole } from "@/app/api/data/user/user"
 import { UserPermission } from "@/app/api/data/user/user"
 import { UserRoleRequest } from "@/app/api/action/role/user-role"
@@ -219,7 +218,6 @@ export function RoleFormClient({ role, iPermissions }: RoleFormProps) {
                     onChange={(e) => setPermissionSearch(e.target.value)}
                   />
                 </div>
-        { /*        <BulkPermissionManager permissions={permissions} onPermissionsChange={setPermissions} /> */ }
               </div>
             </div>
           </CardHeader>

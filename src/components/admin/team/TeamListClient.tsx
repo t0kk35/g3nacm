@@ -127,6 +127,7 @@ export function TeamListClient({ teams }: Props) {
       )}
 
       <DeleteDialog
+        title="Team Delete"
         message={`Are you sure you want to delete the team "${teamToDelete?.name}"? This action cannot be undone.`}
         open={teamToDelete !== null}
         onOpenChange={() => setTeamToDelete(null)}

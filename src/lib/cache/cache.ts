@@ -150,3 +150,12 @@ export const workflowConfigCache = new InMemoryCache(10, 500, 2);
 
 // Eval Engine Rule cache, max size = 20, clean-up every 500 calls with a batch size of 5.
 export const evalEngineRuleConfigCache = new InMemoryCache(20, 500, 5);
+
+// Agent Model Config cache. max size = 10, clean-up every 2000 calls with a batch size of 2.
+export const agentModelConfigCache = new InMemoryCache(10, 2000, 2);
+
+// Agent Config cache. max size = 15, clean-up every 2000 calls with a batch size of 2.
+export const agentConfigCache = new InMemoryCache(15, 2000, 2);
+
+// Permission cache. Max size = 100, clean-up every 1000 calls with a bach size of 5.
+export const permissionCache = new InMemoryCache(100, 2000, 5);

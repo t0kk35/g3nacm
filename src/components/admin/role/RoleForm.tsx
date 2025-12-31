@@ -31,7 +31,6 @@ export async function RoleForm({ roleId } : Props) {
     })
     .then(j => j as UserPermission[])        
 
-
   return (
     <RoleFormClient role={role} iPermissions={permissions} />
   )
@@ -40,7 +39,7 @@ export async function RoleForm({ roleId } : Props) {
 export async function RoleFormSkeleton() {
   return (
     <div className="space-y-6">
-      <Skeleton className="h-10 w-32" />
+      <Skeleton className="h-16 w-36" />
       <Card>
         <CardHeader>
           <Skeleton className="h-6 w-32" />
