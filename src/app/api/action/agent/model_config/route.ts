@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     const permissionCheck = await requirePermissions(user.name, origin, ['admin.agent.model.config']);
     if (permissionCheck) return permissionCheck;
     
-    // Get role to create and validate
+    // Get config to create and validate
     const config: AgentModelConfig = await request.json();    
 
     const req_params = [
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ 'success': true });
     } catch (error) {
         if (client && transactionStarted) await client.query('ROLLBACK');
-        console.error('Error creating user', error);
+        console.error('Error creating agent model config', error);
         return ErrorCreators.db.queryFailed(origin, 'create agent model config', error as Error);
     } finally {
         if (client) client.release();

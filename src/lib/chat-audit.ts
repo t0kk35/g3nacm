@@ -63,11 +63,17 @@ export interface CreateSessionParams {
 
 export interface CreateMessageParams {
   session_id: string
+  agent_code: string
   message_type: 'user' | 'agent'
   message_content: string
   message_metadata?: object
   template_context?: object
   agent_reasoning?: object
+  input_tokens?: number
+  cached_input_tokens?: number
+  output_tokens?: number
+  reasoning_tokens?: number
+  total_tokens?:number
 }
 
 /**
@@ -234,20 +240,27 @@ export async function addChatMessage(
       name: 'insert_chat_message',
       text: `
         INSERT INTO chat_message (
-          session_id, message_sequence, message_type, message_content, 
-          message_metadata, template_context, agent_reasoning
+          session_id, agent_code, message_sequence, message_type, message_content, 
+          message_metadata, template_context, agent_reasoning, input_tokens, cached_input_tokens,
+          output_tokens, reasoning_tokens, total_tokens
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
         RETURNING *
       `,
       values: [
         params.session_id,
+        params.agent_code,
         nextSequence,
         params.message_type,
         params.message_content,
         params.message_metadata ? JSON.stringify(params.message_metadata) : null,
         params.template_context ? JSON.stringify(params.template_context) : null,
-        params.agent_reasoning ? JSON.stringify(params.agent_reasoning) : null
+        params.agent_reasoning ? JSON.stringify(params.agent_reasoning) : null,
+        params.input_tokens,
+        params.cached_input_tokens,
+        params.output_tokens,
+        params.reasoning_tokens,
+        params.total_tokens
       ]
     };
 

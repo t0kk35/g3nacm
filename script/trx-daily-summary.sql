@@ -2,7 +2,7 @@
 -- This table aggregates daily transaction data for efficient AML analysis
 
 CREATE TABLE trx_daily_summary (
-    subject_id VARCHAR(50) NOT NULL,
+    subject_id UUID NOT NULL,
     transaction_date DATE NOT NULL,
     org_unit_code VARCHAR(20) NOT NULL,
     

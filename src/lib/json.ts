@@ -147,7 +147,6 @@ export function normalizeJSONValue(value: AllowedValue): AllowedValue {
 /**
  * Shallow remove of null, undefinded and empty {} object keys from an object. 
  * ! Careful, make sure only optional element are null. Otherwise the returing object might not be valid !
- * 
  * @param obj The object from which to remove nulls and undefined.
  * @returns An object, cleaned of null and '{}' 
  */
@@ -167,4 +166,16 @@ export function removeNullsAndEmptyObjects<T extends Record<string, any>>(obj: T
       return true;
     })
   ) as T;
+}
+
+/**
+ * Get the unique entries for a column of a array
+ * @param array The array to use.
+ * @param key The key/column to get the unique entries from.
+ * @returns A list of unique entries in the 'key' column for 'array' 
+ */
+export function uniqueBy<T, K extends keyof T>(array: T[], key: K): T[K][] {
+  const filtered = array.filter(item => item[key] !== null)
+  if (filtered) return [...new Set(filtered.map(item => item[key]))];
+  else return []
 }

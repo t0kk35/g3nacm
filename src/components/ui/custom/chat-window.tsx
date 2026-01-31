@@ -55,6 +55,7 @@ function isReasoningPart(part: any): part is ReasoningUIPart {
 export function ChatWindow({ agent, context, entityCode, entityId, orgUnitCode }: Props) {
 
   const sessionIdRef = useRef<string | null>(null);
+  const [totalTokenUsage, setTotalTokenUsage] = useState(0);
   const [debugMode, setDebugMode] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const [forceRefresh, setForceRefresh] = useState(0);
@@ -83,6 +84,13 @@ export function ChatWindow({ agent, context, entityCode, entityId, orgUnitCode }
       setRetryCount(prev => prev + 1);
     },
     onFinish: async (m) => {
+      // Update token usage.
+      setTotalTokenUsage(prev => m.message.metadata?.usage?.totalTokens 
+        ? prev + m.message.metadata?.usage?.totalTokens
+        : prev
+      )
+
+      // -- Store the message
       // Get session ID from message metadata (AI SDK v5)
       const currentSessionId = m.message.metadata?.sessionId || sessionIdRef.current;
       
@@ -113,13 +121,15 @@ export function ChatWindow({ agent, context, entityCode, entityId, orgUnitCode }
             },
             body: JSON.stringify({
               sessionId: currentSessionId,
+              agentCode: agent,
               messageContent: textContent,
               messageMetadata: {
                 parts: parts,
                 toolInvocations: toolInvocations,
                 createdAt: new Date().toISOString()
               },
-              agentReasoning: reasoning
+              agentReasoning: reasoning,
+              usage: m.message.metadata?.usage
             }),
           });
         } catch (error) {
@@ -134,7 +144,8 @@ export function ChatWindow({ agent, context, entityCode, entityId, orgUnitCode }
     sendMessage(
       { text: input, 
         metadata: {
-          createdAt: Date.now()
+          createdAt: Date.now(),
+          agentCode: agent
         }
       }
     );
@@ -221,6 +232,11 @@ export function ChatWindow({ agent, context, entityCode, entityId, orgUnitCode }
             <div className="flex items-center gap-2">
               <Bot className="h-5 w-5" />
               AI Assistant
+            </div>
+            <div className="flex items-center gap-2 text-xs font-light text-muted-foreground">
+              <span >Used Tokens : </span>
+              <span className="font-mono font-semibold">{totalTokenUsage / 1000} </span>
+              <span> k</span>
             </div>
             <div className="flex items-center gap-2">
               <button

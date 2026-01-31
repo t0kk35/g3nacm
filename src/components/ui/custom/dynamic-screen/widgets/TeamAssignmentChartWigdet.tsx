@@ -10,12 +10,23 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { DynamicScreenError } from '../DynamicScreenError'
 
+const HEADER_SIZE = 60;
+const SUMMARY_SIZE = 45;
+const FOOTER_SIZE = 40;
+
 interface TeamAssignmentChartWidgetProps {
   title?: string
   refreshInterval?: number
+  width: number
+  height: number
 }
 
-export function TeamAssignmentChartWidget({ title = 'Team Assignment Chart', refreshInterval = 60000 }: TeamAssignmentChartWidgetProps) {
+export function TeamAssignmentChartWidget({ 
+  title = 'Team Assignment Chart', 
+  refreshInterval = 60000,
+  width,
+  height
+}: TeamAssignmentChartWidgetProps) {
  
   const [data, setData] = useState<TeamAssignment[] | null>(null)
   const [loading, setLoading] = useState(true)
@@ -59,10 +70,13 @@ export function TeamAssignmentChartWidget({ title = 'Team Assignment Chart', ref
     }
   }
 
+  // Calculate the available height for the chart
+  const chartHeight = height - HEADER_SIZE - SUMMARY_SIZE - FOOTER_SIZE;
+
   if (error) return <DynamicScreenError title={title} error={error} onClick={fetchData} />
 
   return (
-    <>
+    <div className="h-full">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold">{title}</h3>
@@ -80,14 +94,14 @@ export function TeamAssignmentChartWidget({ title = 'Team Assignment Chart', ref
       <Separator />
       <CardContent className="pt-4">
         {!data ? (
-          <div className="h-48 flex items-center justify-center">
+          <div style={{ height: `${chartHeight}px` }} className="flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         ) : (
           <div className="space-y-2">
             {/* Chart */}
-            <div className="h-56">
-              <ChartContainer config={chartConfig} className='aspect-auto h-[220px] w-full'>
+            <div style={{ height: `${chartHeight}px` }}>
+              <ChartContainer config={chartConfig} className='aspect-auto w-full h-full'>
                 <BarChart accessibilityLayer data={data} layout="vertical">
                   <CartesianGrid horizontal={false} />
                   <XAxis type="number" />
@@ -128,6 +142,6 @@ export function TeamAssignmentChartWidget({ title = 'Team Assignment Chart', ref
         </div>
 
       </CardContent>
-    </>
+    </div>
   )
 }

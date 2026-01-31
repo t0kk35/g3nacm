@@ -13,7 +13,7 @@ type Props = {
 }
 
 const admin_permissions = ['admin.role', 'admin.org_unit', 'admin.user', 'admin.team', 'admin.team_rules']
-const ai_permissions = ['admin.agent.config', 'admin.agent.model.config']
+const ai_permissions = ['admin.agent.config', 'admin.agent.model.config', 'user.agent.preference']
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
 
 export async function AppSidebar({ userName } : Props) {
@@ -33,7 +33,7 @@ export async function AppSidebar({ userName } : Props) {
               <AppSideBarAdmin />          
             </PermissionGuard>
             <PermissionGuard permissions={ai_permissions} requireAll={false} userName={userName}>
-              <AppSideBarAI />
+              <AppSideBarAI userName={userName} />
             </PermissionGuard>
             <SidebarGroup>
               <SidebarGroupLabel>Apearance</SidebarGroupLabel>

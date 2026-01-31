@@ -157,5 +157,8 @@ export const agentModelConfigCache = new InMemoryCache(10, 2000, 2);
 // Agent Config cache. max size = 15, clean-up every 2000 calls with a batch size of 2.
 export const agentConfigCache = new InMemoryCache(15, 2000, 2);
 
+// Agent User Prefrence cache. Max Size = 100, clean-up every 500 calls with batchsize of 20.
+export const agentUserPreferenceCache = new InMemoryCache(100, 500, 20);
+
 // Permission cache. Max size = 100, clean-up every 1000 calls with a bach size of 5.
 export const permissionCache = new InMemoryCache(100, 2000, 5);

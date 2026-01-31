@@ -10,6 +10,9 @@ import { StreamingAgentConfig } from '@/lib/ai-tools/types';
 import { auth } from '@/auth';
 import { findOrCreateChatSession, addChatMessage, getChatSession, isAPIError, isChatSession } from '@/lib/chat-audit';
 import { getCachedAgentConfig } from '@/lib/cache/agent-config-cache';
+import { GLOBAL_POLICY_PROMPT } from '@/lib/ai-tools/policy-prompt';
+import { generateUserPreferences } from '@/lib/ai-tools/user-preferences';
+import { getCachedAgentUserPreferences } from '@/lib/cache/agent-user-preference-cache';
 
 const origin = '/api/chat'
 
@@ -81,6 +84,32 @@ export async function POST(req: Request) {
     chatSession = chatSessionResult;
   }
 
+  // Get tools for this streaming agent
+  const tools = toolRegistry.getTools(streamingAgentConfig.tools);
+
+  // Create model instance based on streaming agent configuration
+  const { model, streamTextOptions } = await getCachedAgentModelConfig(streamingAgentConfig.modelConfigCode);
+
+  // Build three-level system prompt structure
+  const templateContext: TemplateContext = mergeContexts(getDefaultContext(), context as TemplateContext);
+
+  // Level 1: Global Policy (hard-coded)
+  const policyPrompt = GLOBAL_POLICY_PROMPT;
+
+  // Level 2: Agent Instructions (template-processed)
+  const agentInstructions = streamingAgentConfig.systemPrompt ? substituteTemplate(streamingAgentConfig.systemPrompt, templateContext) : '';
+
+  // Level 3: User Instructions
+  const userPreferences = await getCachedAgentUserPreferences(user.name)
+  const userInstructions = userPreferences ? generateUserPreferences(userPreferences) : '';
+
+  // Create system message array, filtering out empty prompts
+  const systemMessages = [
+    { role: 'system' as const, content: policyPrompt },
+    { role: 'system' as const, content: agentInstructions },
+    { role: 'system' as const, content: userInstructions }
+  ].filter(msg => msg.content && msg.content.trim().length > 0);
+
   // Store user message if this is a new message (not just loading conversation)
   const lastMessage = messages[messages.length - 1];
   if (lastMessage && lastMessage.role === 'user') {
@@ -90,45 +119,39 @@ export async function POST(req: Request) {
       .filter((part: any) => part.type === 'text')
       .map((part: any) => part.text || '')
       .join('');
-    
+
     const userMessageResult = await addChatMessage({
       session_id: chatSession.id,
+      agent_code: agent,
       message_type: 'user',
       message_content: textContent,
       message_metadata: {
         parts: parts,
         createdAt: Date.now()
       },
-      template_context: context
+      template_context: {
+        // Store all three prompt levels for complete audit trail
+        level1_policy: policyPrompt,
+        level2_agent_instructions: agentInstructions,
+        level3_user_instructions: userInstructions,
+        // Include original template variables for Level 2 reconstruction
+        template_variables: context
+      }
     }, origin);
-    
+
     if (isAPIError(userMessageResult)) {
       return userMessageResult; // Return error if message storage failed
     }
   }
 
-  // Get tools for this streaming agent
-  const tools = toolRegistry.getTools(streamingAgentConfig.tools);
-
-  // Create model instance based on streaming agent configuration
-  const { model, streamTextOptions } = await getCachedAgentModelConfig(streamingAgentConfig.modelConfigCode);
-
-  // Process system prompt with template variables
-  const templateContext: TemplateContext = mergeContexts(
-    getDefaultContext(),
-    context as TemplateContext
-  );
-
-  const processedSystemPrompt = streamingAgentConfig.systemPrompt 
-    ? substituteTemplate(streamingAgentConfig.systemPrompt, templateContext)
-    : undefined;
-
   try {
     const result = streamText({
       model,
-      messages: convertToModelMessages(messages),
+      messages: [
+        ...systemMessages,  // Three-level system prompts (Level 1: Policy, Level 2: Agent, Level 3: User)
+        ...convertToModelMessages(messages)  // User/assistant conversation
+      ],
       tools,
-      system: processedSystemPrompt,
       stopWhen: stepCountIs(streamingAgentConfig.maxSteps || 5),
       ...streamTextOptions,
     });
@@ -143,13 +166,21 @@ export async function POST(req: Request) {
           return {
             createdAt: Date.now(),
             model: model,
-            sessionId: chatSession.id
+            sessionId: chatSession.id,
+            agentCode: agent
           };
         }
         // Send additional metadata when streaming completes
         if (part.type === 'finish') {
           return {
-            totalTokens: part.totalUsage.totalTokens
+            usage : {
+              inputTokens: part.totalUsage.inputTokens,
+              cachedInputTokens: part.totalUsage.cachedInputTokens,
+              resoningTokens: part.totalUsage.reasoningTokens,
+              outputTokens: part.totalUsage.outputTokens,
+              totalTokens: part.totalUsage.totalTokens
+            },
+            agentCode: agent
           }
         }
       },

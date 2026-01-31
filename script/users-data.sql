@@ -21,8 +21,10 @@ VALUES
     ('Admin', 'admin.agent.model.config', 'Access to the model config for AI Agents'),
     ('Admin', 'admin.agent.config', 'Access to the agent config for AI Agents'),
     ('User', 'user.change_password', 'Allows a user to change their own password'),
+    ('User', 'user.agent.preference', 'Allows a user to change their AI Agent preferences'),
     ('Data', 'data.alert', 'Base permission for the back-end access to alert data. Needed by end-users as well as as APIs.'),
-    ('Data', 'data.attachment', 'Permission needed to read attachments from workflow entities');
+    ('Data', 'data.attachment', 'Permission needed to read attachments from workflow entities'),
+    ('Reporting', 'reporting.agent.usage.all', 'Agent usage and cost reporting for all users');
 
 INSERT INTO user_role_permission_link ("role_id", "permission_id")
 SELECT r.id, p.id
@@ -36,6 +38,8 @@ JOIN user_permission p ON (
     OR (r.name = 'Admin' AND p.permission = 'user.change_password')
     OR (r.name = 'Admin' AND p.permission = 'admin.agent.model.config')
     OR (r.name = 'Admin' AND p.permission = 'admin.agent.config')
+    OR (r.name = 'Admin' AND p.permission = 'reporting.agent.usage.all')
+    OR (r.name = 'Admin' AND p.permission = 'user.agent.preference')
 );
 
 INSERT INTO user_role_link ("user_id", "role_id")

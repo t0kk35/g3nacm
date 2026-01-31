@@ -139,7 +139,7 @@ export function AgentModelConfigFormClient({ config }: AgentModelConfigFormProps
     form.setField("budgetTokens", "")
     form.setField("reasoningEffort", "")
     form.setField("reasoningSummary", "")
-  }, [form.values.provider, isEditing])
+  }, [form.values.provider])
 
   const handleSubmit = async () => {
     setSaving(true)

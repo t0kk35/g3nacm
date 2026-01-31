@@ -32,12 +32,18 @@ CREATE INDEX idx_chat_session_last_activity ON chat_session(session_last_activit
 CREATE TABLE chat_message (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     session_id UUID NOT NULL,
+    agent_code TEXT NOT NULL,
     message_sequence INTEGER NOT NULL, -- Order within session
     message_type TEXT NOT NULL CHECK (message_type IN ('user', 'agent')),
     message_content TEXT NOT NULL, -- Raw text content
     message_metadata JSONB, -- Complex streaming data, UI elements, tool calls
     template_context JSONB, -- Context variables passed to agent
     agent_reasoning JSONB, -- Agent's reasoning/thinking process
+    input_tokens INTEGER,
+    cached_input_tokens INTEGER,
+    output_tokens INTEGER,
+    reasoning_tokens INTEGER,
+    total_tokens INTEGER,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     
     CONSTRAINT fk_chat_session FOREIGN KEY (session_id) REFERENCES chat_session(id) ON DELETE CASCADE,

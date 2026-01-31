@@ -56,3 +56,31 @@ CREATE TABEL agent_tool_link(
 
 CREATE INDEX idx_atl_agent_code ON agent_tool_link(agent_code);
 CREATE INDEX idx_atl_agent_tool_code ON agent_tool_link(agent_code, tool_code);
+
+CREATE TABLE agent_provider_model_cost (
+  model TEXT NOT NULL,
+  input_token_cost NUMERIC NOT NULL,
+  cached_input_token_cost NUMERIC NOT NULL,
+  output_token_cost NUMERIC NOT NULL,
+  reasoning_token_cost NUMERIC
+);
+
+CREATE INDEX idx_apmc_agent_model ON agent_provider_model_cost(model);
+
+CREATE TABLE agent_user_preference(
+  user_id INTEGER PRIMARY KEY NOT NULL,
+  communication_style TEXT NOT NULL,
+  explantion_depth TEXT NOT NULL,
+  risk_perspective TEXT NOT NULL,
+  output_format TEXT NOT NULL,
+  use_visual TEXT NOT NULL,
+  planning_mode TEXT NOT NULL,
+  show_confidence_scores BOOLEAN,
+  highlight_assumptions BOOLEAN,
+  preferred_language TEXT,
+  create_datetime TIMESTAMPTZ default now(),
+  update_datetime TIMESTAMPTZ default now(),
+  CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE INDEX idx_aup_user_uid ON agent_user_preference(user_id);

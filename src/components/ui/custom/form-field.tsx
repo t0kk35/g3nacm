@@ -5,6 +5,7 @@ import { Checkbox } from "../checkbox"
 import { TemplateTextarea } from "./template-textarea/TemplateTextarea"
 import { Label } from "../label"
 import { Input } from "../input"
+import { RadioGroupItem, RadioGroup } from "../radio-group"
 import { FormError } from "./form-error"
 import { VALID_TEMPLATE_VARIABLES } from "@/components/ui/custom/template-textarea/template-variables"
 import { validateTemplate, extractTemplateVariables } from "@/lib/ai-tools/template-utils"
@@ -221,6 +222,49 @@ export function FormFieldTemplateTextArea({
       {description && (
         <p className="text-xs text-muted-foreground">{description}</p>
       )}      
+    </div>
+  )
+}
+
+// Select Field
+type FormFieldRadioGroupOption = {
+  value: string
+  label: string
+}
+
+type FormFieldRadioGroup = {
+  id: string;
+  label: string
+  value: string
+  orientation: 'horizontal' | 'vertical'
+  onChange: (value: string) => void
+  options: FormFieldRadioGroupOption[]
+  error?: string
+  description?: string
+}
+
+// Radio group Field
+export function FormFieldRadioGroup({ id, label, value, orientation, onChange, options, error, description }: FormFieldRadioGroup) {
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={id}>{label}</Label>
+      <RadioGroup 
+        className={orientation === 'horizontal' ? "grid grid-cols-4" : ""}
+        value={value}
+        orientation={orientation}
+        onValueChange={onChange}
+      >
+        { options.map((option, index) => (
+          <div key={index} className="flex items-center gap-3">
+            <RadioGroupItem value={option.value} id={`r${index}`}/>
+            <Label htmlFor={`r${index}`}>{option.label}</Label>
+          </div>
+        ))}
+      </RadioGroup>
+      <FormError error={error} />
+      {description && (
+        <p className="text-xs text-muted-foreground">{description}</p>
+      )}           
     </div>
   )
 }

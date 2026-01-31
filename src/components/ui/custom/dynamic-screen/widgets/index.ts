@@ -7,6 +7,7 @@ import { AlertAssignmentWidget } from './AlertAssignmentWidget'
 import { AlertHandledChartWidget } from './AlertHandledChartWidget'
 import { NotificationWidget } from './NotificationWidget'
 import { TeamAssignmentChartWidget } from './TeamAssignmentChartWigdet'
+import { AgentUsageChartWidget } from './AgentUsageChartWidget'
 
 widgetRegistry.register({
   code: 'alert-assignment',
@@ -48,9 +49,9 @@ widgetRegistry.register({
     timeRange: z.enum(['24h', '7d', '30d', '90d', '6w', '12w', '6m']).default('7d'),
   }),
   responsiveConstraints: {
-    lg: {minW: 6, minH: 6, maxW: 12, maxH: 8},
-    md: {minW: 6, minH: 6, maxW: 8, maxH: 7}, 
-    sm: {minW: 4, minH: 4, maxW: 6, maxH: 6},
+    lg: {minW: 6, minH: 4, maxW: 12, maxH: 8},
+    md: {minW: 6, minH: 4, maxW: 8, maxH: 7}, 
+    sm: {minW: 4, minH: 3, maxW: 6, maxH: 6},
     xs: {minW: 3, minH: 3, maxW: 4, maxH: 4}
   },
   permissions: ['data.alert'],
@@ -128,14 +129,40 @@ widgetRegistry.register({
     refreshInterval: CommonWidgetSchemas.refreshInterval.default(300000),
   }),
   responsiveConstraints: {
-    lg: {minW: 4, minH: 6, maxW: 12, maxH: 8},
-    md: {minW: 4, minH: 6, maxW: 8, maxH: 7}, 
-    sm: {minW: 3, minH: 4, maxW: 6, maxH: 6},
+    lg: {minW: 4, minH: 4, maxW: 12, maxH: 8},
+    md: {minW: 4, minH: 4, maxW: 8, maxH: 7}, 
+    sm: {minW: 3, minH: 3, maxW: 6, maxH: 6},
     xs: {minW: 3, minH: 3, maxW: 4, maxH: 4}
   },
   permissions: ['data.alert'],
   category: WIDGET_CATEGORIES.ANALYTICS,
   tags: ['teams', 'chart', 'statistics']
+})
+
+widgetRegistry.register({
+  code: 'agent-usage',
+  name: 'Agent Usage',
+  description: 'Displays a chart showing the Agent Token cost over time', 
+  component: AgentUsageChartWidget,
+  defaultConfig: {
+    title: 'Agent Usage',
+    refreshInterval: 300000,
+    timeRange: '30d'
+  },
+  configSchema: z.object({
+    title: CommonWidgetSchemas.title.default('Alerts Handled'),
+    refreshInterval: CommonWidgetSchemas.refreshInterval.default(300000),
+    timeRange: z.enum(['24h', '7d', '30d', '90d', '6w', '12w', '6m']).default('30d'),
+  }),
+  responsiveConstraints: {
+    lg: {minW: 5, minH: 4, maxW: 12, maxH: 8},
+    md: {minW: 5, minH: 4, maxW: 8, maxH: 7}, 
+    sm: {minW: 4, minH: 3, maxW: 6, maxH: 6},
+    xs: {minW: 3, minH: 3, maxW: 4, maxH: 4}
+  },
+  permissions: ['reporting.agent.usage.all'],
+  category: WIDGET_CATEGORIES.ANALYTICS,
+  tags: ['agent', 'chart', 'statistics']
 })
 
 // Export widget registry for use in other components
@@ -147,7 +174,8 @@ export {
   AlertHandledChartWidget,
   AlertAssignmentWidget,
   NotificationWidget,
-  TeamAssignmentChartWidget
+  TeamAssignmentChartWidget,
+  AgentUsageChartWidget
 }
 
 // Utility function to get all available widgets

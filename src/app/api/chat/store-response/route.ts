@@ -8,9 +8,11 @@ const origin = '/api/chat/store-response';
 export async function POST(req: NextRequest) {
   const { 
     sessionId, 
+    agentCode,
     messageContent, 
     messageMetadata, 
-    agentReasoning 
+    agentReasoning,
+    usage 
   } = await req.json();
 
   // Authentication check
@@ -36,10 +38,16 @@ export async function POST(req: NextRequest) {
   // Store the agent's response
   const agentMessageResult = await addChatMessage({
     session_id: sessionId,
+    agent_code: agentCode,
     message_type: 'agent',
     message_content: messageContent,
     message_metadata: messageMetadata,
-    agent_reasoning: agentReasoning
+    agent_reasoning: agentReasoning,
+    input_tokens: usage.inputTokens,
+    cached_input_tokens: usage.cachedInputTokens,
+    output_tokens: usage.outputTokens,
+    reasoning_tokens: usage.resoningTokens,
+    total_tokens: usage.totalTokens
   }, origin);
 
   if (isAPIError(agentMessageResult)) {

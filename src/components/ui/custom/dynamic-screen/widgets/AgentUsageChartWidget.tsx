@@ -8,31 +8,32 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { RefreshCw } from 'lucide-react'
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
-import { UserHandled } from '@/app/api/data/user/user'
+import { AgentUsage } from '@/app/api/data/agent/types'
 import { DynamicScreenError } from '../DynamicScreenError'
 import { ChartTrendIndicator } from './helpers/ChartTrendIndicator'
+import { uniqueBy } from '@/lib/json'
 
 const HEADER_SIZE = 60;
 const SUMMARY_SIZE = 45;
 const FOOTER_SIZE = 40;
 
-interface AlertHandledChartWidgetProps {
-  timeRange?: '24h' | '7d' | '30d' | '90d' | '6w' | '12w' | '6m' 
+interface AgentUsageChartWidgetProps {
+  timeRange?: '24h' | '7d' | '30d' | '90d' | '6w' | '12w' | '6m'
   title?: string
   refreshInterval?: number
   width: number
   height: number
 }
 
-export function AlertHandledChartWidget({
+export function AgentUsageChartWidget({
   timeRange = '7d',
   title = 'Alerts Handled',
   refreshInterval = 300000, // 5 minutes
   width,
   height
-}: AlertHandledChartWidgetProps) {
-
-  const [data, setData] = useState<UserHandled | null>(null)
+}: AgentUsageChartWidgetProps) {
+  
+  const [data, setData] = useState<AgentUsage[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date())
@@ -42,9 +43,9 @@ export function AlertHandledChartWidget({
     try {
       setLoading(true)
       setError(null)
-      const response = await fetch(`/api/data/user/entities_handled?time_range=${selectedTimeRange}`)
+      const response = await fetch(`/api/data/agent/usage?time_range=${selectedTimeRange}`)
       if (!response.ok) throw new Error(`Failed to fetch alert handled: ${response.status}`)
-      const data = await response.json();
+      const data:AgentUsage[] = await response.json();
       setData(data);
       setLastRefresh(new Date());  
     } catch (err) {
@@ -76,12 +77,41 @@ export function AlertHandledChartWidget({
   // Calculate the available height for the chart
   const chartHeight = height - HEADER_SIZE - SUMMARY_SIZE - FOOTER_SIZE;
 
-  const chartConfig:ChartConfig = {
-    count: {
-      label: 'Count',
-      color: 'var(--chart-1)'
-    }   
+  // Set-up the chart config. Make sure we have a config object per each agent in the original data
+  const agents = data ? uniqueBy(data, "agent_code") : []
+  const chartConfig: ChartConfig = agents.reduce((acc, agent, index) => {
+    acc[agent] = {
+      label: agent,
+      color: `var(--chart-${index + 1})`
+    };
+    return acc;
+  }, {} as ChartConfig);
+
+  // Remap the input data a little bit. We need to get it into a format rechart likes.
+  // Get Unique periods
+  const periods = data ? uniqueBy(data, "period").sort() : []
+  const costLookup = new Map<string, Map<string, number>>();
+
+  // Build a look-up table
+  for (const item of data ? data : []) {
+    if (!item.agent_code) continue;
+
+    if (!costLookup.has(item.period)) costLookup.set(item.period, new Map());
+    
+    costLookup
+      .get(item.period)!
+      .set(item.agent_code, item.total_token_cost);
   }
+
+  // Build Normalize Recharts data.
+  const chartData = periods.map(period => {
+    const row: Record<string, string | number> = { period };
+    for (const agent of agents) {
+      row[agent] =
+        costLookup.get(period)?.get(agent) ?? 0;
+    }
+    return row;
+  });
 
   if (error) return <DynamicScreenError title={title} error={error} onClick={fetchData} />
 
@@ -91,8 +121,8 @@ export function AlertHandledChartWidget({
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold">{title}</h3>
 
-          { /* Trend indicator */ } 
-          <ChartTrendIndicator data={data?.alerts.map(a => a.count)} />
+          { /* Trend indicator */ }
+          <ChartTrendIndicator data={data?.map(d => d.total_token_cost)} />
           
           { /* Time Range selector */ }
           <div className="flex items-center space-x-2">
@@ -117,10 +147,9 @@ export function AlertHandledChartWidget({
             </Button>
           </div>
         </div>
-        
       </CardHeader>
       <Separator />
-      <CardContent className="pt-4">
+      <CardContent className="pt-4 pb-2">
         {!data ? (
           <div style={{ height: `${chartHeight}px` }} className="flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -130,31 +159,38 @@ export function AlertHandledChartWidget({
             {/* Chart */}
             <div style={{ height: `${chartHeight}px` }}>
               <ChartContainer config={chartConfig} className='aspect-auto w-full h-full'>
-                <BarChart accessibilityLayer data={data?.alerts}>
+                <BarChart accessibilityLayer data={chartData}>
                   <CartesianGrid vertical={false} />
                   <XAxis dataKey='period' />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey='count' fill={`var(--color-count)`} />
+                  <YAxis/>
+                  <ChartTooltip content={<ChartTooltipContent className="min-w-[200px]" labelClassName="mb-1" />} />
+                  {agents.map(a => (
+                    <Bar
+                      key={a}
+                      dataKey={`${a}`}
+                      fill={`var(--color-${a})`}
+                      stackId="a"
+                    />
+                  ))}
                 </BarChart>
               </ChartContainer>
             </div>
-            
+
             {/* Summary */}
             <div className='flex flex-col gap-1 items-center'>
-              <div className="text-xs text-muted-foreground">Total Alert Count</div>
+              <div className="text-xs text-muted-foreground">Total Token Cost</div>
               <div className="text-sm font-bold">
-                {data.alerts.length > 0 ? data.alerts.reduce((sum,d) => sum + d.count, 0).toLocaleString() : '0'}
+                {chartData.length > 0 ? data.reduce((sum,d) => sum + d.total_token_cost, 0).toLocaleString() : '0'}
               </div>
             </div>
-          </div>  
+          </div>
         )}
 
-        <Separator className="mt-4" />
-        <div className="mt-4 text-xs text-muted-foreground text-center">
+        {/* Last Updated */}
+        <div className="text-xs text-muted-foreground text-center mt-2 pt-2 border-t">
           Last updated: {lastRefresh.toLocaleTimeString()}
-        </div>    
-      
+        </div>
+
       </CardContent>
     </div>
   )

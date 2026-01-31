@@ -30,6 +30,10 @@ CREATE TABLE subject_base (
 );
 
 CREATE INDEX idx_bs_id on subject_base(id);
+-- Composite index for peer comparison lookups
+-- Covers: org_unit_code, segment, subject_type
+-- This makes "SELECT id FROM subject_base WHERE org_unit_code = X AND segment = Y AND subject_type = Z" extremely fast
+CREATE INDEX idx_subject_base_peer_lookup ON subject_base(org_unit_code, segment, subject_type);
 
 CREATE TABLE subject_base_history (
     date_from TIMESTAMP,

@@ -2,6 +2,7 @@
 import { toolRegistry } from './registry';
 import { fetchCustomerHistoryTool } from './tools/fetch-customer-history';
 import { createTimelineTool } from './tools/create-timeline';
+import { fetchAlertDetailTool } from './tools/fetch-alert-details';
 import { fetchSubjectDetailTool } from './tools/fetch-subject-detail';
 import { fetchSubjectHistoryTool } from './tools/fetch-subject-history';
 import { fetchSubjectEventsTool } from './tools/fetch-subject-events';
@@ -16,10 +17,12 @@ import { fetchAttachmentListTool } from './tools/fetch-attachment-list';
 import { fetchAttachmentDetailTool } from './tools/fetch-attachment-detail';
 import { executeWorkflowActionTool } from './tools/execute-workflow-action';
 import { searchUser } from './tools/search-user';
+import { transactionPeerComparisonTool } from './tools/transaction-peer-comparison';
 
 // Register all tools
 toolRegistry.registerTool(fetchCustomerHistoryTool);
 toolRegistry.registerTool(createTimelineTool);
+toolRegistry.registerTool(fetchAlertDetailTool);
 toolRegistry.registerTool(fetchSubjectDetailTool);
 toolRegistry.registerTool(fetchSubjectHistoryTool);
 toolRegistry.registerTool(fetchSubjectEventsTool);
@@ -34,6 +37,7 @@ toolRegistry.registerTool(fetchAttachmentListTool);
 toolRegistry.registerTool(fetchAttachmentDetailTool);
 toolRegistry.registerTool(executeWorkflowActionTool);
 toolRegistry.registerTool(searchUser);
+toolRegistry.registerTool(transactionPeerComparisonTool);
 
 // Export main interfaces
 export { toolRegistry } from './registry';

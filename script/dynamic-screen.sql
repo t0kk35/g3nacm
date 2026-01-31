@@ -52,7 +52,8 @@ INSERT INTO dynamic_screen_widget_registry (code, name, description, component_n
 ('alert-assignment', 'Alert Assignment', 'Displays statistics on the alert assigned to the user directly and via teams', 'AlertAssignment'),
 ('alert-handled', 'Alerts Handled', 'Displays a chart showing the alerts handled by a user', 'AlertHandledChartWidget'),
 ('notifications', 'notifications', 'List of unread and read notifications sent to this user', 'NotificationWidget'),
-('team-assignment-chart', 'Team Assignment Chart', 'Displays a chart of the alerts assigned to each time and their priority', 'TeamAssignmentChartWidget');
+('team-assignment-chart', 'Team Assignment Chart', 'Displays a chart of the alerts assigned to each time and their priority', 'TeamAssignmentChartWidget'),
+('agent-usage', 'Agent Usage', 'Displays a chart showing the Agent Token cost over time', 'AgentUsageChartWidget');
 
 UPDATE dynamic_screen_user_config 
 SET layout = jsonb_build_object(

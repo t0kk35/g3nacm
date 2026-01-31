@@ -2,9 +2,14 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/colla
 import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "../ui/sidebar";
 import { SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem } from "../ui/sidebar";
 import { ChevronRight, Bot } from "lucide-react";
+import { PermissionGuard } from "../ui/custom/permission-guard-server";
 import Link from "next/link"
 
-export function AppSideBarAI() {
+type Props = {
+  userName: string | undefined | null;
+}
+
+export function AppSideBarAI({ userName } : Props) {
   
   return(
     <SidebarGroup>
@@ -21,21 +26,34 @@ export function AppSideBarAI() {
             </CollapsibleTrigger>
             <CollapsibleContent>
               <SidebarMenuSub>
-                <SidebarMenuSubItem>
-                  <SidebarMenuSubButton asChild>
-                    <Link href="/admin/agent/config">
-                      <span>Agents</span>
-                    </Link>
-                  </SidebarMenuSubButton>
-                </SidebarMenuSubItem>
-                <SidebarMenuSubItem>
-                  <SidebarMenuSubButton asChild>
-                    <Link href="/admin/agent/model_config">
-                      <span>Agent Models</span>
-                    </Link>
-                  </SidebarMenuSubButton>
-                </SidebarMenuSubItem>  
-              </SidebarMenuSub>    
+                <PermissionGuard permissions={["admin.agent.config"]} userName={userName}>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton asChild>
+                      <Link href="/admin/agent/config">
+                        <span>Agents</span>
+                      </Link>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
+                </PermissionGuard>
+                <PermissionGuard permissions={["admin.agent.model.config"]} userName={userName}>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton asChild>
+                      <Link href="/admin/agent/model_config">
+                        <span>Agent Models</span>
+                      </Link>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
+                </PermissionGuard>
+                <PermissionGuard permissions={["user.agent.preference"]} userName={userName}>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton asChild>
+                      <Link href="/admin/agent/user_preference">
+                        <span>Agent User Preferences</span>
+                      </Link>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
+                </PermissionGuard>    
+              </SidebarMenuSub>
             </CollapsibleContent>
           </SidebarMenuItem>
         </Collapsible>
