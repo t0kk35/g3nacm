@@ -7,12 +7,11 @@ import { Suspense } from "react";
 import { EntityLockProvider } from "@/contexts/entity-lock-context";
 import { EntityLockIndicator, EntityLockIndicatorSkeleton } from "@/components/ui/custom/entity-lock-indicator";
 import { APIError } from "@/lib/api-error-handling";
-import { isAmlTmAlert } from "@/app/api/data/alert/alert";
-import { AlertDetailsDetection } from "@/components/alert/detail/tm/AlertDetailsDetection";
 import { ChatWindow } from "@/components/ui/custom/chat-window";
 import { TemplateContext } from "@/lib/ai-tools";
 import { PermissionGuard } from "@/components/ui/custom/permission-guard-server";
 import { NoPermission } from "@/components/ui/custom/no-permission";
+import { AlertDetailsGeneric, AlertDetailsGenericSkeleton } from "@/components/alert/detail/AlertsDetailsGeneric";
 import { EntityAttachments } from "@/components/ui/custom/entity-attachment";
 
 type Props = {params: Promise<{ alertId : string }>}
@@ -48,27 +47,20 @@ export default async function AlertDetails({ params }: Props) {
           <Suspense fallback={<EntityLockIndicatorSkeleton />}>
             <EntityLockIndicator />
           </Suspense>
-          
-          { /* Transaction Monitoring Alert */ }
-          { isAmlTmAlert(alert) && (
-            <>   
-              <div className="flex flex-col gap-2">
-                <AlertDetailsDetection alert={alert} />
-                <EntityAttachments 
-                  entityCode={alert.entity_state.entity_code}
-                  entityId={alert.id}
-                  orgUnitCode={alert.org_unit_code}
-                />
-                <ChatWindow agent="claude-45" 
-                  context={agentContext} 
-                  orgUnitCode={alert.org_unit_code}
-                  entityCode={alert.entity_state.entity_code}
-                  entityId={alert.id}
-                />
-              </div>
-            </>
-          )}
-
+          <Suspense fallback={<AlertDetailsGenericSkeleton />}>
+            <AlertDetailsGeneric alert={alert}/>
+          </Suspense>
+          <EntityAttachments 
+            entityCode={alert.entity_state.entity_code}
+            entityId={alert.id}
+            orgUnitCode={alert.org_unit_code}
+          />
+          <ChatWindow agent="claude-45" 
+            context={agentContext} 
+            orgUnitCode={alert.org_unit_code}
+            entityCode={alert.entity_state.entity_code}
+            entityId={alert.id}
+          />
         </div>
       </EntityLockProvider>
     </PermissionGuard>

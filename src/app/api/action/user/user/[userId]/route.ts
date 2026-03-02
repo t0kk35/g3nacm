@@ -2,10 +2,14 @@
 
 import { auth } from "@/auth";
 import * as db from "@/db"
+import { authorizedFetch } from "@/lib/org-filtering";
 import { NextRequest, NextResponse } from 'next/server';
 import { UserRequest } from '../types';
 import { ErrorCreators } from '@/lib/api-error-handling';
 import { requirePermissions } from '@/lib/permissions/check';
+import { UserAdmin } from "@/app/api/data/user/user";
+import { AuditData } from "@/lib/audit/types";
+import { createAuditEntry } from "@/lib/audit/audit-log";
 
 type Props = {params: Promise<{ userId: string }>}
 
@@ -65,6 +69,14 @@ export async function PUT(request: NextRequest, { params }: Props) {
         if (!param.field) return ErrorCreators.param.bodyMissing(origin, param.name);
     }
 
+    // Get before state for audit
+    let beforeData:UserAdmin;
+    try {
+        beforeData = await getBeforeData(userId)
+    } catch(error) {
+        return ErrorCreators.user.notFound(origin, parseInt(userId))
+    }
+
     // Set up a connection and transactions
     let client; 
     let transactionStarted = false;
@@ -116,6 +128,34 @@ export async function PUT(request: NextRequest, { params }: Props) {
         
         // Update user data. Though it might not have changed.
         await client.query(query_update_user, [userId, userRequest.first_name, userRequest.last_name])
+
+        // Audit our changes
+        const auditData: AuditData = {
+            category: 'user',
+            action: 'update-user',
+            target_type: 'user',
+            target_id_string: userRequest.name,
+            before_data: {
+                id: beforeData.id,
+                name: beforeData.name,
+                firstName: beforeData.first_name,
+                lastName: beforeData.last_name,
+                roleIds: beforeData.role_ids,
+                teamInfos: beforeData.team_infos,
+                orgUnitIds: beforeData.org_ids
+            },
+            after_data: {
+                id: beforeData.id,
+                name: userRequest.name,
+                firstName: userRequest.first_name,
+                lastName: userRequest.last_name,
+                roleIds: userRequest.role_ids,
+                teamInfos: userRequest.team_infos,
+                orgUnitIds: userRequest.org_unit_ids
+            }
+        }
+        await createAuditEntry(client, user.name, auditData );
+        // And Commit at the end.
         await client.query('COMMIT');  
         return NextResponse.json({success: true});
     } catch (error) {
@@ -141,6 +181,14 @@ export async function DELETE(_request: NextRequest, { params }: Props) {
     const userId = (await params).userId;
     if (!userId) return ErrorCreators.param.urlMissing(origin, 'userId');
 
+    // Get before state for audit
+    let beforeData:UserAdmin;
+    try {
+        beforeData = await getBeforeData(userId)
+    } catch(error) {
+        return ErrorCreators.user.notFound(origin, parseInt(userId))
+    }
+
     // Set up a connection and transactions
     let client;
     let transactionStarted = false;
@@ -156,6 +204,25 @@ export async function DELETE(_request: NextRequest, { params }: Props) {
         ])
         // Then logically delete the user
         await client.query(query_delete_user, [userId]);
+
+        // Audit our changes
+        const auditData: AuditData = {
+            category: 'user',
+            action: 'delete-user',
+            target_type: 'user',
+            target_id_string: beforeData.name,
+            before_data: {
+                id: beforeData.id,
+                name: beforeData.name,
+                firstName: beforeData.first_name,
+                lastName: beforeData.last_name,
+                roleIds: beforeData.role_ids,
+                teamInfos: beforeData.team_infos,
+                orgUnitIds: beforeData.org_ids
+            }
+        }
+        await createAuditEntry(client, user.name, auditData );
+        // And Commit our change
         await client.query('COMMIT');
         return NextResponse.json({ success: true });
     } catch (error) {
@@ -165,4 +232,12 @@ export async function DELETE(_request: NextRequest, { params }: Props) {
     } finally {
         if (client) client.release();
     }
+}
+
+async function getBeforeData(userId: string) {
+    const before =  await authorizedFetch(`${process.env.DATA_URL}/api/data/user/user_admin?user_id=${userId}`)
+        .then(res => { if (!res.ok) throw new Error('Error fetching user audit'); else return res.json() })
+        .then(j => j as UserAdmin[])
+    if (before.length < 1) throw new Error ('Got empty user audit')
+    return before[0]
 }

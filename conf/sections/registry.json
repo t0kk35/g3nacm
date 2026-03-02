@@ -1,0 +1,11 @@
+{
+  "sections": [
+    {
+      "code": "aml.rule.alert",
+      "path": "alert/aml.rule.alert",
+      "enabled": true,
+      "entityCode": "aml.rule.alert",
+      "last_updated": "2026-02-15T00:00:00Z"
+    }
+  ]
+}

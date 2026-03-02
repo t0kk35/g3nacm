@@ -7,8 +7,6 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 import { ArrowLeft, Save, KeyRound } from "lucide-react"
 import { UserAdmin } from "@/app/api/data/user/user"
@@ -20,6 +18,7 @@ import { UserFormRoleTab } from "./UserFormRoleTab"
 import { UserFormTeamTab } from "./UserFormTeamTab"
 import { UserFormOrgTab } from "./UserFormOrgTab"
 import { ChangePasswordModal } from "../ChangePasswordModal"
+import { useValidationForm, FormFieldInput } from "@/components/ui/custom/form-field"
 
 // Update the Permission interface
 export type FormUserRoles =  {
@@ -51,16 +50,26 @@ type UserFormProps = {
 }
 
 export function UserFormClient({ user, iRoles, iTeams, iOrgs }: UserFormProps) {
-  	const router = useRouter()
-  	const [name, setName] = useState(user?.name || "");
-	const [firstName, setFirstName] = useState(user?.first_name || "");
-	const [lastName, setLastName] = useState(user?.last_name || "");
+  const router = useRouter()
 	const [roles, setRoles] = useState<FormUserRoles[]>([]);
 	const [teams, setTeams] = useState<FormUserTeams[]>([]);
 	const [selectedOrgIds, setSelectedOrgIds] = useState<number[]>([]);
-  	const [saving, setSaving] = useState(false);
+  const [saving, setSaving] = useState(false);
 	const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  	const isEditing = !!user;
+  const isEditing = !!user;
+
+  const form = useValidationForm(
+    {
+      name: user?.name || "",
+      firstName: user?.first_name || "",
+      lastName: user?.last_name || ""
+    },
+    {
+      name: (v) => v.trim() ? undefined : "User name is required",
+      firstName: (v) => v.trim() ? undefined : "User first name is required",
+      lastName: (v) => v.trim() ? undefined : "User last name is required",
+    }
+  )
 
 	useEffect(() => {
 		const initRoles = async () => {
@@ -100,15 +109,14 @@ export function UserFormClient({ user, iRoles, iTeams, iOrgs }: UserFormProps) {
 		initOrgs();
 	}, [])
 	
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault()
+	const handleSubmit = async () => {
 		setSaving(true)
 
 		try {
 			const userData: UserRequest = {
-				name: name,
-				first_name: firstName,
-				last_name: lastName,
+				name: form.values.name,
+				first_name: form.values.firstName,
+				last_name: form.values.lastName,
 				role_ids: roles.filter((r) => r.selected).map((r) => r.id),
 				team_infos: teams.filter((t) => t.selected).map((t) => ({team_id: t.id, team_rank: t.rank || -1})),
 				org_unit_ids: selectedOrgIds.filter((o) => o !== null)
@@ -139,38 +147,38 @@ export function UserFormClient({ user, iRoles, iTeams, iOrgs }: UserFormProps) {
 	}
 
 	const toggleRole = (id: number) => {
-    	setRoles(roles.map((role) => role.id === id ? { ...role, selected: !role.selected } : role))
-  	}
+    setRoles(roles.map((role) => role.id === id ? { ...role, selected: !role.selected } : role))
+  }
 	
 	const toggleOrg = (id: number) => {
 		if (selectedOrgIds.indexOf(id) === -1) setSelectedOrgIds([...selectedOrgIds, id])
 		else setSelectedOrgIds(selectedOrgIds.filter(sid=>sid !== id))
 	}
 
-  	const toggleTeam = (id: number) => {
-    	setTeams(
-      		teams.map((team) => {
-        		if (team.id === id) {
-          			// If selecting a team for the first time, initialize rank to 1
-          			return {
-            			...team,
-            			selected: !team.selected,
-            			rank: !team.selected ? 1 : team.rank,
-          			}
-        		}
-        		return team
-      		}),
-    	)
-  	}	
+  const toggleTeam = (id: number) => {
+    setTeams(
+      teams.map((team) => {
+        if (team.id === id) {
+          // If selecting a team for the first time, initialize rank to 1
+          return {
+            ...team,
+            selected: !team.selected,
+            rank: !team.selected ? 1 : team.rank,
+          }
+        }
+        return team
+      }),
+    )
+  }	
 
-  	const updateTeamRank = (id: number, rank: number) => {
-    	// Ensure rank is at least 1
-    	const validRank = Math.max(1, rank)
-    	setTeams(teams.map((team) => (team.id === id ? { ...team, rank: validRank } : team)))
-  	}
+  const updateTeamRank = (id: number, rank: number) => {
+    // Ensure rank is at least 1
+    const validRank = Math.max(1, rank)
+    setTeams(teams.map((team) => (team.id === id ? { ...team, rank: validRank } : team)))
+  }
 
 	return (
-		<form onSubmit={handleSubmit}>
+		<form onSubmit={form.handleSubmit(handleSubmit)}>
 			<div className="space-y-2">
 				<Card className="pt-5">
 					<CardContent>
@@ -202,45 +210,32 @@ export function UserFormClient({ user, iRoles, iTeams, iOrgs }: UserFormProps) {
 					</CardHeader>
 					<CardContent>
 						<div className="space-y-4">
-							{ isEditing ? (
-        						<div className="p-3 bg-muted rounded-md">
-          							<p className="text-sm font-medium">User Name</p>
-          							<p className="text-sm font-mono font-bold text-chart-1">{name}</p>
-          							<p className="text-xs text-muted-foreground mt-1">The user name can not be changed</p>
-        						</div>
-							) : (
-								<div className="space-y-2">
-									<Label htmlFor="name">User Name</Label>
-									<Input
-										id="name"
-										value={name}
-										onChange={(e) => setName(e.target.value)}
-										placeholder="Enter user name"
-										required
-									/>
-								</div>
-							)}
+              <FormFieldInput 
+                id="name"
+                label="User Name"
+                value={form.values.name}
+                onChange={(v) => form.setField("name", v)}
+                error={form.errors.name}
+                disabled={isEditing}
+                required
+              />
 							<div className="grid grid-cols-2 gap-2">
-								<div className="space-y-2">
-									<Label htmlFor="firstName">First Name</Label>
-									<Input
-										id="firstName"
-										value={firstName}
-										onChange={(e) => setFirstName(e.target.value)}
-										placeholder="Enter first name"
-										required
-									/>
-								</div>
-								<div className="space-y-2">
-									<Label htmlFor="lastName">Last Name</Label>
-									<Input
-										id="lastName"
-										value={lastName}
-										onChange={(e) => setLastName(e.target.value)}
-										placeholder="Enter last name"
-										required
-									/>
-								</div>
+                <FormFieldInput 
+                  id="firstName"
+                  label="First Name"
+                  value={form.values.firstName}
+                  onChange={(v) => form.setField("firstName", v)}
+                  error={form.errors.firstName}
+                  required
+                />
+                <FormFieldInput 
+                  id="lastName"
+                  label="Last Name"
+                  value={form.values.lastName}
+                  onChange={(v) => form.setField("lastName", v)}
+                  error={form.errors.lastName}
+                  required
+                />
 							</div>
 						</div>
 					</CardContent>

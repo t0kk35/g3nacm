@@ -18,16 +18,19 @@ export function UserListClient({ users }: Props) {
 
   const [userToDelete, setUserToDelete] = useState<UserAdmin | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
+  const [deletedUserIds, setDeletedUserIds] = useState<number[]>([])
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid")
 
   const filteredUsers = useMemo(()=>{
-    if (!searchQuery.trim()) return users
+    if (!searchQuery.trim() && deletedUserIds.length === 0) return users
     return users.filter(u => 
-      u.name.toLocaleLowerCase().includes(searchQuery.toLocaleLowerCase()) ||
-      u.first_name.toLocaleLowerCase().includes(searchQuery.toLocaleLowerCase()) ||
-      u.last_name.toLocaleLowerCase().includes(searchQuery.toLocaleLowerCase())
+      (
+        u.name.toLocaleLowerCase().includes(searchQuery.toLocaleLowerCase()) ||
+        u.first_name.toLocaleLowerCase().includes(searchQuery.toLocaleLowerCase()) ||
+        u.last_name.toLocaleLowerCase().includes(searchQuery.toLocaleLowerCase())
+      ) && !deletedUserIds.includes(u.id)
     )
-  }, [searchQuery])  
+  }, [searchQuery, deletedUserIds])  
 
   const handleDeleteUser = async (userId: number) => {
     try {
@@ -38,6 +41,7 @@ export function UserListClient({ users }: Props) {
 
       if (response.ok) {
         toast.success("User deleted successfully");
+        setDeletedUserIds([...deletedUserIds, userId])
       } else {
         const err:ApiError = await response.json();
         toast.error(`Failed to delete user. Message ${err.message}`); 

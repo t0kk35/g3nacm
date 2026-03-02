@@ -103,7 +103,7 @@ export function AlertTable({ data }: Props) {
   ]
 
   return (
-    <div className="ontainer mx-auto">
+    <div className="container mx-auto">
       <TanStackTable columns={cols} data={alertData} visibilityChange={true} />
     </div>
   )

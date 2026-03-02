@@ -1,0 +1,121 @@
+# {{ alert.alert_identifier }}
+
+{% comment %}
+AML Transaction Monitoring Alert Detail Template
+Renders alert information, detections, subject details, and audit history
+{% endcomment %}
+
+## Alert Information
+
+**Alert Type:** {{ alert.alert_type | alert_icon }} {{ alert.alert_type }}
+**Description:** {{ alert.description | default: "No description available" }}
+**Organization Unit:** {{ alert.org_unit_code }}
+**Created:** {{ alert.create_date_time | date: "%Y-%m-%d %H:%M:%S" }}
+**Current State:** {{ alert.entity_state.to_state_name }}
+**Priority:** {{ alert.entity_state.priority | default: "Not Set" }}
+
+{% if alert.entity_state.assigned_to_user_name and alert.entity_state.assigned_to_user_name != "" %}
+**Assigned to User:** {{ alert.entity_state.assigned_to_user_name }}
+{% elsif alert.entity_state.assigned_to_team_name and alert.entity_state.assigned_to_team_name != "" %}
+**Assigned to Team:** {{ alert.entity_state.assigned_to_team_name }}
+{% else %}
+**Assignment Status:** Unassigned
+{% endif %}
+
+---
+
+## Detections
+
+{% if alert.detections and alert.detections.size > 0 %}
+
+The following transaction monitoring rules were triggered:
+
+| Detection Name | Information | Score | Time Frame |
+|---------------|-------------|-------|------------|
+{% for detection in alert.detections -%}
+| {{ detection.name }} | {{ detection.info | default: "-" }} | {{ detection.score | round: 2 }} | {{ detection.time_frame | default: "-" }} |
+{% endfor %}
+
+**Total Detections:** {{ alert.detections.size }}
+
+{% else %}
+
+*No detections available*
+
+{% endif %}
+
+---
+
+## Alert Item
+
+{% if alert.alert_item %}
+**Type:** {{ alert.alert_item.type | default: "Unknown" }}
+**ID:** {{ alert.alert_item.id }}
+
+{% if alert.alert_item.type == "SUB" and subject %}
+
+### Subject Details
+
+**Subject Name:** {{ subject.name }}
+**Subject Identifier:** {{ subject.identifier }}
+**Subject Type:** {{ subject.type | subject_type_name }}
+**KYC Risk Rating:** {{ subject.kyc_risk | default: "Not Rated" }}
+
+{% if subject.type == "IND" %}
+**Date of Birth:** {{ subject.type_specific.date_of_birth | default: "Not Available" }}
+**Nationality:** {{ subject.type_specific.nationality | default: "Not Available" }}
+**Country of Residence:** {{ subject.type_specific.country_of_residence | default: "Not Available" }}
+{% elsif subject.type == "CRP" %}
+**Incorporation Date:** {{ subject.type_specific.incorporation_date | default: "Not Available" }}
+**Registration Number:** {{ subject.type_specific.registration_number | default: "Not Available" }}
+**Country of Incorporation:** {{ subject.type_specific.country_of_incorporation | default: "Not Available" }}
+{% endif %}
+
+{% elsif alert.alert_item.type == "TXN" %}
+
+### Transaction Reference
+
+**Transaction ID:** {{ alert.alert_item.id }}
+
+*Transaction details can be viewed separately*
+
+{% endif %}
+{% else %}
+
+*No alert item information available*
+
+{% endif %}
+
+---
+
+## Audit History
+
+{% if alert.entity_state_history and alert.entity_state_history.size > 0 %}
+
+The alert has undergone the following state transitions:
+
+{% include 'entity-state-history', history: alert.entity_state_history %}
+
+{% else %}
+
+*No audit history available*
+
+{% endif %}
+
+---
+
+## Additional Information
+
+{% if alert.entity_state.comment and alert.entity_state.comment != "" %}
+
+### Latest Comment
+
+> {{ alert.entity_state.comment }}
+
+*By: {{ alert.entity_state.user_name }} at {{ alert.entity_state.date_time | date: "%Y-%m-%d %H:%M:%S" }}*
+
+{% endif %}
+
+---
+
+*Template Version: 1.0.0 | Rendered: {{ render_time | date: "%Y-%m-%d %H:%M:%S" }}*

@@ -5,6 +5,7 @@ import { TodoListDisplay } from './todo-list-display';
 import { ChartDisplay } from './chart-display';
 import { SubjectDisplay } from './subject-display';
 import { WorkflowActionExecutor } from './workflow-action-executor';
+import { ComponentSectionRenderer } from '../component-section/ComponentSectionRenderer';
 
 // Registry mapping component names to actual components
 const componentRegistry = {
@@ -14,6 +15,7 @@ const componentRegistry = {
   'ChartDisplay': ChartDisplay,
   'SubjectDisplay': SubjectDisplay,
   'WorkflowActionExecutor': WorkflowActionExecutor,
+  'ComponentSectionRenderer': ComponentSectionRenderer,
 };
 
 interface ToolComponentProps {

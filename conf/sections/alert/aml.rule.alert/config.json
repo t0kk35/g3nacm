@@ -1,0 +1,41 @@
+{
+  "code": "aml.rule.alert",
+  "name": "AML TM Retail Alert Detail",
+  "version": "1.0.0",
+  "permissions": ["data.alert"],
+  "apiCalls": [
+    {
+      "name": "alert_detail",
+      "endpoint": "/api/data/alert/detail",
+      "params": {"alert_id": "{{entity_id}}"},
+      "required": true,
+      "variable_name": "alert"
+    }
+  ],
+  "rootComponent": {
+    "id": "root",
+    "type": "tabs",
+    "props": {
+      "tabs": [
+        { "id": "det-tab1", "label": "Detections" }
+      ]
+    },
+    "children": [
+      {
+        "id": "detections-table",
+        "type": "data-table",
+        "dataMode": "reference",
+        "props": {
+          "columns": [
+            {"id": "name", "label": "Detection Name", "accessor": "name"},
+            {"id": "info", "label": "Info", "accessor": "info"},                
+            {"id": "score", "label": "Score", "accessor": "score"},
+            {"id": "time_frame", "label": "Time Frame", "accessor": "time_frame"}
+          ],
+          "data": "{{alert.detections}}",
+          "pagination": true
+        }
+      }
+    ]
+  }
+}

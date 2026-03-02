@@ -1,0 +1,31 @@
+{
+  "entity_code": "aml.rule.alert",
+  "entity_type": "alert",
+  "version": "1.0.0",
+  "name": "AML TM Alert Detail",
+  "description": "Detail view for AML Transaction Monitoring alerts",
+  "permissions": ["data.alert"],
+  "api_calls": [
+    {
+      "name": "alert_detail",
+      "endpoint": "/api/data/alert/detail",
+      "params": {
+        "alert_id": "{{entity_id}}"
+      },
+      "required": true,
+      "variable_name": "alert"
+    },
+    {
+      "name": "subject_detail",
+      "endpoint": "/api/data/subject/detail",
+      "params": {
+        "subject_id": "{{alert.alert_item.id}}"
+      },
+      "required": false,
+      "condition": "{{alert.alert_item}} && {{alert.alert_item.type}} === 'SUB'",
+      "depends_on": "alert_detail",
+      "variable_name": "subject"
+    }
+  ],
+  "enable_markdown": true
+}

@@ -1,0 +1,30 @@
+{% comment %}
+Entity State History Partial
+Displays a timeline of entity state transitions with actions, users, and comments
+Can be included in any entity detail template
+
+Usage:
+{% include 'entity-state-history', history: alert.entity_state_history %}
+{% endcomment %}
+
+{% if history and history.size > 0 %}
+
+{% assign sorted_history = history | sort: 'date_time' | reverse %}
+
+| Date & Time | Action | State Transition | User | Comment |
+|-------------|--------|------------------|------|---------|
+{% for entry in sorted_history -%}
+| {{ entry.date_time | date: "%Y-%m-%d %H:%M:%S" }} | **{{ entry.action_name }}** | {{ entry.from_state_name }} → {{ entry.to_state_name }} | {{ entry.user_name }} | {{ entry.comment | default: "-" | truncate: 50 }} |
+{% endfor %}
+
+**Total History Entries:** {{ history.size }}
+
+{% if sorted_history.size > 10 %}
+*Showing most recent {{ sorted_history.size }} entries*
+{% endif %}
+
+{% else %}
+
+*No state history entries found*
+
+{% endif %}

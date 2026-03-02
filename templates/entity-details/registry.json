@@ -1,0 +1,10 @@
+{
+  "templates": [
+    {
+      "entity_code": "aml.rule.alert",
+      "path": "aml.rule.alert",
+      "enabled": true,
+      "last_updated": "2026-01-31T10:00:00Z"
+    }
+  ]
+}

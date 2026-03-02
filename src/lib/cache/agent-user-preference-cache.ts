@@ -15,7 +15,7 @@ SELECT
   aup.show_confidence_scores,
   aup.highlight_assumptions,
   aup.preferred_language
-FROM agent_user_preferences aup
+FROM agent_user_preference aup
 JOIN users u on aup.user_id = u.id
 WHERE u.name = $1
 `

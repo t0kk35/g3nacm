@@ -47,8 +47,8 @@ SQL schema files are located in the `script/` directory and should be run in dep
 
 **API Structure** (`src/app/api/`)
 - RESTful endpoints organized by domain (alert, user, role, team, org_unit)
-- Action-based endpoints for entity operations
-- Data endpoints for read operations
+- Action-based endpoints for entity operations (`src/app/api/action`)
+- Data endpoints for read operations (`src/app/api/data`)
 - Authentication endpoints
 
 **Workflow Engine** (`src/lib/workflow/`)
@@ -195,6 +195,122 @@ Widgets are registered in the widget registry with:
 - Configuration schema using Zod validation
 - Responsive constraints defining min/max sizes per breakpoint
 - Default configuration and permissions
+
+## Template-Based Entity Detail Screen System
+
+### Overview
+The template system provides a configurable, file-based approach to rendering entity detail screens using markdown templates with the liquidjs template engine. Templates define which APIs to call and how to render the data, enabling easy customization without code changes.
+
+### Core Components
+
+**Template Engine** (`src/lib/entity-template/`)
+- **`types.ts`** - TypeScript type definitions for templates, API calls, and rendering
+- **`registry.ts`** - Template registry with file-based loading and caching
+- **`api-orchestrator.ts`** - API call execution with dependency resolution and parallel execution
+- **`renderer.ts`** - Liquidjs template engine wrapper with custom filters
+
+**API Endpoint**
+- **`/api/data/entity/rendered_detail`** - Renders entity detail using template system
+  - Query params: `entity_id` (UUID), `entity_code` (e.g., "aml.rule.alert")
+  - Returns: JSON with `rendered_markdown`, `data_sources`, `template_version`, and optional `errors`
+
+**Template Files** (`templates/entity-details/`)
+- **`registry.json`** - Registry of available templates
+- **`{entity_code}/config.json`** - API configuration per entity type
+- **`{entity_code}/template.liquid`** - Markdown template with liquidjs syntax
+- **`_shared/*.liquid`** - Reusable template partials
+
+### Template Configuration
+
+Each template directory contains a `config.json` defining:
+- **`entity_code`** - Entity type this template renders (e.g., "aml.rule.alert")
+- **`permissions`** - Required permissions to render
+- **`api_calls`** - Array of API calls to execute before rendering:
+  - `name` - Unique identifier for the API call
+  - `endpoint` - API endpoint path
+  - `params` - Query parameters with template variable support (`{{entity_id}}`, `{{alert.alert_item.id}}`)
+  - `required` - Whether to fail fast if call fails (true/false)
+  - `condition` - JavaScript expression to conditionally execute call
+  - `depends_on` - Name of API call this depends on (for execution ordering)
+  - `variable_name` - Name to store response data in template context
+
+### API Orchestration
+
+The orchestrator executes API calls with:
+- **Dependency resolution** - Topological sort to determine execution order
+- **Parallel execution** - Calls with no dependencies run in parallel waves
+- **Template variable substitution** - Resolves `{{variable}}` in API params from context
+- **Conditional execution** - Evaluates conditions before executing optional calls
+- **Fail-fast error handling** - Required API failures abort rendering immediately
+
+### Liquid Template Syntax
+
+Templates support standard liquidjs syntax with custom filters:
+- **Variables**: `{{ alert.alert_identifier }}`
+- **Conditionals**: `{% if subject %} ... {% endif %}`
+- **Loops**: `{% for detection in alert.detections %} ... {% endfor %}`
+- **Partials**: `{% include 'entity-state-history', history: alert.entity_state_history %}`
+
+**Custom Filters:**
+- `date: "%Y-%m-%d %H:%M:%S"` - Date formatting
+- `alert_icon` - Alert type icons (🎯 TM, 🔍 NS, 💰 TF, 📋 CDD)
+- `subject_type_name` - Convert IND/CRP to Individual/Corporate
+- `round: 2` - Round numbers to decimal places
+- `json` - JSON stringify
+- `default: "value"` - Default value if null/undefined
+- `upcase`, `downcase`, `capitalize` - Text transformations
+- `truncate: 50` - Truncate long text
+
+### Creating New Templates
+
+To add a new entity type template:
+
+1. Create directory: `templates/entity-details/{entity_code}/`
+2. Create `config.json` with API calls and permissions
+3. Create `template.liquid` with markdown and liquidjs syntax
+4. Register in `templates/entity-details/registry.json`
+
+Example minimal config:
+```json
+{
+  "entity_code": "case",
+  "entity_type": "case",
+  "version": "1.0.0",
+  "name": "Case Detail",
+  "permissions": ["data.case"],
+  "api_calls": [
+    {
+      "name": "case_detail",
+      "endpoint": "/api/data/case/detail",
+      "params": { "case_id": "{{entity_id}}" },
+      "required": true,
+      "variable_name": "case"
+    }
+  ],
+  "enable_markdown": true
+}
+```
+
+### Integration Pattern
+
+1. Client calls `/api/data/entity/rendered_detail?entity_id={id}&entity_code={code}`
+2. System loads template and validates permissions
+3. Orchestrator executes API calls in dependency-optimized order
+4. Template engine renders markdown with API response data
+5. Returns JSON with markdown text for client's markdown renderer
+6. Client displays rendered markdown in UI
+
+### Security Considerations
+- **Liquidjs sandboxing** - Prevents arbitrary code execution in templates
+- **Permission validation** - Template-level and API-level permission checks
+- **UUID validation** - Entity ID format validation
+- **Entity code whitelist** - Only registered templates can be rendered
+
+### Future Migration Path
+- **Phase 2**: Migrate templates from files to database storage
+- **Phase 3**: Build UI for template editing and configuration
+- **Phase 4**: Add template versioning and rollback capabilities
+- **Phase 5**: Implement caching layer for rendered output
 
 ## Path Aliases
 
