@@ -51,11 +51,11 @@ type UserFormProps = {
 
 export function UserFormClient({ user, iRoles, iTeams, iOrgs }: UserFormProps) {
   const router = useRouter()
-	const [roles, setRoles] = useState<FormUserRoles[]>([]);
-	const [teams, setTeams] = useState<FormUserTeams[]>([]);
-	const [selectedOrgIds, setSelectedOrgIds] = useState<number[]>([]);
+  const [roles, setRoles] = useState<FormUserRoles[]>([]);
+  const [teams, setTeams] = useState<FormUserTeams[]>([]);
+  const [selectedOrgIds, setSelectedOrgIds] = useState<number[]>([]);
   const [saving, setSaving] = useState(false);
-	const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const isEditing = !!user;
 
   const form = useValidationForm(

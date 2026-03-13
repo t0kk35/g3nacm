@@ -17,6 +17,7 @@ import { UserRole } from "@/app/api/data/user/user"
 import { UserPermission } from "@/app/api/data/user/user"
 import { UserRoleRequest } from "@/app/api/action/role/user-role"
 import { UserRevokeEntityTable } from "../UserRevokeEntityTable"
+import { useValidationForm, FormFieldInput } from "@/components/ui/custom/form-field"
 
 // Update the Permission interface
 type FormUserPermission =  {
@@ -34,13 +35,22 @@ type RoleFormProps = {
 
 export function RoleFormClient({ role, iPermissions }: RoleFormProps) {
   const router = useRouter()
-  const [name, setName] = useState(role?.name || "")
-  const [description, setDescription] = useState(role?.description || "")
   const [permissions, setPermissions] = useState<FormUserPermission[]>([])
   const [permissionGroups, setPermissionGroups] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
   const [permissionSearch, setPermissionSearch] = useState("")
   const isEditing = !!role
+
+  const form = useValidationForm(
+    {
+      name: role?.name || "",
+      description: role?.description || ""
+    },
+    {
+      name: (v) => v.trim() ? undefined : "Role name is required",
+      description: (v) => v.trim() ? undefined : "Role Description is required",
+    }
+  )
 
   // Update the fetchPermissions function in useEffect
   useEffect(() => {
@@ -82,14 +92,13 @@ export function RoleFormClient({ role, iPermissions }: RoleFormProps) {
     return permissionGroups.filter((group) => groupsWithMatchingPermissions.has(group))
   }, [permissionGroups, filteredPermissions, permissionSearch])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = async () => {
     setSaving(true)
 
     try {
       const roleData: UserRoleRequest = {
-        name: name,
-        description: description,
+        name: form.values.name,
+        description: form.values.description,
         permission_ids: permissions.filter((p) => p.selected).map((p) => p.id),
       }
       // Create or update role
@@ -154,7 +163,7 @@ export function RoleFormClient({ role, iPermissions }: RoleFormProps) {
   const selectedPermissionCount = permissions.filter((p) => p.selected).length
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={form.handleSubmit(handleSubmit)}>
       <div className="space-y-2">
         <Card className="pt-5">
           <CardContent>
@@ -170,26 +179,22 @@ export function RoleFormClient({ role, iPermissions }: RoleFormProps) {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Role Name</Label>
-                <Input
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Enter role name"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="description">Role Description</Label>
-                <Input
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Enter a description for the role"
-                  required
-                />
-              </div>
+              <FormFieldInput 
+                id="name"
+                label="Role Name"
+                value={form.values.name}
+                onChange={(v) => form.setField("name", v)}
+                error={form.errors.name}
+                required
+              />
+              <FormFieldInput 
+                id="description"
+                label="Role Description"
+                value={form.values.description}
+                onChange={(v) => form.setField("description", v)}
+                error={form.errors.description}
+                required
+              />
             </div>
           </CardContent>
         </Card>

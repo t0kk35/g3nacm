@@ -50,6 +50,7 @@ CREATE INDEX idx_a_model_code on agent(model_code);
 CREATE TABEL agent_tool_link(
   agent_code TEXT NOT NULL,
   tool_code TEXT NOT NULL,
+  PRIMARY KEY (agent_code, tool_code),
   CONSTRAINT fk_agent FOREIGN KEY (agent_code) REFERENCES agent(code),
   CONSTRAINT fk_tool FOREIGN KEY (tool_code) REFERENCES agent_tool(code)
 );
@@ -58,7 +59,7 @@ CREATE INDEX idx_atl_agent_code ON agent_tool_link(agent_code);
 CREATE INDEX idx_atl_agent_tool_code ON agent_tool_link(agent_code, tool_code);
 
 CREATE TABLE agent_provider_model_cost (
-  model TEXT NOT NULL,
+  model TEXT PRIMARY KEY NOT NULL,
   input_token_cost NUMERIC NOT NULL,
   cached_input_token_cost NUMERIC NOT NULL,
   output_token_cost NUMERIC NOT NULL,
@@ -84,3 +85,14 @@ CREATE TABLE agent_user_preference(
 );
 
 CREATE INDEX idx_aup_user_uid ON agent_user_preference(user_id);
+
+CREATE TABLE agent_workflow_state_link(
+  workflow_state_code TEXT PRIMARY KEY NOT NULL,
+  agent_code TEXT NOT NULL,
+  create_datetime TIMESTAMPTZ default now(),
+  update_datetime TIMESTAMPTZ default now(),
+  CONSTRAINT fk_workflow_state FOREIGN KEY (workflow_state_code) REFERENCES workflow_state(code),
+  CONSTRAINT fk_agent FOREIGN KEY (agent_code) REFERENCES agent(code),
+);
+
+CREATE INDEX idx_awsl_agent_code ON agent_workflow_state_link(workflow_state_code);

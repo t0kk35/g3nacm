@@ -232,6 +232,7 @@ export function ChatWindow({ agent, context, entityCode, entityId, orgUnitCode }
             <div className="flex items-center gap-2">
               <Bot className="h-5 w-5" />
               AI Assistant
+              <span className="font-light text-chart-1">{agent}</span>
             </div>
             <div className="flex items-center gap-2 text-xs font-light text-muted-foreground">
               <span >Used Tokens : </span>

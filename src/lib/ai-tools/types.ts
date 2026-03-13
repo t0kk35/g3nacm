@@ -71,6 +71,10 @@ export const modelProviderModels = [
     name: 'claude-sonnet-4-5-20250929'
   },
   {
+    providerId:0,
+    name: 'claude-sonnet-4-6'
+  },
+  {
     providerId: 1,
     name: 'gpt-5'
   },

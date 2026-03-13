@@ -1,6 +1,6 @@
 'use server'
 
-import { authorizedFetch } from "@/lib/org-filtering"
+import { authorizedGetJSON } from "@/lib/org-filtering"
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { RoleFormClient } from "./RoleFormClient"
@@ -8,28 +8,18 @@ import { UserRole } from "@/app/api/data/user/user"
 import { UserPermission } from "@/app/api/data/user/user"
 
 type Props = {
-    roleId?: number;
+  roleId?: number;
 }
 
 export async function RoleForm({ roleId } : Props) {
 
-  const role = roleId ? await authorizedFetch(`${process.env.DATA_URL}/api/data/user/role?role_id=${roleId}`)
-    .then(res => {
-      if (!res.ok) throw new Error(`Error looking for role with id ${roleId}`);
-        return res.json();
-      })
-    .then(j => j as UserRole[])
+  const role = roleId ? await authorizedGetJSON<UserRole[]>(`${process.env.DATA_URL}/api/data/user/role?role_id=${roleId}`)
     .then(ur => { 
       if (ur.length === 0) throw new Error(`Roless with id ${roleId} not found`)
       else return ur[0]
-    }) : undefined
+    }): undefined
 
-  const permissions = await authorizedFetch(`${process.env.DATA_URL}/api/data/user/permission`)
-    .then(res => { 
-      if (!res.ok) throw new Error(`Could not get permissions`)
-      else return res.json()
-    })
-    .then(j => j as UserPermission[])        
+  const permissions = await authorizedGetJSON<UserPermission[]>(`${process.env.DATA_URL}/api/data/user/permission`)
 
   return (
     <RoleFormClient role={role} iPermissions={permissions} />

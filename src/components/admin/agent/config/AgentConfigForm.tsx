@@ -1,6 +1,6 @@
 'use server'
 
-import { authorizedFetch } from "@/lib/org-filtering"
+import { authorizedGetJSON } from "@/lib/org-filtering"
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AgentConfigAdmin } from "@/app/api/data/agent/types"
@@ -9,42 +9,25 @@ import { AgentModelConfig } from "@/lib/cache/agent-model-config-cache"
 import { AgentConfigFormClient } from "./AgentConfigFormClient"
 
 type Props = {
-    configCode?: string;
+  configCode?: string;
 }
 
 export async function AgentConfigForm({ configCode } : Props) {
 
-  const agentConfig = configCode ? await authorizedFetch(`${process.env.DATA_URL}/api/data/agent/config?code=${configCode}`)
-    .then(res => {
-      if (!res.ok) throw new Error(`Error fetching agent config code with code "${configCode}"`);
-        return res.json();
-      })
-    .then(j => j as AgentConfigAdmin[])
+  const agentConfig = configCode ? await authorizedGetJSON<AgentConfigAdmin[]>(`${process.env.DATA_URL}/api/data/agent/config?code=${configCode}`)
     .then(ac => { 
       if (ac.length === 0) throw new Error(`Agent model with code "${configCode}" not found`)
       else return ac[0]
     }) : undefined
 
-  const agentTools = authorizedFetch(`${process.env.DATA_URL}/api/data/agent/tool`)
-    .then(res => { 
-      if (!res.ok) throw new Error(`Could not get agent tools`)
-      else return res.json()
-    })
-    .then(j => j as AgentToolAdmin[])
-
-  const agentModelConfig = authorizedFetch(`${process.env.DATA_URL}/api/data/agent/model_config`)
-    .then(res => { 
-      if (!res.ok) throw new Error(`Could not get agent model config`)
-      else return res.json()
-    })
-    .then(j => j as AgentModelConfig[])
+  const agentTools = authorizedGetJSON<AgentToolAdmin[]>(`${process.env.DATA_URL}/api/data/agent/tool`)
+  const agentModelConfig = authorizedGetJSON<AgentModelConfig[]>(`${process.env.DATA_URL}/api/data/agent/model_config`)
 
   const data = await Promise.all([agentTools, agentModelConfig]);
 
   return(
     <AgentConfigFormClient config={agentConfig} iTools={data[0]} iModelConfig={data[1]}/>
   )
-
 }
 
 export async function AgentConfigSkeleton() {

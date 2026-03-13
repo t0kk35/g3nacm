@@ -17,7 +17,7 @@ export const fetchAlertDetailTool: AIToolDefinition = {
     
     try {      
       // Make the API call to fetch subject details
-      const response = await authorizedFetch(`${process.env.DATA_URL}/api/data/alert/detail?subject_id=${encodeURIComponent(alertId)}`);
+      const response = await authorizedFetch(`${process.env.DATA_URL}/api/data/alert/detail?alert_id=${encodeURIComponent(alertId)}`);
 
       if (!response.ok) {
         const errorText = await response.text();

@@ -2,6 +2,7 @@ import { OrgUnitFilter } from "@/app/api/data/org_unit/org_unit";
 import { OrgUnit } from "@/app/api/data/org_unit/org_unit";
 import { OrgUnitUserAccess } from "@/app/api/data/org_unit/access/route";
 import { cookies } from "next/headers";
+import { APIError } from "./api-error-handling";
 
 /**
  * Checks if a child path is under a parent path in the hierarchy.
@@ -90,6 +91,27 @@ export async function authorizedFetch(url: string) {
         }
       })
     return result
+}
+
+/**
+ * Helper function to call internal API's from server code. It will automatically forward the user credentials 
+ * and return a typed object
+ * @param url - URL to fetch
+ * @returns A promise of typed object <T>
+ */
+export async function authorizedGetJSON<T>(url: string) {
+    const authcookie = (await cookies()).get('authjs.session-token')
+    const result = await fetch(url, {
+        method: "GET",
+        headers: {
+          Cookie: `authjs.session-token=${authcookie?.value}`,
+        }
+    })
+    if (!result.ok) {
+        const err: APIError = await result.json();
+        throw new Error(`Error Calling URL '${url}' Error Code: ${err.errorCode}. Error Message ${err.message}`);
+    }
+    return result.json() as Promise<T>;
 }
 
 export async function authorizedPost(url: string, body: string) {

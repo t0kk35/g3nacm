@@ -34,7 +34,7 @@ export function RoleListClient({ roles }: Props) {
   const handleDeleteRole = async (roleId: number) => {
     try {
       // Replace with your actual API endpoint
-      const response = await fetch(`/api/action/user/role/${roleId}`, {
+      const response = await fetch(`/api/action/role/${roleId}`, {
         method: "DELETE",
       });
 
@@ -111,7 +111,7 @@ export function RoleListClient({ roles }: Props) {
               <TableRow>
                 <TableHead>Role Name</TableHead>
                 <TableHead>Description</TableHead>
-                <TableHead className="w-[180px]">Actions</TableHead>
+                <TableHead className="w-45">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

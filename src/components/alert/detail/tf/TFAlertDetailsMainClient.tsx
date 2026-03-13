@@ -8,16 +8,17 @@ import { Button } from "@/components/ui/button"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
-import { TFAlert, TFDetection } from "@/app/api/data/alert/alert"
+import { Alert, TFDetection } from "@/app/api/data/alert/alert"
 import { TFTransaction, TFParticipant, TFFinancialTransaction } from "@/app/api/data/transaction/transaction"
 import { ScoreBar } from "@/components/ui/custom/score-bar"
 
 type Props = {
-  alert: TFAlert
+  alert: Alert
   tfTransaction: TFTransaction
 }
 
 export function TFAlertDetailsMainClient({ alert, tfTransaction }: Props) {
+  const tfDetections = alert.detections as unknown as TFDetection[]
   const [expandedTransactions, setExpandedTransactions] = useState<Set<string>>(new Set())
   const [expandedParticipants, setExpandedParticipants] = useState<Set<string>>(new Set())
   const [clearedDetections, setClearedDetections] = useState<Set<string>>(new Set())
@@ -30,11 +31,11 @@ export function TFAlertDetailsMainClient({ alert, tfTransaction }: Props) {
 
   // Get transactions that have detections
   const transactionsWithDetections = tfTransaction.type_specific.transactions.filter((t) =>
-    alert.detections.some((detection) => detection.transaction_id === t.transactionId),
+    tfDetections.some((detection) => detection.transaction_id === t.transactionId),
   )
 
   const getActiveDetections = (): TFDetection[] => {
-    return alert.detections.filter((d) => !clearedDetections.has(d.id))
+    return tfDetections.filter((d) => !clearedDetections.has(d.id))
   }
 
   const getDetectionsForTransaction = (transactionId: string): TFDetection[] => {
@@ -114,14 +115,14 @@ export function TFAlertDetailsMainClient({ alert, tfTransaction }: Props) {
     setClearedDetections(newClearedDetections)
     
     // Find the detection being cleared
-    const detection = alert.detections.find((d) => d.id === detectionId)
+    const detection = tfDetections.find((d) => d.id === detectionId)
     if (!detection) return
 
     const participantKey = `${detection.transaction_id}-${detection.participant_role}`
 
     // Show progress toast
     const newClearedCount = clearedDetections.size + 1
-    const totalDetections = alert.detections.length
+    const totalDetections = tfDetections.length
     const remainingCount = totalDetections - newClearedCount
     const progressPercentage = Math.round((newClearedCount / totalDetections) * 100)
 
@@ -131,7 +132,7 @@ export function TFAlertDetailsMainClient({ alert, tfTransaction }: Props) {
 
     // Create a local function that uses the new cleared detections
     const getActiveDetectionsWithNewCleared = (): TFDetection[] => {
-      return alert.detections.filter((d) => !newClearedDetections.has(d.id))
+      return tfDetections.filter((d) => !newClearedDetections.has(d.id))
     }
 
     const getDetectionsForParticipantWithNewCleared = (transactionId: string, participantRole: string): TFDetection[] => {
@@ -224,16 +225,16 @@ export function TFAlertDetailsMainClient({ alert, tfTransaction }: Props) {
           setInvestigationStartTime(new Date())
 
           // Show investigation start toast
-          toast.info(`${alert.detections.length} detection${alert.detections.length !== 1 ? "s" : ""} to review for ${alert.alert_identifier}`)
+          toast.info(`${tfDetections.length} detection${tfDetections.length !== 1 ? "s" : ""} to review for ${alert.alert_identifier}`)
         }, 500) // Delay to ensure component is fully rendered
       }
     }
-  }, [isInitialized, toast, alert.detections.length, alert.alert_identifier])
+  }, [isInitialized, toast, tfDetections.length, alert.alert_identifier])
 
   // Handle completion: close all sections and scroll to top when all matches cleared
   useEffect(() => {
     const activeDetections = getActiveDetections()
-    const totalDetections = alert.detections.length
+    const totalDetections = tfDetections.length
 
     if (totalDetections > 0 && activeDetections.length === 0 && clearedDetections.size > 0) {
       // Calculate investigation time
@@ -262,7 +263,7 @@ export function TFAlertDetailsMainClient({ alert, tfTransaction }: Props) {
         }, 300)
       }, 500) // Small delay to let user see the last clear action
     }
-  }, [clearedDetections, alert.detections.length, investigationStartTime, toast])
+  }, [clearedDetections, tfDetections.length, investigationStartTime, toast])
 
   const toggleTransaction = (transactionId: string) => {
     const newExpanded = new Set(expandedTransactions)
@@ -331,11 +332,11 @@ export function TFAlertDetailsMainClient({ alert, tfTransaction }: Props) {
       .filter(Boolean) as { label: string; value: string }[]
   }
 
-  const transactionHits = new Set(alert.detections.map((d) => d.transaction_id)).size
-  const participantHits = new Set(alert.detections.map((d) => d.participant_role)).size
-  const uniqueListsHits = new Set(alert.detections.map((d) => d.list_name)).size
+  const transactionHits = new Set(tfDetections.map((d) => d.transaction_id)).size
+  const participantHits = new Set(tfDetections.map((d) => d.participant_role)).size
+  const uniqueListsHits = new Set(tfDetections.map((d) => d.list_name)).size
   const activeDetections = getActiveDetections()
-  const totalDetections = alert.detections.length
+  const totalDetections = tfDetections.length
   const clearedCount = clearedDetections.size
 
   return (

@@ -163,7 +163,7 @@ export function AgentUsageChartWidget({
                   <CartesianGrid vertical={false} />
                   <XAxis dataKey='period' />
                   <YAxis/>
-                  <ChartTooltip content={<ChartTooltipContent className="min-w-[200px]" labelClassName="mb-1" />} />
+                  <ChartTooltip content={<ChartTooltipContent className="min-w-50" labelClassName="mb-1" />} />
                   {agents.map(a => (
                     <Bar
                       key={a}

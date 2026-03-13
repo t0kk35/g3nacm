@@ -20,7 +20,7 @@ export async function AlertDetailsGeneric({ alert }: { alert: Alert }) {
   
   const componentBody = {
     "entity_id": alert.id,
-    "section_code": "aml.rule.alert",
+    "section_code": `${alert.entity_state.entity_code}.details`,
     "initial_context": {
       "alert": { ...alert }
     }
@@ -28,8 +28,9 @@ export async function AlertDetailsGeneric({ alert }: { alert: Alert }) {
 
   const screenData = await authorizedPost(
     `${process.env.DATA_URL}/api/data/entity/component_section`,
-    JSON.stringify(componentBody)
-  ).then(res => res.json()).then(j=> j as ComponentSection)
+    JSON.stringify(componentBody)).
+  then(res => res.json()).
+  then(j=> j as ComponentSection)
   
   return (
     <Card className="w-full">
@@ -37,7 +38,7 @@ export async function AlertDetailsGeneric({ alert }: { alert: Alert }) {
         <CardTitle className="flex justify-between items-center">
           <span>{alert.alert_identifier}</span>
           <AlertPriorityBadgeAndText priority={alert.entity_state.priority} />
-          {getTypeIcon(alert.alert_type)}
+          {getTypeIcon(alert.entity_state.entity_code)}
         </CardTitle>
         <div className="text-sm">
           <p>

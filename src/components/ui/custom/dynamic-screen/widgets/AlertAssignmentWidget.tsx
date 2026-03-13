@@ -16,7 +16,7 @@ interface AlertAssignmentWidgetProps {
   refreshInterval?: number
 }
 
-export function AlertAssignmentWidget({ title = 'My Alerts', refreshInterval = 60000 }: AlertAssignmentWidgetProps) {
+export function AlertAssignmentWidget({ title = 'Assigned Alerts', refreshInterval = 60000 }: AlertAssignmentWidgetProps) {
 
   const [assignment, setAssignment] = useState<UserAssignment | null>(null);
   const [loading, setLoading] = useState(true);

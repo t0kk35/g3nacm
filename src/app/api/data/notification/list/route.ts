@@ -3,7 +3,7 @@
 import { auth } from "@/auth";
 import * as db from '@/db'
 import { NextRequest, NextResponse } from "next/server";
-import { NotificationList } from "../types";
+import { Notification } from "../types";
 import { ErrorCreators } from '@/lib/api-error-handling';
 import { getStartDate } from "@/lib/date-time/date-range";
 
@@ -11,13 +11,20 @@ const origin = 'api/data/notification/list'
 
 const query_text = `
 SELECT
-  id,
-  sender_user_name,
-  receiver_user_name,
-  title,
-  create_date_time,
-  read_date_time
-FROM notification n
+  n.id,
+  n.sender_user_name,
+  n.receiver_user_name,
+  n.linked_entity_id,
+  n.linked_entity_code,
+  we.description AS "linked_entity_description",
+  we.display_url AS "linked_entity_display_url",
+  n.title,
+  n.body,
+  n.metadata,
+  n.create_date_time,
+  n.read_date_time
+FROM notification n 
+LEFT JOIN workflow_entity we ON n.linked_entity_code = we.code
 WHERE n.receiver_user_name = $1
 AND n.create_date_time >= $2
 `
@@ -47,7 +54,7 @@ export async function GET(request: NextRequest) {
         };
         try {
             const response = await db.pool.query(query);
-            const res:NotificationList[] = response.rows;
+            const res:Notification[] = response.rows;
             return NextResponse.json(res);
         } catch (error) {
             return ErrorCreators.db.queryFailed(origin, 'Get user Notifications', error as Error);

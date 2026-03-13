@@ -3,7 +3,7 @@
 import { auth } from "@/auth";
 import * as db from '@/db'
 import { NextRequest, NextResponse } from "next/server";
-import { NotificationDetail } from "../types";
+import { Notification } from "../types";
 import { ErrorCreators } from '@/lib/api-error-handling';
 
 const origin = 'api/data/notification/detail'
@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
             const response = await db.pool.query(query);
             if (response.rows.length === 0) return ErrorCreators.db.entityNotFound(origin, 'notification', notificationId);
             if (response.rows.length > 1) return ErrorCreators.db.entityNotUnique(origin, 'notification', notificationId);
-            const res:NotificationDetail = response.rows[0];  
+            const res:Notification = response.rows[0];  
             return NextResponse.json(res);          
         } catch (error) {
             return ErrorCreators.db.queryFailed(origin, 'Get user Notifications', error as Error);

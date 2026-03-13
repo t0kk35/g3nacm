@@ -33,7 +33,7 @@ export function TeamListClient({ teams }: Props) {
 
   const handleDeleteTeam = async (roleId: number) => {
     try {
-      const response = await fetch(`/api/action/user/team/${roleId}`, {
+      const response = await fetch(`/api/action/team/${roleId}`, {
         method: "DELETE",
       });
 
@@ -110,7 +110,7 @@ export function TeamListClient({ teams }: Props) {
               <TableRow>
                 <TableHead>Team Name</TableHead>
                 <TableHead>Description</TableHead>
-                <TableHead className="w-[180px]">Actions</TableHead>
+                <TableHead className="w-45">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

@@ -27,6 +27,33 @@ export function Markdown({ content }: MarkdownProps) {
       return `<pre><code>${escapeHtml(code)}</code></pre>`;
     });
 
+    // --- Headings ---
+    // Processed early so table/list regexes don't consume the newlines that
+    // separate a heading from the preceding block (e.g. a table row's trailing \n).
+    html = html.replace(/^######\s+(.*)$/gm, '<h6>$1</h6>');
+    html = html.replace(/^#####\s+(.*)$/gm, '<h5>$1</h5>');
+    html = html.replace(/^####\s+(.*)$/gm, '<h4>$1</h4>');
+    html = html.replace(/^###\s+(.*)$/gm, '<h3>$1</h3>');
+    html = html.replace(/^##\s+(.*)$/gm, '<h2>$1</h2>');
+    html = html.replace(/^#\s+(.*)$/gm, '<h1>$1</h1>');
+
+    // --- Horizontal Rules ---
+    // Matches three or more dashes on their own line (--- or ---- etc.), processed
+    // before lists to avoid any ambiguity, though the list regex already requires
+    // a trailing space so there is no actual conflict.
+    html = html.replace(/^-{3,}\s*$/gm, '<hr>');
+
+    // --- Blockquotes ---
+    // Matches one or more consecutive lines starting with '>' and wraps them in a blockquote.
+    html = html.replace(/((?:^>\s?.*(?:\n|$))+)/gm, (match) => {
+      const inner = match
+        .split('\n')
+        .filter((line) => /^>/.test(line))
+        .map((line) => line.replace(/^>\s?/, ''))
+        .join('<br>');
+      return `<blockquote>${inner}</blockquote>`;
+    });
+
     // --- Unordered Lists ---
     // Matches one or more lines starting with '-', '*', or '+' and converts them to list items.
     html = html.replace(/((?:^[-*+]\s+.*(?:\n|$))+)/gm, (match) => {
@@ -82,15 +109,6 @@ export function Markdown({ content }: MarkdownProps) {
       return `<table>${headerHtml}${bodyHtml}</table>`;
     });
 
-    // --- Headings ---
-    // Convert markdown headings (#, ##, …, ######) to HTML headings.
-    html = html.replace(/^######\s+(.*)$/gm, '<h6>$1</h6>');
-    html = html.replace(/^#####\s+(.*)$/gm, '<h5>$1</h5>');
-    html = html.replace(/^####\s+(.*)$/gm, '<h4>$1</h4>');
-    html = html.replace(/^###\s+(.*)$/gm, '<h3>$1</h3>');
-    html = html.replace(/^##\s+(.*)$/gm, '<h2>$1</h2>');
-    html = html.replace(/^#\s+(.*)$/gm, '<h1>$1</h1>');
-
     // --- Inline Code ---
     // Matches inline code delimited by single backticks.
     html = html.replace(/`([^`\n]+)`/g, (_, code) => {
@@ -119,7 +137,7 @@ export function Markdown({ content }: MarkdownProps) {
     html = html
       .split(/\n{2,}/)
       .map((block) => {
-        if (/^\s*(<(h[1-6]|ul|ol|pre|blockquote|p|code|table))/.test(block)) {
+        if (/^\s*(<(h[1-6]|ul|ol|pre|blockquote|p|code|table|hr))/.test(block)) {
           return block;
         }
         return `<p>${block}</p>`;
@@ -142,7 +160,7 @@ export function Markdown({ content }: MarkdownProps) {
   return (
     /* Return a div, with the correct styling, otherwise tailwind pre-flight takes over and removes all list stuff */
     <div
-      className="markdown-content [&_ul]:list-disc [&_ul]:ml-6 [&_ul]:my-2 [&_ol]:list-decimal [&_ol]:ml-6 [&_ol]:my-2 [&_li]:ml-1 [&_li]:my-1 [&_p]:my-2 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:my-3 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:my-2 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:my-2 [&_pre]:bg-muted [&_pre]:p-3 [&_pre]:rounded [&_pre]:overflow-x-auto [&_pre]:my-2 [&_code]:bg-muted [&_code]:px-1 [&_code]:rounded [&_code]:text-sm [&_a]:text-blue-500 [&_a]:underline [&_table]:border-collapse [&_table]:w-full [&_table]:my-4 [&_th]:border [&_th]:border-border [&_th]:bg-muted [&_th]:px-4 [&_th]:py-2 [&_th]:text-left [&_th]:font-semibold [&_td]:border [&_td]:border-border [&_td]:px-4 [&_td]:py-2"
+      className="markdown-content [&_ul]:list-disc [&_ul]:ml-6 [&_ul]:my-2 [&_ol]:list-decimal [&_ol]:ml-6 [&_ol]:my-2 [&_li]:ml-1 [&_li]:my-1 [&_p]:my-2 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:my-3 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:my-2 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:my-2 [&_pre]:bg-muted [&_pre]:p-3 [&_pre]:rounded [&_pre]:overflow-x-auto [&_pre]:my-2 [&_code]:bg-muted [&_code]:px-1 [&_code]:rounded [&_code]:text-sm [&_a]:text-blue-500 [&_a]:underline [&_hr]:border-t [&_hr]:border-border [&_hr]:my-4 [&_blockquote]:border-l-4 [&_blockquote]:border-border [&_blockquote]:pl-4 [&_blockquote]:my-2 [&_blockquote]:text-muted-foreground [&_blockquote]:italic [&_table]:border-collapse [&_table]:w-full [&_table]:my-4 [&_th]:border [&_th]:border-border [&_th]:bg-muted [&_th]:px-4 [&_th]:py-2 [&_th]:text-left [&_th]:font-semibold [&_td]:border [&_td]:border-border [&_td]:px-4 [&_td]:py-2"
       dangerouslySetInnerHTML={{ __html: htmlContent }}
     />
   );

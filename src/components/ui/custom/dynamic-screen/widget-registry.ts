@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react'
-import { string, z } from 'zod'
+import { z } from 'zod'
 
 // Base widget interface
 export interface BaseWidgetConfig {

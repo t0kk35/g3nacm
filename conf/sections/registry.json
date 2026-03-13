@@ -1,8 +1,15 @@
 {
   "sections": [
     {
-      "code": "aml.rule.alert",
-      "path": "alert/aml.rule.alert",
+      "code": "aml.rule.alert.details",
+      "path": "alert/aml.rule.alert/details",
+      "enabled": true,
+      "entityCode": "aml.rule.alert",
+      "last_updated": "2026-02-15T00:00:00Z"
+    },
+    {
+      "code": "aml.rule.alert.detection_list",
+      "path": "alert/aml.rule.alert/detection_list",
       "enabled": true,
       "entityCode": "aml.rule.alert",
       "last_updated": "2026-02-15T00:00:00Z"

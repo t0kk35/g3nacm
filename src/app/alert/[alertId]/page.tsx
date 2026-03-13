@@ -1,12 +1,11 @@
 'use server'
 
 import { auth } from "@/auth";
-import { authorizedFetch } from "@/lib/org-filtering";
+import { authorizedGetJSON } from "@/lib/org-filtering";
 import { Alert } from "@/app/api/data/alert/alert";
 import { Suspense } from "react";
 import { EntityLockProvider } from "@/contexts/entity-lock-context";
 import { EntityLockIndicator, EntityLockIndicatorSkeleton } from "@/components/ui/custom/entity-lock-indicator";
-import { APIError } from "@/lib/api-error-handling";
 import { ChatWindow } from "@/components/ui/custom/chat-window";
 import { TemplateContext } from "@/lib/ai-tools";
 import { PermissionGuard } from "@/components/ui/custom/permission-guard-server";
@@ -24,15 +23,10 @@ export default async function AlertDetails({ params }: Props) {
 
   // Fetch alert details
   const alertId  = (await params).alertId;
-  const alert = await authorizedFetch(`${process.env.DATA_URL}/api/data/alert/detail?alert_id=${alertId}`)
-    .then(async res => {
-      if (!res.ok) {
-        const err: APIError = await res.json();
-        throw new Error(`Alert with id ${alertId} not found. Error Code: ${err.errorCode}. Error Message ${err.message}`);
-      } 
-        return res.json();
-      })
-    .then(j => j as Alert)
+  const alert = await authorizedGetJSON<Alert>(`${process.env.DATA_URL}/api/data/alert/detail?alert_id=${alertId}`);
+  
+  // Get the agent code for the chat window 
+  const agentCode = await authorizedGetJSON<any>(`${process.env.DATA_URL}/api/data/agent/workflow?workflow_state_code=${alert.entity_state.to_state_code}`)
 
   // Setup context for the agent
   const agentContext: TemplateContext = {
@@ -55,7 +49,7 @@ export default async function AlertDetails({ params }: Props) {
             entityId={alert.id}
             orgUnitCode={alert.org_unit_code}
           />
-          <ChatWindow agent="claude-45" 
+          <ChatWindow agent={agentCode.agent_code} 
             context={agentContext} 
             orgUnitCode={alert.org_unit_code}
             entityCode={alert.entity_state.entity_code}

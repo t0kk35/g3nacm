@@ -4,6 +4,7 @@ import { widgetRegistry, WIDGET_CATEGORIES, CommonWidgetSchemas } from '../widge
 // Widget Components
 import { AlertSummaryWidget } from './AlertSummaryWidget'
 import { AlertAssignmentWidget } from './AlertAssignmentWidget'
+import { AlertListWidget } from './AlertListWidget'
 import { AlertHandledChartWidget } from './AlertHandledChartWidget'
 import { NotificationWidget } from './NotificationWidget'
 import { TeamAssignmentChartWidget } from './TeamAssignmentChartWigdet'
@@ -11,7 +12,7 @@ import { AgentUsageChartWidget } from './AgentUsageChartWidget'
 
 widgetRegistry.register({
   code: 'alert-assignment',
-  name: 'My Alerts',
+  name: 'Assigned Alerts',
   description: 'Displays statistics on the alerts assigned to a user directly and via team membership',
   component: AlertAssignmentWidget,
   defaultConfig: {
@@ -163,6 +164,30 @@ widgetRegistry.register({
   permissions: ['reporting.agent.usage.all'],
   category: WIDGET_CATEGORIES.ANALYTICS,
   tags: ['agent', 'chart', 'statistics']
+})
+
+widgetRegistry.register({
+  code: 'alert-list',
+  name: 'Alert List',
+  description: 'Lists the alerts assigned to a specific user',
+  component: AlertListWidget,
+  defaultConfig: {
+    title: 'Alert List',
+    refreshInterval: 60000
+  },
+  configSchema: z.object({
+    title: CommonWidgetSchemas.title.default('Alert List'),
+    refreshInterval: CommonWidgetSchemas.refreshInterval.default(60000)
+  }),
+  responsiveConstraints: {
+    lg: {minW: 10, minH: 10, maxW: 15, maxH: 12},
+    md: {minW: 8, minH: 8, maxW: 12, maxH: 10}, 
+    sm: {minW: 2, minH: 4, maxW: 4, maxH: 5},
+    xs: {minW: 2, minH: 3, maxW: 4, maxH: 4}
+  },
+  permissions: ['data.alert'],
+  category: WIDGET_CATEGORIES.ANALYTICS,
+  tags: ['alerts', 'list']
 })
 
 // Export widget registry for use in other components

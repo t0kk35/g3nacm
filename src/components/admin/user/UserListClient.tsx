@@ -35,7 +35,7 @@ export function UserListClient({ users }: Props) {
   const handleDeleteUser = async (userId: number) => {
     try {
       // Replace with your actual API endpoint
-      const response = await fetch(`/api/action/user/user/${userId}`, {
+      const response = await fetch(`/api/action/user/${userId}`, {
         method: "DELETE",
       });
 
@@ -98,7 +98,7 @@ export function UserListClient({ users }: Props) {
               <TableRow>
                 <TableHead>Role Name</TableHead>
                 <TableHead>First and Last Name</TableHead>
-                <TableHead className="w-[180px]">Actions</TableHead>
+                <TableHead className="w-45">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

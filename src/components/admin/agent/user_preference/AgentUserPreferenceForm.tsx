@@ -1,7 +1,6 @@
 'use server'
 
-import { authorizedFetch } from "@/lib/org-filtering"
-import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card"
+import { authorizedGetJSON } from "@/lib/org-filtering"
 import { AgentUserPreference } from "@/app/api/data/agent/types"
 import { AgentUserPerferenceFormClient } from "./AgentUserPreferenceFormClient"
 
@@ -10,12 +9,8 @@ type Props = {
 }
 
 export async function AgentUserPreferenceForm({ userName }: Props) {
-  const userPreference = await authorizedFetch(`${process.env.DATA_URL}/api/data/agent/user_preference`)
-    .then(res => {
-      if (!res.ok) throw new Error(`Error fetching agent user preference for user`);
-        return res.json();
-      })
-    .then(j => j as AgentUserPreference)
+  
+  const userPreference = await authorizedGetJSON<AgentUserPreference>(`${process.env.DATA_URL}/api/data/agent/user_preference`)
 
   return (
     <AgentUserPerferenceFormClient userName={userName} preference={userPreference} />

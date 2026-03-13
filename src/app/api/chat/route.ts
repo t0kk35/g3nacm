@@ -149,7 +149,8 @@ export async function POST(req: Request) {
       model,
       messages: [
         ...systemMessages,  // Three-level system prompts (Level 1: Policy, Level 2: Agent, Level 3: User)
-        ...convertToModelMessages(messages)  // User/assistant conversation
+        ...await convertToModelMessages(messages) // User/assistant conversation
+  // User/assistant conversation
       ],
       tools,
       stopWhen: stepCountIs(streamingAgentConfig.maxSteps || 5),

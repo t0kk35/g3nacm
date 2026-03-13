@@ -1,5 +1,6 @@
 export type EntityState = {
     entity_code: string;
+    entity_description: string;
     date_time: string;
     action_code: string;
     action_name: string;

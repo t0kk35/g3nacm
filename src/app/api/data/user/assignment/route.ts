@@ -44,8 +44,7 @@ FROM (
     FROM alert_base ab
     JOIN workflow_entity_state wes ON wes.entity_code = ab.entity_code AND wes.entity_id = ab.id
     JOIN users u ON wes.assigned_to_user_id = u.id
-    WHERE ab.alert_type = 'TM'
-    AND wes.assigned_to_user_id IS NOT null
+    WHERE wes.assigned_to_user_id IS NOT null
     AND u.name = $1
   UNION ALL 
     SELECT 
@@ -55,8 +54,7 @@ FROM (
       'team' AS assignment_type
     FROM alert_base ab
     JOIN workflow_entity_state wes ON wes.entity_code = ab.entity_code AND wes.entity_id = ab.id
-    WHERE ab.alert_type = 'TM'
-    AND wes.assigned_to_team_id is NOT null
+    WHERE wes.assigned_to_team_id is NOT null
     AND wes.assigned_to_team_id in (
       SELECT ut.id FROM users u
       JOIN user_team_link utl ON u.id = utl.user_id

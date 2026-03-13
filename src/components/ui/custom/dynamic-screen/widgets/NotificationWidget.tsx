@@ -9,7 +9,7 @@ import { Bell, RefreshCw, Check } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { NotificationList, NotificationDetail } from '@/app/api/data/notification/types'
+import { Notification } from '@/app/api/data/notification/types'
 import { PerformWorkflowAction } from '@/app/api/action/workflow/workflow'
 import { DynamicScreenError } from '../DynamicScreenError'
 import Link from 'next/link'
@@ -32,7 +32,7 @@ export function NotificationWidget({
   width,
   height
 }: NotificationWidgetProps) {
-  const [notifications, setNotifications] = useState<NotificationList[]>([])
+  const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date())
@@ -253,7 +253,7 @@ export function NotificationWidget({
 }
 
 function NotificationDetailContent({ notificationId }: { notificationId: string }) {
-  const [detail, setDetail] = useState<NotificationDetail | null>(null)
+  const [detail, setDetail] = useState<Notification | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {

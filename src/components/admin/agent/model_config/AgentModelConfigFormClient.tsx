@@ -148,7 +148,7 @@ export function AgentModelConfigFormClient({ config }: AgentModelConfigFormProps
       // Build headers object
       const headers: Record<string, string> = {}
       if (form.values.provider === 'anthropic' && interleavedThinkingEnabled) {
-        headers['anthropic-beta'] = 'interleaved-thinking-2025-12-13'
+        headers['anthropic-beta'] = 'interleaved-thinking-2025-05-14'
       }
 
       // Build provider options
@@ -217,7 +217,7 @@ export function AgentModelConfigFormClient({ config }: AgentModelConfigFormProps
 
   // Show reasoning options based on provider and model
   const showReasoningOptions = () => {
-    if (form.values.provider === 'anthropic' && form.values.model === 'claude-sonnet-4-5-20250929') {
+    if (form.values.provider === 'anthropic' && (form.values.model === 'claude-sonnet-4-5-20250929') || (form.values.model === 'claude-sonnet-4-6')) {
       return true
     }
     if (form.values.provider === 'openai' && (form.values.model === 'gpt-5')) {

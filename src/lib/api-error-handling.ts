@@ -73,6 +73,8 @@ export enum ErrorCode {
     AGENT_NOT_FOUND = "AGNT_000001",
     /** Invalid agent type */
     AGENT_INVALID_TYPE = "AGNT_000002",
+    /** No agent for a given workflow state */
+    AGENT_WORKFLOW_NOT_FOUND = "AGNT_000003",
 
     /** User not found (by ID) */
     USER_NOT_FOUND = "USR_00001",
@@ -167,6 +169,7 @@ export const ErrorCreators = {
     agent: {
         notFound: (origin: string, code: string) => createErrorResponse(ErrorCode.AGENT_NOT_FOUND, origin, { 'code': code }),
         invalidType: (origin: string, name: string, expectedType: string, actualType: string) => createErrorResponse(ErrorCode.AGENT_INVALID_TYPE, origin, { 'name': name, 'expected_type': expectedType, 'actual_type': actualType }),
+        agentWorkflowNotFound: (origin: string, workflow_state_code: string) => createErrorResponse(ErrorCode.AGENT_WORKFLOW_NOT_FOUND, origin, { 'workflow_state_code': workflow_state_code }), 
     },
     user: {
         notFound: (origin: string, userId: number) => createErrorResponse(ErrorCode.USER_NOT_FOUND, origin, {'userId': userId}),
@@ -305,6 +308,10 @@ const errorDefinition = new Map<ErrorCode, errorParams>([
     [ErrorCode.AGENT_INVALID_TYPE, {
       httpCode: 400,
       text: "Agent '{name}' is of type '{actual_type}', but expected type '{expected_type}'"
+    }],
+    [ErrorCode.AGENT_WORKFLOW_NOT_FOUND, {
+      httpCode: 404,
+      text: "No agent found for workflow state: '{workflow_state_code}'"
     }],
     [ErrorCode.USER_NOT_FOUND, {
       httpCode: 400,

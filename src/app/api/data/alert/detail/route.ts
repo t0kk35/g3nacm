@@ -16,7 +16,6 @@ SELECT
     ab.create_date_time,
     ab.org_unit_code,
     ab.description,
-    ab.alert_type,
     jsonb_build_object(
         'id', ai.item_id,
         'type', ai.item_type,
@@ -24,6 +23,7 @@ SELECT
     ) AS "alert_item",
     json_build_object(
         'entity_code', ab.entity_code,
+        'entity_description', we.description,
         'date_time', wes.date_time,
         'action_code', wes.action_code,
         'action_name', wes.action_name,
@@ -38,13 +38,10 @@ SELECT
         'user_name', wes.user_name,
         'comment', wes.comment 
     ) as "entity_state",
-    COALESCE(wesl.entity_state_history, '[]'::jsonb) as "entity_state_history", 
-    CASE 
-        WHEN ab.alert_type = 'TM' THEN COALESCE(atd.tm_detections, '[]'::jsonb)
-        WHEN ab.alert_type = 'NS' THEN COALESCE(ansd.ns_detections, '[]'::jsonb)
-        WHEN ab.alert_type = 'TF' THEN COALESCE(atfd.tf_detections, '[]'::jsonb)
-    END as "detections"  
+    COALESCE(wesl.entity_state_history, '[]'::jsonb) as "entity_state_history",
+    COALESCE(det.detections, '[]'::jsonb) AS "detections"
 FROM alert_base ab
+JOIN workflow_entity we ON ab.entity_code = we.code
 JOIN org_unit ou ON ou.code = ab.org_unit_code
 JOIN v_user_org_access_path ouap ON ou.path = ouap.path OR ou.path LIKE CONCAT(ouap.path, '/%')
 JOIN users u ON ouap.user_id = u.id
@@ -77,6 +74,7 @@ LEFT JOIN LATERAL (
     SELECT jsonb_agg(   
         jsonb_build_object(
             'entity_code', ab.entity_code,
+            'entity_description', we.description,
             'date_time', wesli.date_time,
             'action_code', wesli.action_code,
             'action_name', wesli.action_name,
@@ -97,53 +95,12 @@ LEFT JOIN LATERAL (
 ) wesl on TRUE
 LEFT JOIN LATERAL (
     SELECT jsonb_agg(
-        jsonb_build_object(
-            'id', atdi.id,
-            'model_id', atdi.model_id,
-            'name', atdi.name,
-            'info', atdi.info,
-            'score', atdi.score,
-            'time_frame', atdi.time_frame
-    )) AS "tm_detections"
-    FROM alert_tm_detection atdi
-    WHERE ab.alert_type = 'TM'
-    AND atdi.alert_id = ab.id
-) atd on TRUE
-LEFT JOIN LATERAL (
-    SELECT jsonb_agg(
-        jsonb_build_object(
-            'id', andi.id,
-            'input_data', andi.input_data,
-            'list_name', andi.list_name,
-            'list_uid', andi.list_uid,
-            'list_data', andi.list_data,
-            'algorithm', andi.algorithm,
-            'score', andi.score
-    )) AS "ns_detections"
-    FROM alert_ns_detection andi
-    WHERE ab.alert_type = 'NS'
-    AND andi.alert_id = ab.id
-) ansd on TRUE
-LEFT JOIN LATERAL (
-    SELECT jsonb_agg(
-        jsonb_build_object(
-            'id', atfdi.id,
-            'message_id', atfdi.tf_message_id,
-            'transaction_id', atfdi.tf_transaction_id,
-            'participant_role', atfdi.tf_participant_role,
-            'list_name', wl.name,
-            'input_data', atfdi.input_data,
-            'list_data', atfdi.list_data,
-            'algorithm', atfdi.algorithm,
-            'score', atfdi.score
-    )) AS "tf_detections"
-    FROM alert_tf_detection atfdi
-    JOIN wl_list_entry wle ON wle.id = atfdi.wl_list_entry_id
-    JOIN wl_list_schema wls ON wls.id = wle.schema_id
-    JOIN wl_list wl ON wl.id = wls.list_id
-    WHERE ab.alert_type = 'TF'
-    AND atfdi.alert_id = ab.id
-) atfd on TRUE
+        jsonb_build_object('id', ad.id) || ad.detection_data || jsonb_build_object('schema_version', ad.schema_version)
+        ORDER BY ad.create_datetime
+    ) AS detections
+    FROM alert_detection ad
+    WHERE ad.alert_id = ab.id
+) det ON TRUE
 WHERE u.name=$1 AND ab.id=$2
 `
 

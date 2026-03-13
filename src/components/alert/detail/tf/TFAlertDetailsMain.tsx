@@ -1,12 +1,12 @@
 'use server'
 
-import { TFAlert } from "@/app/api/data/alert/alert"
+import { Alert } from "@/app/api/data/alert/alert"
 import { authorizedFetch } from "@/lib/org-filtering"
 import { TFAlertDetailsMainClient } from "./TFAlertDetailsMainClient"
 import { TFTransaction } from "@/app/api/data/transaction/transaction"
 
 type Props = {
-  alert: TFAlert
+  alert: Alert
 }
 
 export async function TFAlertDetailsMain({ alert }: Props) {

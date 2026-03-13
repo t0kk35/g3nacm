@@ -9,10 +9,11 @@ import { DynamicScreenWidgetDelete, DynamicScreenWidgetCreate } from '@/app/api/
 import { APIError } from '@/lib/api-error-handling'
 
 interface DynamicScreenContainerProps {
+  userName: string;
   dynamicScreenConfig: DynamicScreenConfig
 }
 
-export function DynamicScreenContainer({ dynamicScreenConfig }: DynamicScreenContainerProps) {
+export function DynamicScreenContainer({ userName, dynamicScreenConfig }: DynamicScreenContainerProps) {
   
   const layouts = dynamicScreenConfig.layout
   const widgets = dynamicScreenConfig.widget_config.map(c => createDynamicScreenWidget(c.code, c.id, c.title, c.config ))
@@ -110,6 +111,7 @@ export function DynamicScreenContainer({ dynamicScreenConfig }: DynamicScreenCon
   return (
     <div className="w-full">
       <DynamicScreenGrid
+        userName={userName}
         widgets={widgets}
         layouts={layouts}
         isEditable={true}

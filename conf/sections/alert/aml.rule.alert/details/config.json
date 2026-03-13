@@ -1,5 +1,5 @@
 {
-  "code": "aml.rule.alert",
+  "code": "aml.rule.alert.details",
   "name": "AML TM Retail Alert Detail",
   "version": "1.0.0",
   "permissions": ["data.alert"],

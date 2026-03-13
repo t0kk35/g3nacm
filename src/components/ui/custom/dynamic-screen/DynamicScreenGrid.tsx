@@ -13,6 +13,7 @@ import { DynamicScreenWidgetSizeObserver } from './DynamicScreenWidgetSizeObserv
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
 export interface DynamicScreenGridProps {
+  userName: string
   widgets: DynamicScreenWidget[]
   layouts?: { [key: string]: Layout[] }
   isEditable?: boolean
@@ -28,6 +29,7 @@ export interface DynamicScreenGridProps {
 }
 
 export function DynamicScreenGrid({
+  userName,
   widgets,
   layouts = {},
   isEditable = false,
@@ -276,13 +278,9 @@ export function DynamicScreenGrid({
               {/* Widget Content */}
               <DynamicScreenWidgetSizeObserver>
                 {({ width, height }) => (
-                  <widget.component {...widget.config} width={width} height={height} />
+                  <widget.component {...widget.config} userName={userName} width={width} height={height} />
                 )}
               </DynamicScreenWidgetSizeObserver>
-              {/* Widget Content 
-              <div className="h-full">
-                <widget.component {...widget.config} />
-              </div> */}
             </Card>
           </div>
         ))}
