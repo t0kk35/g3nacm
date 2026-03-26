@@ -54,7 +54,8 @@ INSERT INTO dynamic_screen_widget_registry (code, name, description, component_n
 ('notifications', 'notifications', 'List of unread and read notifications sent to this user', 'NotificationWidget'),
 ('team-assignment-chart', 'Team Assignment Chart', 'Displays a chart of the alerts assigned to each time and their priority', 'TeamAssignmentChartWidget'),
 ('agent-usage', 'Agent Usage', 'Displays a chart showing the Agent Token cost over time', 'AgentUsageChartWidget'),
-('alert-list', 'Alert List', 'Lists the alerts assigned to a specific user', 'AlertListWidget');
+('alert-list', 'Alert List', 'Lists the alerts assigned to a specific user', 'AlertListWidget'),
+('rfi-list', 'RFI List', 'Lists the RFIs assigned to a specific user', 'RfiAssignmentWidget');
 
 UPDATE dynamic_screen_user_config 
 SET layout = jsonb_build_object(

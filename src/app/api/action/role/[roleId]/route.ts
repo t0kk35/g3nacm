@@ -2,10 +2,14 @@
 
 import { auth } from "@/auth";
 import * as db from "@/db"
+import { authorizedGetJSON } from "@/lib/org-filtering";
 import { NextRequest, NextResponse } from 'next/server';
 import { UserRoleRequest } from '../user-role';
+import { UserRole } from "@/app/api/data/user/user";
 import { ErrorCreators } from '@/lib/api-error-handling';
 import { requirePermissions } from '@/lib/permissions/check';
+import { AuditData } from "@/lib/audit/types";
+import { createAuditEntry } from "@/lib/audit/audit-log";
 
 type Props = { params: Promise<{ roleId: string }> }
 
@@ -52,6 +56,16 @@ export async function PUT(request: NextRequest, { params }: Props) {
         if (!param.field) return ErrorCreators.param.bodyMissing(origin, param.name);
     }
 
+    // Get audit before data
+    let beforeData;
+    try {
+        const before = await authorizedGetJSON<UserRole[]>(`${process.env.DATA_URL}/api/data/user/role?role_id=${roleId}`)
+        if (before.length < 1) return ErrorCreators.db.entityNotFound(origin, "Role", roleId)
+        beforeData = before[0]
+    } catch (error) {
+        return ErrorCreators.api.failedCall(origin, error as Error)
+    }
+
     // Set up a connection and transactions
     let client;
     let transactionStarted = false;
@@ -73,6 +87,27 @@ export async function PUT(request: NextRequest, { params }: Props) {
         }
         // Update the role name (though it might not have changed)
         await client.query(query_role_update, [roleId, role.name, role.description]);
+
+        const auditData: AuditData = {
+            category: 'role',
+            action: 'update-role',
+            target_type: 'role',
+            target_id_num: beforeData.id,
+            before_data: {
+                id: beforeData.id,
+                name: beforeData.name,
+                description: beforeData.description,
+                permission_ids: beforeData.permission_ids
+            },
+            after_data: {
+                id: roleId,
+                name: role.name,
+                description: role.description,
+                permission_ids: role.permission_ids
+            }
+        }
+        await createAuditEntry(client, user.name, auditData );
+        // And Commit at the end.
         await client.query('COMMIT');
         return NextResponse.json({success: true});
     } catch (error) {
@@ -98,10 +133,20 @@ export async function DELETE(_request: NextRequest, { params }: Props) {
     const roleId = (await params).roleId;
     if (!roleId) return ErrorCreators.param.urlMissing(origin, 'roleId');
 
+    // Get audit before data
+    let beforeData;
+    try {
+        const before = await authorizedGetJSON<UserRole[]>(`${process.env.DATA_URL}/api/data/user/role?role_id=${roleId}`)
+        if (before.length < 1) return ErrorCreators.db.entityNotFound(origin, "Role", roleId)
+        beforeData = before[0]
+    } catch (error) {
+        return ErrorCreators.api.failedCall(origin, error as Error)
+    }
+
     // Set up a connection and transactions
     let client;
     let transactionStarted = false;
-    try {     
+    try {
         client = await db.pool.connect();
         await client.query('BEGIN');
         transactionStarted = true;
@@ -109,6 +154,21 @@ export async function DELETE(_request: NextRequest, { params }: Props) {
         await client.query(query_permission_delete, [roleId]);
         // Then the role
         await client.query(query_role_delete, [roleId]);
+
+        const auditData: AuditData = {
+            category: 'role',
+            action: 'delete-role',
+            target_type: 'role',
+            target_id_num: beforeData.id,
+            before_data: {
+                id: beforeData.id,
+                name: beforeData.name,
+                description: beforeData.description,
+                permission_ids: beforeData.permission_ids
+            }
+        }
+        await createAuditEntry(client, user.name, auditData );
+        // And Commit at the end.
         await client.query('COMMIT');
         return NextResponse.json({ success: true });
     } catch (error) {

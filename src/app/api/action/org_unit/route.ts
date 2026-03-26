@@ -6,6 +6,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { OrgUnitRequest } from './org-unit';
 import { ErrorCreators } from '@/lib/api-error-handling';
 import { requirePermissions } from '@/lib/permissions/check';
+import { AuditData } from "@/lib/audit/types";
+import { createAuditEntry } from "@/lib/audit/audit-log";
 
 const origin = 'api/action/org_unit/'
 
@@ -37,6 +39,7 @@ const query_update_path = `
             ELSE (SELECT CONCAT(path, '/', $1) FROM org_unit WHERE id = $2::integer) 
         END
     WHERE id = $1
+    RETURNING path
 `
 
 // Creation of a new org-unit
@@ -80,7 +83,25 @@ export async function POST(request: NextRequest) {
         const newOrg = await client.query(query_insert_org, [org.code, org.name, org.parent_id]);
         const newOrgId:number = newOrg.rows[0].id;
         // Knowing the new id we can set the path
-        await client.query(query_update_path, [newOrgId, org.parent_id]);
+        const path = await client.query(query_update_path, [newOrgId, org.parent_id]);
+        const updatedPath = path.rows[0].path
+        
+        const auditData: AuditData = {
+            category: 'org-unit',
+            action: 'create-org-unit',
+            target_type: 'org-unit',
+            target_id_num: newOrgId,
+            after_data: {
+                id: newOrgId,
+                code: org.code,
+                name: org.name,
+                parent_id: org.parent_id,
+                path: updatedPath,
+                deleted: false
+            }
+        };
+        await createAuditEntry(client, user.name, auditData );
+        // And Commit at the end.        
         await client.query('COMMIT');
         return NextResponse.json({ 'success': true });
     } catch (error) {

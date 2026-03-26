@@ -1,17 +1,5 @@
 -- Insert statements for registering functions
 
--- Entity state change
-INSERT INTO workflow_function 
-  ("code", "name") 
-VALUES 
-  ('function.entity.change_state', 'Change Entity State');
-
-INSERT INTO workflow_function_parameter 
-  ("code", "function_code", "name", "parameter_type", "direction") 
-VALUES 
-  -- Input parameters
-  ('function.entity.change_state.comment', 'function.entity.change_state', 'Regulatory Comment', 'string', 'Input');
-
 --- Assign to user function
 INSERT INTO workflow_function 
   ("code", "name") 
@@ -126,3 +114,39 @@ INSERT INTO workflow_action_function_link
   ("action_code", "function_code", "order")
 VALUES 
   ('system.notification.mark_read', 'function.notification.mark_read', '0');
+
+-- RFI workflow functions
+INSERT INTO workflow_function 
+  ("code", "name") 
+VALUES 
+  ('function.rfi_request.create', 'Create an RFI request'),
+  ('function.rfi_request.send', 'Send an RFI request');
+
+INSERT INTO workflow_setting ("code", "function_code", "name") VALUES ('setting.rfi_outbound_entity_code', 'function.rfi_request.create', 'rfi.outbound');
+
+-- Create parameters
+INSERT INTO workflow_function_parameter 
+  ("code", "function_code", "name", "parameter_type", "direction") 
+VALUES
+  -- Input
+  ('function.rfi_request.create.body', 'function.rfi_request.create', 'Main body of the RFI', 'string', 'Input'), 
+  ('function.rfi_request.create.channel_code', 'function.rfi_request.create', 'RFI Channel Code', 'string', 'Input'), 
+  ('function.rfi_request.create.due_datetime', 'function.rfi_request.create', 'Due date for the RFI', 'string', 'Input'), 
+  ('function.rfi_request.create.recipient_subject_id', 'function.rfi_request.create', 'RFI recipient subject id.', 'string', 'Input'), 
+  ('function.rfi_request.create.title', 'function.rfi_request.create', 'RFI Title', 'string', 'Input'),
+  -- Output
+  ('function.rfi_request.create.rfi_id', 'function.rfi_request.create', 'rfiId', 'string', 'Output');
+
+-- Send parameters
+INSERT INTO "workflow_function" 
+  ("code", "name") 
+VALUES 
+  ('function.rfi_request.send', 'Send an RFI request');
+
+INSERT INTO "workflow_function_parameter" 
+  ("code", "function_code", "name", "parameter_type", "direction") 
+VALUES
+  --- Input
+  ('function.rfi_request.send.rfi_id', 'function.rfi_request.send', 'RFI ID', 'string', 'Input'),
+  --- Output TBD
+  

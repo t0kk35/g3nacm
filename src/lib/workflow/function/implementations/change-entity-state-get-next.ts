@@ -1,8 +1,7 @@
 import { PoolClient } from "pg";
 import { WorkflowContext } from "../../types";
 import { IWorkflowFunction } from "../function";
-import { getInput, isString } from "../function-helpers";
-import { updateEntityState, updateEntityAssignUser, copyToEntityStateLog } from "../../workflow-data";
+import { updateEntityAssignUser } from "../../workflow-data";
 import { WorkflowErrorCreators } from "../../workflow-error-handling";
 
 const query_lease_text = `
@@ -23,10 +22,7 @@ export class FunctionChangeEntityStateGetNext implements IWorkflowFunction {
 
     async run(inputs: { [key:string]: any }, ctx: WorkflowContext, client: PoolClient): Promise<{ [key: string]: any }> {
         // The user that does the get will be the current user
-        const comment = (ctx.system.commentRequired) ? getInput(this.code, inputs, 'function.entity.change_state.assign_user.comment', isString) : null
         await checkLease(client, ctx.system.entityId, ctx.system.entityCode, ctx.system.userName);
-        await copyToEntityStateLog(client, ctx.system.entityId, ctx.system.entityCode);
-        await updateEntityState(client, ctx.system.entityId, ctx.system.entityCode, ctx.system.actionCode, ctx.system.fromStateCode, ctx.system.userName, comment);
         await updateEntityAssignUser(client, ctx.system.entityId, ctx.system.entityCode, ctx.system.userName);
         return {};
     }

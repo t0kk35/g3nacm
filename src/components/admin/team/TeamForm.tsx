@@ -1,6 +1,6 @@
 'use server'
 
-import { authorizedFetch } from "@/lib/org-filtering"
+import { authorizedFetch, authorizedGetJSON } from "@/lib/org-filtering"
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TeamFormClient } from "./TeamFormClient";
@@ -12,19 +12,14 @@ type Props = {
 
 export async function TeamForm({ teamId } : Props) {
 
-    const team = teamId ? await authorizedFetch(`${process.env.DATA_URL}/api/data/user/team?team_id=${teamId}`)
-        .then(res => {
-            if (!res.ok) throw new Error(`Error looking for team with id ${teamId}`);
-            return res.json();
-        })
-        .then(j => j as UserTeam[])
-        .then(ut => { 
-            if (ut.length === 0) throw new Error(`Team with id ${teamId} not found`)
-            else return ut[0]
-        }) : undefined
+  const team = teamId ? await authorizedGetJSON<UserTeam[]>(`${process.env.DATA_URL}/api/data/user/team?team_id=${teamId}`)
+    .then(ut => { 
+      if (ut.length === 0) throw new Error(`Team with id ${teamId} not found`)
+      else return ut[0]
+    }) : undefined
 
     return (
-        <TeamFormClient team={team} />
+      <TeamFormClient team={team} />
     )
 
 }

@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils"
 const HEADER_SIZE = 60;
 const SUMMARY_SIZE = 45;
 const FOOTER_SIZE = 40;
-const ALERT_CARD_WIDTH = 300;
+const ALERT_CARD_WIDTH = 310;
 
 interface AlertAssignmentWidgetProps {
   title?: string

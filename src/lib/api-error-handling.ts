@@ -83,6 +83,9 @@ export enum ErrorCode {
     COMPONENT_SECTION_NOT_FOUND = 'CMP_00001',
     COMPONENT_SECTION_INTERNAL_ERROR = 'CMP_00002',
 
+    /** API Errors */
+    API_FAILED_CALL = 'API_000001',
+
     /** Schema Not Found */
     SCHEMA_NOT_FOUND = "SCHM_00001",
 
@@ -177,6 +180,9 @@ export const ErrorCreators = {
     componentSection : {
         notFound: (origin: string, section_code: string) => createErrorResponse(ErrorCode.COMPONENT_SECTION_NOT_FOUND, origin, {'section_code': section_code}),
         internalError: (origin: string, section_code: string, error: Error) => createErrorResponse(ErrorCode.COMPONENT_SECTION_INTERNAL_ERROR, origin, {'section_code': section_code}, error),
+    },
+    api : {
+        failedCall: (origin: string, error: Error) => createErrorResponse(ErrorCode.API_FAILED_CALL, origin, {'error_message': error.message }, error)
     }
 } as const;
 
@@ -217,7 +223,7 @@ const errorDefinition = new Map<ErrorCode, errorParams>([
     }],
     [ErrorCode.PARAM_BODY_MISSING, {
       httpCode: 400,
-      text: "Required field is '{param}' in request body"
+      text: "Required field '{param}' is missing in request body"
     }],
     [ErrorCode.PARAM_TYPE_INVALID, {
       httpCode: 400,
@@ -324,6 +330,10 @@ const errorDefinition = new Map<ErrorCode, errorParams>([
     [ErrorCode.COMPONENT_SECTION_NOT_FOUND, {
       httpCode: 500,
       text: "Internal Error rendering Component Section: '{section_code}'"
+    }],
+    [ErrorCode.API_FAILED_CALL, {
+      httpCode: 500,
+      text: "Call to API Failed. Error Message: '{error_message}'"
     }],
   ]);
 

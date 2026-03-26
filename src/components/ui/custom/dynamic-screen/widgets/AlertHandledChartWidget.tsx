@@ -2,15 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { CardHeader, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { RefreshCw } from 'lucide-react'
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { UserHandled } from '@/app/api/data/user/user'
 import { DynamicScreenError } from '../DynamicScreenError'
 import { ChartTrendIndicator } from './helpers/ChartTrendIndicator'
+import { TimeRangeSelector } from './helpers/TimeRangeSelector'
 
 const HEADER_SIZE = 60;
 const SUMMARY_SIZE = 45;
@@ -60,19 +58,16 @@ export function AlertHandledChartWidget({
     return () => clearInterval(interval)
   }, [selectedTimeRange, refreshInterval])
 
-  const getTimeRangeLabels = () => {
-    const labels = [
-      { key: '24h', value: 'Last 24 Hours' },
-      { key: '7d', value: 'Last 7 Days' },
-      { key: '30d', value: 'Last 30 Days' },
-      { key: '90d', value: 'Last 90 Days' },
-      { key: '6w', value: 'Last 6 Weeks' },
-      { key: '12w', value: 'Last 12 Weeks' },
-      { key: '6m', value: 'Last 6 Months' }
-    ]
-    return labels
-  }
-
+  const options = [
+    { key: '24h', value: 'Last 24 Hours' },
+    { key: '7d', value: 'Last 7 Days' },
+    { key: '30d', value: 'Last 30 Days' },
+    { key: '90d', value: 'Last 90 Days' },
+    { key: '6w', value: 'Last 6 Weeks' },
+    { key: '12w', value: 'Last 12 Weeks' },
+    { key: '6m', value: 'Last 6 Months' }
+  ] as const
+  
   // Calculate the available height for the chart
   const chartHeight = height - HEADER_SIZE - SUMMARY_SIZE - FOOTER_SIZE;
 
@@ -95,27 +90,13 @@ export function AlertHandledChartWidget({
           <ChartTrendIndicator data={data?.alerts.map(a => a.count)} />
           
           { /* Time Range selector */ }
-          <div className="flex items-center space-x-2">
-            <Select value={selectedTimeRange} onValueChange={(value: any) => setSelectedTimeRange(value)}>
-              <SelectTrigger className="w-36">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                { getTimeRangeLabels().map((l, i) => {
-                    return <SelectItem key={i} value={l.key}>{l.value}</SelectItem>
-                  })}
-              </SelectContent>
-            </Select>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={fetchData}
-              disabled={loading}
-              className="h-6 w-6 p-0"
-            >
-              <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
-            </Button>
-          </div>
+          <TimeRangeSelector
+            value={selectedTimeRange}
+            onChange={setSelectedTimeRange}
+            options={options}
+            onRefresh={fetchData}
+            loading={loading}
+          />
         </div>
         
       </CardHeader>

@@ -1,6 +1,6 @@
 CREATE TYPE function_parameter_type AS ENUM ('string', 'number', 'boolean', 'object');
 CREATE TYPE function_parameter_direction as ENUM('Input', 'Output');
-CREATE TYPE form_field_type as ENUM('select', 'textarea', 'checkbox', 'text', 'radio', 'userselect');
+CREATE TYPE form_field_type as ENUM('select', 'textarea', 'checkbox', 'text', 'radio', 'userselect', 'datedatetime');
 CREATE TYPE workflow_lock_action as ENUM('aquire', 'release');
 CREATE TYPE entity_priority AS ENUM ('High', 'Medium', 'Low');
 CREATE TYPE action_trigger as ENUM ('get', 'auto', 'user', 'system');
@@ -33,8 +33,10 @@ CREATE TABLE workflow_action (
   from_state TEXT NOT NULL,
   to_state TEXT NOT NULL,
   comment_required BOOLEAN NOT NULL DEFAULT false,
+  comment_mapping TEXT,
   permission TEXT NOT NULL,
   redirect_url TEXT,
+  start_action BOOLEAN NOT NULL DEFAULT false,
   CONSTRAINT fk_workflow_config FOREIGN KEY (config_code) REFERENCES workflow_config(code),
   CONSTRAINT fk_workflow_state_from FOREIGN KEY (from_state) REFERENCES workflow_state(code),
   CONSTRAINT fk_workflow_state_to FOREIGN KEY (to_state) REFERENCES workflow_state(code),
@@ -122,6 +124,7 @@ CREATE TABLE workflow_entity_state(
   from_state_name TEXT NOT NULL,
   to_state_code TEXT NOT NULL,
   to_state_name TEXT NOT NULL,
+  to_state_is_active BOOLEAN DEFAULT FALSE,
   priority entity_priority NOT NULL,
   priority_num INTEGER NOT NULL,
   assigned_to_user_id INTEGER,
@@ -162,6 +165,7 @@ CREATE TABLE workflow_entity_state_log(
   from_state_name TEXT NOT NULL,
   to_state_code TEXT NOT NULL,
   to_state_name TEXT NOT NULL,
+  to_state_is_active BOOLEAN DEFAULT FALSE,
   priority entity_priority NOT NULL,
   priority_num INTEGER NOT NULL,  
   assigned_to_user_id INTEGER,

@@ -1,6 +1,5 @@
 import { PoolClient } from "pg";
 import { WorkflowContext } from "../types";
-import { FunctionChangeEntityState } from "./implementations/change-entity-state";
 import { FunctionChangeEntityStateAssignUser } from "./implementations/change-entity-state-assign-user";
 import { FunctionChangeEntityStateAssignTeam } from "./implementations/change-entity-state-assign-team";
 import { FunctionCreateEntity } from "./implementations/create-entity";
@@ -10,6 +9,8 @@ import { FunctionUploadDocument } from "./implementations/upload-document";
 import { FunctionChangeEntityStateGetNext } from "./implementations/change-entity-state-get-next";
 import { FunctionNotificationCreate } from "./implementations/notification-create";
 import { FunctionNotificationMarkRead } from "./implementations/notification-mark-read";
+import { FunctionRfiRequestCreate } from "./implementations/rfi-request-create";
+import { FunctionRfiRequestSend } from "./implementations/rfi-request-send";
 
 export interface IWorkflowFunction {
     code: string;
@@ -24,7 +25,6 @@ export const workflowFunctionRegistry: {
 } = {};
 
 // Register sample functions.
-workflowFunctionRegistry['function.entity.change_state'] = new FunctionChangeEntityState();
 workflowFunctionRegistry['function.entity.change_state.assign_user'] = new FunctionChangeEntityStateAssignUser();
 workflowFunctionRegistry['function.entity.change_state.assign_team'] = new FunctionChangeEntityStateAssignTeam();
 workflowFunctionRegistry['function.entity.create'] = new FunctionCreateEntity();
@@ -34,3 +34,5 @@ workflowFunctionRegistry['function.document.upload'] = new FunctionUploadDocumen
 workflowFunctionRegistry['function.entity.change_state.get_next'] = new FunctionChangeEntityStateGetNext();
 workflowFunctionRegistry['function.notification.create'] = new FunctionNotificationCreate();
 workflowFunctionRegistry['function.notification.mark_read'] = new FunctionNotificationMarkRead();
+workflowFunctionRegistry['function.rfi_request.create'] = new FunctionRfiRequestCreate();
+workflowFunctionRegistry['function.rfi_request.send'] = new FunctionRfiRequestSend();

@@ -3,15 +3,15 @@
 import { useEffect, useState } from 'react'
 import { CardHeader, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { Bell, RefreshCw, Check } from 'lucide-react'
+import { Bell, Check } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Notification } from '@/app/api/data/notification/types'
 import { PerformWorkflowAction } from '@/app/api/action/workflow/workflow'
 import { DynamicScreenError } from '../DynamicScreenError'
+import { TimeRangeSelector } from './helpers/TimeRangeSelector'
+import { formatDateToInterval } from '@/lib/date-time/formatting'
 import Link from 'next/link'
 
 const HEADER_SIZE = 60;
@@ -113,31 +113,13 @@ export function NotificationWidget({
   }, [selectedTimeRange, refreshInterval])
 
 
-  const getTimeRangeLabels = () => {
-      const labels = [
-      { key: '1h', value: 'Last Hour' },
-      { key: '24h', value: 'Last 24 Hours' },
-      { key: '7d', value: 'Last 7 Days' },
-      { key: '30d', value: 'Last 30 Days' },
-      { key: '90d', value: 'Last 90 Days' }
-      ]
-    return labels
-  }
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffMs = now.getTime() - date.getTime()
-    const diffMins = Math.floor(diffMs / 60000)
-    const diffHours = Math.floor(diffMs / 3600000)
-    const diffDays = Math.floor(diffMs / 86400000)
-
-    if (diffMins < 1) return 'Just now'
-    if (diffMins < 60) return `${diffMins}m ago`
-    if (diffHours < 24) return `${diffHours}h ago`
-    if (diffDays < 7) return `${diffDays}d ago`
-    return date.toLocaleDateString()
-  }
+  const options = [
+    { key: '1h', value: 'Last Hour' },
+    { key: '24h', value: 'Last 24 Hours' },
+    { key: '7d', value: 'Last 7 Days' },
+    { key: '30d', value: 'Last 30 Days' },
+    { key: '90d', value: 'Last 90 Days' }
+  ] as const;
 
   const unreadCount = notifications.filter(n => !n.read_date_time).length
   const scrollSize = height - HEADER_SIZE - FOOTER_SIZE
@@ -156,27 +138,13 @@ export function NotificationWidget({
               </Badge>
             )}
           </div>
-          <div className="flex items-center space-x-2">
-            <Select value={selectedTimeRange} onValueChange={(value: any) => setSelectedTimeRange(value)}>
-              <SelectTrigger className="w-36">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                { getTimeRangeLabels().map((l, i) => {
-                    return <SelectItem key={i} value={l.key}>{l.value}</SelectItem>
-                  })}
-              </SelectContent>
-            </Select>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={fetchNotifications}
-              disabled={loading}
-              className="h-6 w-6 p-0"
-            >
-              <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
-            </Button>
-          </div>
+          <TimeRangeSelector
+            value={selectedTimeRange}
+            onChange={setSelectedTimeRange}
+            options={options}
+            onRefresh={fetchNotifications}
+            loading={loading}
+          />
         </div>
       </CardHeader>
       <Separator />
@@ -187,14 +155,14 @@ export function NotificationWidget({
           </div>
         ) : (
           <ScrollArea className="pr-4" style={{ height: `${scrollSize}px`}}>
-            {notifications.length === 0 ? (
+            { notifications.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <Bell className="h-12 w-12 mx-auto mb-2 opacity-20" />
                 <p className="text-sm">No notifications</p>
               </div>
             ) : (
               <div className="space-y-2">
-                {notifications.map((notification) => {
+                { notifications.map((notification) => {
                   const isUnread = !notification.read_date_time
                   const isMarking = markingRead.has(notification.id)
 
@@ -225,7 +193,7 @@ export function NotificationWidget({
                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
                               <span>From: {notification.sender_user_name}</span>
                               <span>•</span>
-                              <span>{formatDate(notification.create_date_time)}</span>
+                              <span>{formatDateToInterval(notification.create_date_time)}</span>
                             </div>
                           </div>
                           {!isUnread && (
@@ -234,7 +202,7 @@ export function NotificationWidget({
                         </div>
                       </PopoverTrigger>
                       <PopoverContent className="w-80" align="start">
-                        <NotificationDetailContent notificationId={notification.id} />
+                        <NotificationDetailContent notification={notification} />
                       </PopoverContent>
                     </Popover>
                   )
@@ -252,63 +220,29 @@ export function NotificationWidget({
   )
 }
 
-function NotificationDetailContent({ notificationId }: { notificationId: string }) {
-  const [detail, setDetail] = useState<Notification | null>(null)
-  const [loading, setLoading] = useState(true)
+function NotificationDetailContent({ notification }: { notification: Notification }) {
 
-  useEffect(() => {
-    const fetchDetail = async () => {
-      try {
-        const response = await fetch(`/api/data/notification/detail?notification_id=${notificationId}`)
-        if (response.ok) {
-          const data = await response.json()
-          setDetail(data)
-        }
-      } catch (err) {
-        console.error('Failed to fetch notification detail:', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchDetail()
-  }, [notificationId])
-
-  if (loading) {
-    return (
-      <div className="space-y-2">
-        <div className="h-4 bg-muted rounded animate-pulse" />
-        <div className="h-4 bg-muted rounded animate-pulse" />
-        <div className="h-20 bg-muted rounded animate-pulse" />
-      </div>
-    )
-  }
-
-  if (!detail) {
-    return <div className="text-sm text-muted-foreground">Failed to load details</div>
-  }
-
-  const linked_entity_link = detail.linked_entity_id ? detail.linked_entity_display_url + '/' + detail.linked_entity_id : undefined
+  const linked_entity_link = notification.linked_entity_id ? notification.linked_entity_display_url + '/' + notification.linked_entity_id : undefined
 
   return (
     <div className="space-y-3">
       <div>
-        <h4 className="font-semibold text-sm mb-1">{detail.title}</h4>
+        <h4 className="font-semibold text-sm mb-1">{notification.title}</h4>
         <p className="text-xs text-muted-foreground">
-          From: {detail.sender_user_name} • {new Date(detail.create_date_time).toLocaleString()}
+          From: {notification.sender_user_name} • {new Date(notification.create_date_time).toLocaleString()}
         </p>
       </div>
       <Separator />
-      <div className="text-sm whitespace-pre-wrap">{detail.body}</div>
+      <div className="text-sm whitespace-pre-wrap">{notification.body}</div>
       {linked_entity_link && (
         <>
           <Separator />
           <div className="text-xs text-muted-foreground">
-            <p><strong>Linked to: </strong>{detail.linked_entity_description}</p>
+            <p><strong>Linked to: </strong>{notification.linked_entity_description}</p>
             <p>
               <strong>ID: </strong>
               <Link href={linked_entity_link} className='hover:underline'>
-                {detail.linked_entity_id}
+                {notification.linked_entity_id}
               </Link>
             </p>
           </div>

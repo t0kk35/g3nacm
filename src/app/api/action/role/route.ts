@@ -6,6 +6,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { UserRoleRequest } from './user-role';
 import { ErrorCreators } from '@/lib/api-error-handling';
 import { requirePermissions } from '@/lib/permissions/check';
+import { AuditData } from "@/lib/audit/types";
+import { createAuditEntry } from "@/lib/audit/audit-log";
 
 const origin = 'api/action/role'
 
@@ -69,6 +71,21 @@ export async function POST(request: NextRequest) {
             const params = [newRoleId, ...role.permission_ids];
             await client.query(permission_query, params);
         }
+
+        const auditData: AuditData = {
+            category: 'role',
+            action: 'create-role',
+            target_type: 'role',
+            target_id_num: newRoleId,
+            after_data: {
+                id: newRoleId,
+                name: role.name,
+                description: role.description,
+                permission_ids: role.permission_ids
+            }
+        }
+        await createAuditEntry(client, user.name, auditData );
+        // And Commit at the end.
         await client.query('COMMIT');
         return NextResponse.json({ 'success': true });
     } catch (error) {

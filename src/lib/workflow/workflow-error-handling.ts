@@ -15,6 +15,7 @@ export enum ErrorCode {
     WFL_ACTION_INVALID_TRANSITION = "WRKA_00004",
     WFL_ACTION_FUNCTION_NOT_REGISTERED = "WRKA_00005",
     WFL_ACTION_REQUIRES_COMMENT = "WRKA_00006",
+    WFL_ACTION_MAPPING_MISSING = "WRKA_00007",
     WFL_CONTEXT_CAN_NOT_OVERWRITE_CONTEXT = "WRKC_00001",
     WFL_CONTEXT_UNKNOWN_REPLACEMENT_SOURCE = "WRKC_00002",
     WFL_CONTEXT_CAN_NOT_FIND_ENV_SETTING = "WRKC_00003",
@@ -29,6 +30,7 @@ const errorDefinition = new Map<ErrorCode, string>([
     [ErrorCode.WFL_ACTION_INVALID_TRANSITION, 'Invalid transition: current state "{entity_from_state_code}" does not match required state "{action_from_state_code}" for action "{action_code}"'],
     [ErrorCode.WFL_ACTION_FUNCTION_NOT_REGISTERED, 'Performing action {action_code}. Workflow function with code "{func_code}" is not registered in function registry'],
     [ErrorCode.WFL_ACTION_REQUIRES_COMMENT, 'Action "{action_code}" requires a comment context variable. Could not find comment in the context'],
+    [ErrorCode.WFL_ACTION_MAPPING_MISSING, 'Action "{action_code}" requires a comment, but the comment_mapping field is missing'],
     [ErrorCode.WFL_CONTEXT_CAN_NOT_OVERWRITE_CONTEXT, 'Can not overwrite system context variable "{output_param_code}" with mapping "{optput_param_context_mapping}" in function "{function_code}" performing action "{action_code}"'],
     [ErrorCode.WFL_CONTEXT_UNKNOWN_REPLACEMENT_SOURCE, 'Unknown Replacement source "{source}" for setting "{setting_path}", can not replace in context'],
     [ErrorCode.WFL_CONTEXT_CAN_NOT_FIND_ENV_SETTING, 'Missing env variable: "{setting_path}". Can not resolve setting'],
@@ -44,7 +46,8 @@ export const WorkflowErrorCreators: {
         invalidAnyStateTransition: (origin: string, actionCode: string, entityFromStateCode: string) => never;
         invalidStateTransition: (origin: string, actionCode: string, actionFromStateCode: string, entityFromStateCode: string) => never;
         assertFunctionRegistered: (origin: string, actionCode: string, workflowFunctionCode: string, workflowFunction: IWorkflowFunction | undefined) => asserts workflowFunction is IWorkflowFunction;
-        assertCommentInContext: (origin: string, actionCode: string, comment: string | undefined) => asserts comment is string
+        assertCommentInContext: (origin: string, actionCode: string, comment: string | undefined) => asserts comment is string;
+        assertActionHasCommentMapping: (origin: string, actionCode: string, actionMapping: string) => asserts actionMapping is string
     },
     context: {
         canNotOverWriteSystem: (origin: string, actionCode: string, functionCode: string, outputParamCode: string, outputParamContextMapping: string) => never;
@@ -68,6 +71,9 @@ export const WorkflowErrorCreators: {
         },
         assertCommentInContext: (origin: string, actionCode: string, comment: string | undefined): asserts comment is string => {
             if (!comment && typeof comment !== 'string' ) workflowErrorCreator(ErrorCode.WFL_ACTION_REQUIRES_COMMENT, origin, {'action_code': actionCode})
+        }, 
+        assertActionHasCommentMapping: (origin: string, actionCode: string, actionMapping: string): asserts actionMapping is string => {
+            if (!actionMapping && typeof actionMapping !== 'string') workflowErrorCreator(ErrorCode.WFL_ACTION_MAPPING_MISSING, origin, {'action_code': actionCode})
         }
     },
     context: {

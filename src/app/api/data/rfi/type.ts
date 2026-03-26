@@ -34,6 +34,12 @@ export enum RfiQuestionType {
   StructuredData = "Structured Data"
 }
 
+export enum RfiStatus {
+  Draft = 'Draft',
+  Sent = 'Sent',
+  Failed = 'Failed'
+}
+
 /* =========================
    TABLE TYPES
 ========================= */
@@ -82,11 +88,16 @@ export type RfiRequest = {
   entity_code: string;
   org_unit_code: string;
   direction: RfiDirection;
-  linked_entity: string;
+  linked_entity: {
+    id: string;
+    code: string;
+    description: string;
+    display_url: string;
+  };
   parent_rfi_id?: string;
   related_rfi_ids?: string[];
   title: string;
-  description?: string;
+  body?: string;
   purpose?: string;
   /* Outbound */
   recipient_subject_id?: string;
@@ -99,12 +110,13 @@ export type RfiRequest = {
   channel: {
     code: string;
     name: string;
-    type: RfiChannel;
+    type: RfiChannelType;
     is_inbound: boolean;
     is_outbound: boolean;
   };
   /* Template */
   template_id?: string;
+  status: RfiStatus;
   /* AI Support */
   ai_generated_draft: boolean;
   ai_confidence_score?: number;
@@ -114,6 +126,7 @@ export type RfiRequest = {
   update_datetime: string;
   due_datetime: string;
   reminder_datetime?: string;
+  sent_datetime?: string;
   tags?: string[];
   entity_state: EntityState;
 }

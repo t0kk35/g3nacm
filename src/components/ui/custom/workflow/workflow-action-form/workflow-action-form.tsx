@@ -7,6 +7,7 @@ import { CheckBoxField } from "./checkbox-field"
 import { RadioField } from "./radio-field"
 import { UserSelectField } from "./user-select-field"
 import { UserTeamSelectField } from "./user-team-select-field"
+import { DateTimeField } from "./datetime-field"
 
 type WorkflowActionFormProps = {
   fields: WorkflowFormField[]
@@ -29,7 +30,8 @@ const fieldRenderers: { [key: string]: (p: WorkflowFieldRendererProps) => JSX.El
   "checkbox": CheckBoxField,
   "radio": RadioField,
   "userselect": UserSelectField,
-  "userteamselect": UserTeamSelectField
+  "userteamselect": UserTeamSelectField,
+  "datetime": DateTimeField
 };
 
 // The base workflow form. This renders each fo the field types in order.

@@ -4,6 +4,7 @@
 CREATE TYPE rfi_direction AS ENUM ('Inbound', 'Outbound');
 CREATE TYPE rfi_channel_type AS ENUM ('Email', 'SWIFT', 'Portal', 'Mail');
 CREATE TYPE rfi_question_type as ENUM ('Open Ended', 'Document Request', 'Yes/No', 'Multiple Choice', 'Date', 'Amount', 'Structured Data');
+CREATE TYPE rfi_status AS ENUM ('Draft', 'Sent', 'Failed');
 
 -- Possible RFI Channels, the communication method used for the RFI.
 CREATE TABLE rfi_channel (
@@ -62,7 +63,7 @@ CREATE TABLE rfi_request(
     parent_rfi_id UUID,
     related_rfi_ids UUID[],
     title TEXT NOT NULL,
-    description TEXT,
+    body TEXT, -- Main body of the RFI.
     purpose TEXT,
     -- Outbound fields
     recipient_subject_id UUID,
@@ -75,6 +76,7 @@ CREATE TABLE rfi_request(
     channel_id INTEGER NOT NULL,
     --- Template
     template_id UUID,
+    status rfi_status NOT NULL DEFAULT 'Draft',
     --- AI Support
     ai_generated_draft BOOLEAN DEFAULT false,
     ai_confidence_score DECIMAL(3,2),
@@ -84,6 +86,7 @@ CREATE TABLE rfi_request(
     update_datetime TIMESTAMPTZ NOT NULL DEFAULT now(),
     due_datetime TIMESTAMPTZ NOT NULL,
     reminder_datetime TIMESTAMPTZ,
+    sent_datetime TIMESTAMPTZ,
     tags TEXT[], -- for categorization/search
     CONSTRAINT fk_rfi_r_entity_code FOREIGN KEY (entity_code) REFERENCES workflow_entity(code),
     CONSTRAINT fk_rfi_r_org_unit_code FOREIGN KEY (org_unit_code) REFERENCES org_unit(code),

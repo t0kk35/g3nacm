@@ -30,6 +30,7 @@ SELECT
         'from_state_name', wes.from_state_name,
         'to_state_code', wes.to_state_code,
         'to_state_name', wes.to_state_name,
+        'to_state_is_active', wes.to_state_is_active,
         'priority', wes.priority,
         'priority_num', wes.priority_num,   
         'assigned_to_user_name', COALESCE(wes.assigned_to_user_name, ''),

@@ -12,6 +12,7 @@ import { PermissionGuard } from "@/components/ui/custom/permission-guard-server"
 import { NoPermission } from "@/components/ui/custom/no-permission";
 import { AlertDetailsGeneric, AlertDetailsGenericSkeleton } from "@/components/alert/detail/AlertsDetailsGeneric";
 import { EntityAttachments } from "@/components/ui/custom/entity-attachment";
+import { WorkflowSelector } from "@/components/ui/custom/workflow/workflow-selection";
 
 type Props = {params: Promise<{ alertId : string }>}
 
@@ -54,6 +55,14 @@ export default async function AlertDetails({ params }: Props) {
             orgUnitCode={alert.org_unit_code}
             entityCode={alert.entity_state.entity_code}
             entityId={alert.id}
+          />
+          <WorkflowSelector
+            entityCode={alert.entity_state.entity_code}
+            entityId={alert.id}
+            entityIdentifier={alert.alert_identifier}
+            orgUnitCode={alert.org_unit_code}
+            entityData={alert}
+            stateCode={alert.entity_state.to_state_code}
           />
         </div>
       </EntityLockProvider>

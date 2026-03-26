@@ -24,8 +24,10 @@ LEFT JOIN LATERAL (
           'from_state_code', wai.from_state,
           'to_state_code', wai.to_state,
           'comment_required', wai.comment_required,
+          'comment_mapping', wai.comment_mapping,
           'redirect_url', wai.redirect_url,
           'permission', wai.permission,
+          'start_action', wai.start_action,
           'form_fields', COALESCE(waff.form_fields, '[]'::jsonb),
           'functions', COALESCE(wf.functions, '[]'::jsonb)
       )
@@ -133,7 +135,7 @@ LEFT JOIN LATERAL (
     )
   ) AS "states"
   FROM workflow_state wsi
-  JOIN workflow_action wasi on (wasi.from_state = wsi.code OR wasi.from_state = wsi.code) 
+  JOIN workflow_action wasi on (wasi.from_state = wsi.code OR wasi.to_state = wsi.code) 
   WHERE wasi.config_code = wc.code
 ) ws ON TRUE
 WHERE wc.entity_code = $1 AND wc.org_unit_code = $2

@@ -18,6 +18,8 @@ import { UserPermission } from "@/app/api/data/user/user"
 import { UserRoleRequest } from "@/app/api/action/role/user-role"
 import { UserRevokeEntityTable } from "../UserRevokeEntityTable"
 import { useValidationForm, FormFieldInput } from "@/components/ui/custom/form-field"
+import { clientFetch } from "@/lib/client-api-connection"
+import { ur } from "zod/v4/locales"
 
 // Update the Permission interface
 type FormUserPermission =  {
@@ -105,17 +107,8 @@ export function RoleFormClient({ role, iPermissions }: RoleFormProps) {
       const url = isEditing ? `/api/action/role/${role.id}` : "/api/action/role"
       const method = isEditing ? "PUT" : "POST"
 
-      const response = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(roleData),
-      })
+      await clientFetch(url, method, roleData, 'Failed to save Role')
 
-      if (!response.ok) {
-        throw new Error("Failed to save role")
-      }
       toast.success(isEditing ? "Role updated successfully" : "Role created successfully")
       router.push("/admin/role")
       router.refresh()
@@ -174,7 +167,7 @@ export function RoleFormClient({ role, iPermissions }: RoleFormProps) {
           </CardContent>          
         </Card>
         <Card>
-          <CardHeader className="pb-3">
+          <CardHeader>
             <CardTitle>Role Details</CardTitle>
           </CardHeader>
           <CardContent>

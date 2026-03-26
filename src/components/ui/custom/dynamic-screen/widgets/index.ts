@@ -9,6 +9,7 @@ import { AlertHandledChartWidget } from './AlertHandledChartWidget'
 import { NotificationWidget } from './NotificationWidget'
 import { TeamAssignmentChartWidget } from './TeamAssignmentChartWigdet'
 import { AgentUsageChartWidget } from './AgentUsageChartWidget'
+import { RfiAssignmentWidget } from './RfiAssignmentWidget'
 
 widgetRegistry.register({
   code: 'alert-assignment',
@@ -182,12 +183,36 @@ widgetRegistry.register({
   responsiveConstraints: {
     lg: {minW: 10, minH: 10, maxW: 15, maxH: 12},
     md: {minW: 8, minH: 8, maxW: 12, maxH: 10}, 
-    sm: {minW: 2, minH: 4, maxW: 4, maxH: 5},
-    xs: {minW: 2, minH: 3, maxW: 4, maxH: 4}
+    sm: {minW: 5, minH: 6, maxW: 8, maxH: 8},
+    xs: {minW: 4, minH: 5, maxW: 6, maxH: 6}
   },
   permissions: ['data.alert'],
   category: WIDGET_CATEGORIES.ANALYTICS,
   tags: ['alerts', 'list']
+})
+
+widgetRegistry.register({
+  code: 'rfi-list',
+  name: 'RFI List',
+  description: 'Lists the RFIs assigned to a specific user',
+  component: RfiAssignmentWidget,
+  defaultConfig: {
+    title: 'RFI List',
+    refreshInterval: 60000
+  },
+  configSchema: z.object({
+    title: CommonWidgetSchemas.title.default('RFI List'),
+    refreshInterval: CommonWidgetSchemas.refreshInterval.default(60000)
+  }),
+  responsiveConstraints: {
+    lg: {minW: 6, minH: 4, maxW: 9, maxH: 10},
+    md: {minW: 5, minH: 4, maxW: 8, maxH: 9},
+    sm: {minW: 4, minH: 3, maxW: 4, maxH: 8},
+    xs: {minW: 3, minH: 3, maxW: 4, maxH: 6}
+  },
+  permissions: [],
+  category: WIDGET_CATEGORIES.COMMUNICATION,
+  tags: ['rfi', 'list']
 })
 
 // Export widget registry for use in other components
@@ -200,7 +225,8 @@ export {
   AlertAssignmentWidget,
   NotificationWidget,
   TeamAssignmentChartWidget,
-  AgentUsageChartWidget
+  AgentUsageChartWidget,
+  RfiAssignmentWidget
 }
 
 // Utility function to get all available widgets

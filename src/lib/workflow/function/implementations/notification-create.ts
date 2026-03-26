@@ -2,7 +2,6 @@ import { PoolClient } from "pg";
 import { WorkflowContext } from "../../types";
 import { IWorkflowFunction } from "../function";
 import { getInput, isString } from "../function-helpers";
-import { error } from "console";
 
 const query_text = `
 INSERT INTO notification (
@@ -44,12 +43,18 @@ export class FunctionNotificationCreate implements IWorkflowFunction {
         };
 
         const res = await client.query(query);
-        if (res.rows.length !== 1) throw error ('Something when wrong trying to create a notification')
+        if (res.rows.length !== 1) throw new Error ('Something when wrong trying to create a notification')
         const notification = res.rows[0];
         
         // Return a reference to the newly created notification.
         return {
-            notification_id: notification.id
+            function: {
+                notification: {
+                    create: {
+                        notification_id: notification.id
+                    }
+                }
+            }
         };
     }
 }

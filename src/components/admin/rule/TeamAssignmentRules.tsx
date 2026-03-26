@@ -1,43 +1,24 @@
 'use server'
 
-import { authorizedFetch } from "@/lib/org-filtering"
+import { authorizedGetJSON } from "@/lib/org-filtering"
 import { UserTeam } from "@/app/api/data/user/user"
 import { EvalInputSchema } from "@/lib/eval-engine/types"
 import { OrgUnit } from "@/app/api/data/org_unit/org_unit"
-import { APIError } from "@/lib/api-error-handling"
 import { TeamAssignmentRulesClient } from "./TeamAssignmentRulesClient"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export async function TeamAssignmentRules() {
 
-  const teams = authorizedFetch(`${process.env.DATA_URL}/api/data/user/team`)
-    .then(res => {
-      if (!res.ok) throw new Error(`Could not load teams`);
-      return res.json();
-      })
-    .then(j => j as UserTeam[]);
-
-  const schemas = authorizedFetch(`${process.env.DATA_URL}/api/data/eval/schema`)
-    .then(res => {
-      if (!res.ok) throw new Error('Could not load schemas');
-      else return res.json();
-    })
-    .then(j => j as EvalInputSchema[]);
-
-  const orgUnits = authorizedFetch(`${process.env.DATA_URL}/api/data/org_unit/org_unit`)
-    .then(res => {
-      if (!res.ok) throw new Error('Could not load org_units');
-      else return res.json();
-    })
-    .then(j => j as OrgUnit[]);
+  const teams = authorizedGetJSON<UserTeam[]>(`${process.env.DATA_URL}/api/data/user/team`);
+  const schemas = authorizedGetJSON<EvalInputSchema[]>(`${process.env.DATA_URL}/api/data/eval/schema`);
+  const orgUnits = authorizedGetJSON<OrgUnit[]>(`${process.env.DATA_URL}/api/data/org_unit/org_unit`);
   
   const data = await Promise.all([teams, schemas, orgUnits]);
 
   return (
     <TeamAssignmentRulesClient teams={data[0]} schemas={data[1]} orgUnits={data[2]}/>
   )
-
 }
 
 export async function TeamAssignmentRulesSkeleton() {

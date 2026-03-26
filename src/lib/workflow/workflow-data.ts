@@ -1,6 +1,7 @@
 import { error } from "console";
 import { PoolClient } from "pg"
 import { isAnyActive } from "./workflow-engine";
+import { getCachedWorkflowConfig } from "../cache/workflow-cache";
 
 export type WorkflowEntityState = {
     entity_id: string;
@@ -10,6 +11,7 @@ export type WorkflowEntityState = {
     action_code: string;
     from_state_code: string;
     to_state_code: string;
+    to_state_is_active: boolean;
     assigned_to_user_id: number;
     assigned_to_user_name: string;
     user_id: number;
@@ -24,8 +26,9 @@ SELECT
   wes.org_unit_code AS "org_unit_code",
   wes.date_time AS "date_time",
   wes.action_code AS "action_code",
-  wa.from_state as "from_state_code",
-  wa.to_state as "to_state_code",
+  wa.from_state AS "from_state_code",
+  wa.to_state AS "to_state_code",
+  wa.to_state_is_active AS "to_state_is_active",
   wes.assigned_to_user_id AS "assinged_to_user_id",
   wes.assigned_to_user_name AS "assigned_to_user_name",
   wes.user_id AS "user_id",
@@ -62,6 +65,7 @@ INSERT INTO workflow_entity_state_log
   from_state_name,
   to_state_code,
   to_state_name,
+  to_state_is_active,
   priority,
   priority_num,
   assigned_to_user_id,
@@ -83,6 +87,7 @@ SELECT
   from_state_name,
   to_state_code,
   to_state_name,
+  to_state_is_active,
   priority,
   priority_num,
   assigned_to_user_id,
@@ -117,7 +122,8 @@ WITH action_details AS (
         ws_from.code AS from_state_code,
         ws_from.name AS from_state_name,
         ws_to.code AS to_state_code,
-        ws_to.name AS to_state_name
+        ws_to.name AS to_state_name,
+        ws_to.is_active AS to_state_is_active,
     FROM workflow_action wa
     JOIN workflow_state ws_from ON wa.from_state = ws_from.code
     JOIN workflow_state ws_to ON wa.to_state = ws_to.code
@@ -135,6 +141,7 @@ SET
     from_state_name = CASE WHEN $5 THEN wes.from_state_name ELSE ad.from_state_name END,
     to_state_code = CASE WHEN $5 THEN wes.to_state_code ELSE ad.to_state_code END,
     to_state_name = CASE WHEN $5 THEN wes.to_state_name ELSE ad.to_state_name END,
+    to_state_is_active = CASE WHEN $5 THEN wes.to_state_is_active ELSE ad.to_state_is_active END,
     user_id = ud.user_id,
     user_name = $4,
     comment = $6
@@ -142,7 +149,7 @@ FROM action_details ad, user_details ud
 WHERE entity_id = $1 AND entity_code = $2
 `
 
-export async function updateEntityState(client: PoolClient, entityId: string, entityCode: string, actionCode: string, fromStateCode: string, userName: string, comment: string | null) {
+export async function updateEntityState(client: PoolClient, entityId: string, entityCode: string, actionCode: string, fromStateCode: string, userName: string, comment: string | undefined) {
     const query = {
         name: 'workflow_update_entity_state',
         text: update_entity_state_log,
@@ -202,3 +209,63 @@ export async function updateEntityAssignTeam(client: PoolClient, entityId: strin
         throw new Error(`Error Updating workflow_entity_state_assing_user for entityId ${entityId} and entityCode ${entityCode}. Err=${err}`)    
     })
 };
+
+const query_insert_entity_state = `
+INSERT INTO workflow_entity_state (
+    entity_id, entity_code, org_unit_code,
+    date_time,
+    action_code, action_name,
+    from_state_code, from_state_name,
+    to_state_code, to_state_name, to_state_is_active,
+    priority, priority_num,
+    assigned_to_user_id, assigned_to_user_name,
+    user_id, user_name
+)
+VALUES (
+    $1, $2, $3,
+    now(),
+    $4, $5,
+    $6, $7,
+    $8, $9, $10
+    $11, $12,
+    (SELECT id FROM users WHERE name = $13), $13,
+    (SELECT id FROM users WHERE name = $13), $13
+)
+`
+export async function createEntity(client: PoolClient, entityId: string, entityCode: string, orgUnitCode: string, userName: string) {
+    
+    // Get the start action for this entity
+    const workflowConfig = await getCachedWorkflowConfig(entityCode, orgUnitCode);
+
+    const start_action = workflowConfig.actions.find(a => a.start_action)
+    if (!start_action) throw new Error(`Could not find start action for workflow '${entityCode}' and org '${orgUnitCode}'`);
+    const start_from_state = workflowConfig.states.find(s => s.code === start_action.from_state_code);
+    if (!start_from_state) throw new Error (`Could not find from_state for action '${start_action.code}'`);
+    const start_to_state = workflowConfig.states.find(s => s.code === start_action.to_state_code);
+    if (!start_to_state) throw new Error (`Could not find to_state for action '${start_action.code}'`)
+
+        const query = {
+        name: 'workflow_create_entity_state',
+        text: query_insert_entity_state,
+        values:[
+            entityId, 
+            entityCode,
+            orgUnitCode,
+            start_action.code,
+            start_action.name,
+            start_action.from_state_code,
+            start_from_state.name,
+            start_action.to_state_code,
+            start_to_state.name,
+            start_to_state.is_active,
+            'Medium', 
+            1,
+            userName
+        ]
+    } 
+
+    client.query(query).catch((err) => {
+        throw new Error(`Error creating workflow_entity_state for entityId ${entityId}, entityCode ${entityCode} and action code ${start_action.code}. Err=${err}`)    
+    });
+
+}

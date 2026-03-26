@@ -83,8 +83,10 @@ export type WorkflowAction = {
     from_state_code: string;
     to_state_code: string;
     comment_required: boolean;
+    comment_mapping: string;
     redirect_url: string;
     permission: string;
+    start_action: boolean;
     form_fields: WorkflowFormField[];
     functions: WorkflowFunction[];
 }

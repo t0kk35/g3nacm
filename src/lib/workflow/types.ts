@@ -9,7 +9,6 @@ export type SystemFields = {
     entityCode: string;
     fromStateCode: string;
     toStateCode: string;
-    commentRequired?: boolean;
     entityData: any; // Complete entity data with all related information
 }
 

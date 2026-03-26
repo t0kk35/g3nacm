@@ -5,6 +5,7 @@ import { workflowFunctionRegistry } from "./function/function";
 import { getEntityState } from "./workflow-data";
 import { hasPermissions } from "../permissions/core";
 import { WorkflowErrorCreators } from "./workflow-error-handling";
+import { copyToEntityStateLog, updateEntityState } from "./workflow-data";
 
 const origin = 'workflow-engine'
 
@@ -43,8 +44,20 @@ export async function executeWorkflowAction(client: PoolClient, workflowConfig: 
     // Set system fields for this execution.
     ctx.system.fromStateCode = entityState.to_state_code;
     ctx.system.toStateCode = action.to_state_code;
-    ctx.system.commentRequired = action.comment_required;
-  
+
+    // First update the entity state and state_log. So they reflect the action transition.
+    copyToEntityStateLog(client, ctx.system.entityId, ctx.system.entityCode);    
+    // Get the comment if required for the action.
+    if (action.comment_required) {
+      WorkflowErrorCreators.action.assertActionHasCommentMapping(origin, action.code, action.comment_mapping);
+      const comment = ctx.data[action.comment_mapping];
+      WorkflowErrorCreators.action.assertCommentInContext(origin, action.code, comment);
+      updateEntityState(client, ctx.system.entityId, ctx.system.entityCode, ctx.system.actionCode, ctx.system.fromStateCode, ctx.system.userName, comment);
+    }
+    else {
+      updateEntityState(client, ctx.system.entityId, ctx.system.entityCode, ctx.system.actionCode, ctx.system.fromStateCode, ctx.system.userName, undefined);
+    }
+
     // Execute each workflow function in order.
     action.functions.sort((a, b) => { return a.order - b.order })    
     for (const func of action.functions) {      
@@ -72,7 +85,7 @@ export async function executeWorkflowAction(client: PoolClient, workflowConfig: 
 
       // Map the outputs back to the context.
       func.output_parameters.forEach((op) => {
-        const opValue = getByPath(outputs,op.code);
+        const opValue = getByPath(outputs, op.code);
         if (opValue) {
           if (op.context_mapping.startsWith('system.')) WorkflowErrorCreators.context.canNotOverWriteSystem(origin, action.code, func.code, op.code, op.context_mapping)
           // Consider properly doing this by path. What would happen if I have '.' in the mapping?
@@ -133,10 +146,7 @@ function resolveSetting(value: any, ctx: WorkflowContext ): any {
  * @param ctx - The workflow context containing system fields and data
  * @returns The resolved URL string or null if no redirect should occur
  */
-export function resolveRedirectUrl(
-  redirectUrl: string | null | undefined,
-  ctx: WorkflowContext
-): string | null {
+export function resolveRedirectUrl(redirectUrl: string | null | undefined, ctx: WorkflowContext ): string | null {
   // Return null for empty/null/undefined URLs
   if (!redirectUrl || redirectUrl.trim() === '') {
     return null;
@@ -155,15 +165,3 @@ export function isAnyActive(fromStateCode: string): Boolean {
 function getByPath(obj: any, path: string) {
   return path.split('.').reduce((o, key) => (o ? o[key] : undefined), obj);
 }
-
-/*function setByPath(obj: any, path: string, value: any) {
-  const parts = path.split('.');
-  const last = parts.pop();
-  
-  const target = parts.reduce((o, key) => {
-    if (!(key in o)) o[key] = {};
-    return o[key];
-  }, obj);
-
-  target[last] = value;
-}*/

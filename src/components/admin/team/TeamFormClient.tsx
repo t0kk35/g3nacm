@@ -6,13 +6,13 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 import { ArrowLeft, Save } from "lucide-react"
 import { UserTeam } from "@/app/api/data/user/user"
 import { UserTeamRequest } from "@/app/api/action/team/user-team"
 import { UserRevokeEntityTable } from "../UserRevokeEntityTable"
+import { useValidationForm, FormFieldInput } from "@/components/ui/custom/form-field"
+import { clientFetch } from "@/lib/client-api-connection"
 
 type TeamFormProps = {
   team?: UserTeam;
@@ -20,41 +20,40 @@ type TeamFormProps = {
 
 export function TeamFormClient({ team }: TeamFormProps) {
   const router = useRouter()
-  const [name, setName] = useState(team?.name || "")
-  const [description, setDescription] = useState(team?.description || "")
   const [saving, setSaving] = useState(false)
   const isEditing = !!team
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const form = useValidationForm(
+    {
+      name: team?.name || "",
+      description: team?.description || ""
+    },
+    {
+      name: (v) => v.trim() ? undefined : "Team name is required",
+      description: (v) => v.trim() ? undefined : "Team Description is required",
+    }
+  )
+
+  const handleSubmit = async () => {
     setSaving(true)
 
     try {
       const teamData: UserTeamRequest = {
-        name: name,
-        description: description
+        name: form.values.name,
+        description: form.values.description
       }
       // Create or update role
-      const url = isEditing ? `/api/action/user/team/${team.id}` : "/api/action/user/team"
+      const url = isEditing ? `/api/action/team/${team.id}` : "/api/action/team"
       const method = isEditing ? "PUT" : "POST"
+      
+      await clientFetch(url, method, teamData, 'Failed to save team' )
 
-      const response = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(teamData),
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to save team")
-      }
       toast.success(isEditing ? "Team updated successfully" : "Team created successfully",)
       router.push("/admin/team")
       router.refresh()
     } catch (error) {
       console.error("Error saving team:", error)
-      toast.error("Failed to save team. Please try again.")
+      toast.error(`Failed to save team. Error: ${error}`)
     } finally {
       setSaving(false)
     }
@@ -66,7 +65,7 @@ export function TeamFormClient({ team }: TeamFormProps) {
   }  
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={form.handleSubmit(handleSubmit)}>
       <div className="space-y-2">
         <Card className="pt-5">
           <CardContent>
@@ -77,31 +76,29 @@ export function TeamFormClient({ team }: TeamFormProps) {
           </CardContent>          
         </Card>
         <Card>
-          <CardHeader className="pb-3">
+          <CardHeader>
             <CardTitle>Team Details</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Role Name</Label>
-                <Input
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Enter team name"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="description">Team Description</Label>
-                <Input
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Enter a description for the team"
-                  required
-                />
-              </div>
+              <FormFieldInput
+                id="name"
+                label="Team Name"
+                value={form.values.name}
+                onChange={(v) => form.setField("name", v)}
+                placeholder="Enter team name"
+                error={form.errors.name}
+                required
+              />
+              <FormFieldInput 
+                id="description"
+                label="Team Description"
+                value={form.values.description}
+                onChange={(v) => form.setField("description", v)}
+                placeholder="Enter Team Decription"
+                error={form.errors.description}
+                required
+              />
             </div>
           </CardContent>
           <CardFooter>

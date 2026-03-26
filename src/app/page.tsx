@@ -1,7 +1,9 @@
 'use server'
 
 import { auth } from "@/auth"
-import { Dashboard } from "@/components/dashboard/Dashboard"
+import { authorizedGetJSON } from "@/lib/org-filtering"
+import { DynamicScreenConfig } from "@/app/api/data/dynamic_screen/types"
+import { DynamicScreenContainer } from "@/components/ui/custom/dynamic-screen/DynamicScreenContainer"
 
 export default async function Home() {
   const session = await auth()
@@ -9,9 +11,12 @@ export default async function Home() {
   const user = session?.user
   if (!user?.name) throw new Error("No user-name found in main page")
 
+  // Get the config for the dashboard
+  const config = await authorizedGetJSON<DynamicScreenConfig>(`${process.env.DATA_URL}/api/data/dynamic_screen?user_name=${encodeURIComponent(user.name)}&screen_name=Dashboard`);
+
   return (
     <div className="p-4">
-      <Dashboard userName={user.name} />
+      <DynamicScreenContainer userName={user.name} dynamicScreenConfig={config} />
     </div>
   );
 }

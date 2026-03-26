@@ -19,6 +19,7 @@ import { UserFormTeamTab } from "./UserFormTeamTab"
 import { UserFormOrgTab } from "./UserFormOrgTab"
 import { ChangePasswordModal } from "../ChangePasswordModal"
 import { useValidationForm, FormFieldInput } from "@/components/ui/custom/form-field"
+import { clientFetch } from "@/lib/client-api-connection"
 
 // Update the Permission interface
 export type FormUserRoles =  {
@@ -125,15 +126,7 @@ export function UserFormClient({ user, iRoles, iTeams, iOrgs }: UserFormProps) {
 			const url = isEditing ? `/api/action/user/user/${user.id}` : "/api/action/user/user"
 			const method = isEditing ? "PUT" : "POST"
 
-			const response = await fetch(url, {
-				method,
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify(userData),
-			})
-
-			if (!response.ok) { throw new Error("Failed to save user") }
+      await clientFetch(url, method, userData, 'Failed to save User');
 
 			toast.success(isEditing ? "User updated successfully" : "User created successfully");
 			router.push("/admin/user");
@@ -205,7 +198,7 @@ export function UserFormClient({ user, iRoles, iTeams, iOrgs }: UserFormProps) {
 					</CardContent>          
 				</Card>
 				<Card>
-					<CardHeader className="pb-3">
+					<CardHeader>
 						<CardTitle>User Details</CardTitle>
 					</CardHeader>
 					<CardContent>
@@ -219,7 +212,7 @@ export function UserFormClient({ user, iRoles, iTeams, iOrgs }: UserFormProps) {
                 disabled={isEditing}
                 required
               />
-							<div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 <FormFieldInput 
                   id="firstName"
                   label="First Name"

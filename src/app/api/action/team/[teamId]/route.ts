@@ -1,11 +1,15 @@
 'use server'
 
 import { auth } from "@/auth";
-import * as db from "@/db"
+import * as db from "@/db";
+import { authorizedGetJSON } from "@/lib/org-filtering";
 import { NextRequest, NextResponse } from 'next/server';
 import { UserTeamRequest } from '../user-team';
+import { UserTeam } from "@/app/api/data/user/user";
 import { ErrorCreators } from '@/lib/api-error-handling';
 import { requirePermissions } from '@/lib/permissions/check';
+import { AuditData } from "@/lib/audit/types";
+import { createAuditEntry } from "@/lib/audit/audit-log";
 
 type Props = {params: Promise<{ teamId: string }>}
 
@@ -47,15 +51,44 @@ export async function PUT(request: NextRequest, { params }: Props) {
         if (!param.field) return ErrorCreators.param.bodyMissing(origin, param.name);
     }
 
+    // Get audit before data
+    let beforeData;
+    try {
+        const before = await authorizedGetJSON<UserTeam[]>(`${process.env.DATA_URL}/api/data/user/team?team_id=${teamId}`)
+        if (before.length < 1) return ErrorCreators.db.entityNotFound(origin, "Team", teamId)
+        beforeData = before[0]
+    } catch (error) {
+        return ErrorCreators.api.failedCall(origin, error as Error)
+    }
+
     // Set up a connection and transactions
     let client;
     let transactionStarted = false;
-    try {     
+    try {
         client = await db.pool.connect();
         await client.query('BEGIN');
         transactionStarted = true;
         // Update the team record
         await client.query(query_team_update, [teamId, team.name, team.description]);
+
+        const auditData: AuditData = {
+            category: 'team',
+            action: 'update-team',
+            target_type: 'team',
+            target_id_num: beforeData.id,
+            before_data: {
+                id: beforeData.id,
+                name: beforeData.name,
+                description: beforeData.description
+            },
+            after_data: {
+                id: teamId,
+                name: team.name,
+                description: team.description
+            }
+        }
+        await createAuditEntry(client, user.name, auditData );
+        // And Commit at the end.
         await client.query('COMMIT');
         return NextResponse.json({ sucess : true });
     } catch (error) {
@@ -81,15 +114,39 @@ export async function DELETE(_request: NextRequest, { params }: Props) {
     const teamId = (await params).teamId;
     if (!teamId) return ErrorCreators.param.urlMissing(origin, 'teamId');
 
+    // Get audit before data
+    let beforeData;
+    try {
+        const before = await authorizedGetJSON<UserTeam[]>(`${process.env.DATA_URL}/api/data/user/team?team_id=${teamId}`)
+        if (before.length < 1) return ErrorCreators.db.entityNotFound(origin, "Team", teamId)
+        beforeData = before[0]
+    } catch (error) {
+        return ErrorCreators.api.failedCall(origin, error as Error)
+    }
+
     // Set up a connection and transactions
     let client;
     let transactionStarted = false;
 
-    try {     
+    try {
         client = await db.pool.connect();
         await client.query('BEGIN');
         transactionStarted = true;
         await client.query(query_team_delete, [teamId]);
+
+        const auditData: AuditData = {
+            category: 'team',
+            action: 'delete-team',
+            target_type: 'team',
+            target_id_num: beforeData.id,
+            before_data: {
+                id: beforeData.id,
+                name: beforeData.name,
+                description: beforeData.description,
+            }
+        }
+        await createAuditEntry(client, user.name, auditData );
+        // And Commit at the end.
         await client.query('COMMIT');
         return NextResponse.json({ 'success' : true });
     } catch (error) {

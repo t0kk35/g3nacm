@@ -16,12 +16,16 @@ SELECT
   rr.entity_code AS "entity_code",
   rr.org_unit_code AS "org_unit_code",
   rr.direction AS "direction",
-  rr.linked_entity_id AS "linked_entity_id",
-  rr.linked_entity_code AS "linked_entity_code",
+  jsonb_build_object(
+    'id', rr.linked_entity_id,
+    'code', rr.linked_entity_code,
+    'description', wel.description,
+    'display_url', wel.display_url
+  ) AS "linked_entity",
   rr.parent_rfi_id AS "parent_rfi_id",
   rr.related_rfi_ids AS "related_rfi_ids",
   rr.title AS "title",
-  rr.description AS "description",
+  rr.body AS "body",
   rr.purpose AS "purpose",
   rr.recipient_subject_id AS "recipient_subject_id",
   rr.recipient_contact_details AS "recipient_contact_details",
@@ -55,6 +59,7 @@ SELECT
     'from_state_name', wes.from_state_name,
     'to_state_code', wes.to_state_code,
     'to_state_name', wes.to_state_name,
+    'to_state_is_active', wes.to_state_is_active,
     'priority', wes.priority,
     'priority_num', wes.priority_num,   
     'assigned_to_user_name', COALESCE(wes.assigned_to_user_name, ''),
@@ -65,12 +70,13 @@ SELECT
 FROM rfi_request rr
 JOIN rfi_channel rc ON rc.id = rr.channel_id
 JOIN workflow_entity we on rr.entity_code = we.code
+JOIN workflow_entity wel on rr.linked_entity_code = wel.code
 JOIN workflow_entity_state wes ON rr.entity_code = wes.entity_code and rr.id = wes.entity_id 
 JOIN org_unit ou ON ou.code = rr.org_unit_code
 JOIN v_user_org_access_path ouap ON ou.path = ouap.path OR ou.path LIKE CONCAT(ouap.path, '/%')
 JOIN users u ON ouap.user_id = u.id
 WHERE u.name=$1
-AND rc.create_datetime >= $2
+AND rr.create_datetime >= $2
 AND wes.assigned_to_user_name = $1
 `
 
