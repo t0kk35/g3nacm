@@ -9,6 +9,7 @@ import { DynamicScreenWidget } from './widget-registry'
 import { AddWidgetDialog } from './AddWidgetDialog'
 import { createDynamicScreenWidget } from './widget-registry'
 import { DynamicScreenWidgetSizeObserver } from './DynamicScreenWidgetSizeObserver'
+import { useTranslations } from 'next-intl'
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
@@ -39,6 +40,9 @@ export function DynamicScreenGrid({
   onWidgetConfigure,
   className = ''
 }: DynamicScreenGridProps) {
+
+  const t = useTranslations('DynamicScreen.Framework.Grid');
+
   const [currentWidgets, setCurrentWidgets] = useState<DynamicScreenWidget[]>([])
   const [isEditMode, setIsEditMode] = useState(false)
   const [currentLayouts, setCurrentLayouts] = useState<{ [key: string]: Layout[] }>({})
@@ -177,7 +181,7 @@ export function DynamicScreenGrid({
           <div className="flex items-center space-x-2">
             <Button variant="outline" size="sm" disabled>
               <Settings className="h-4 w-4 mr-2" />
-              Loading...
+              { t('loading') }
             </Button>
           </div>
         </div>
@@ -206,24 +210,24 @@ export function DynamicScreenGrid({
               {isEditMode ? (
                 <>
                   <Unlock className="text-chart-1 h-4 w-4 mr-2" />
-                  Edit Mode
+                  { t('unlockButton') }
                 </>
               ) : (
                 <>
                   <Lock className="h-4 w-4 mr-2" />
-                  Locked
+                  { t('lockButton')}
                 </>
               )}
             </Button>
             {onWidgetAdd && (
               <Button 
                 variant="outline" 
-                size="sm" 
+                size="sm"
                 onClick={() => setAddWidgetDialogOpen(true)}
                 disabled={!isEditMode}
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Add Widget
+                { t('addWidgetButton') }
               </Button>
             )}
           </div>
@@ -291,12 +295,12 @@ export function DynamicScreenGrid({
         <div className="text-center py-12">
           <div className="text-muted-foreground mb-4">
             <Settings className="h-12 w-12 mx-auto mb-2" />
-            <p>No widgets configured</p>
+            <p>{ t('noWidgets') }</p>
           </div>
           {onWidgetAdd && (
             <Button onClick={() => setAddWidgetDialogOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              Add Your First Widget
+              { t('addFirstWidgetButton') }
             </Button>
           )}
         </div>

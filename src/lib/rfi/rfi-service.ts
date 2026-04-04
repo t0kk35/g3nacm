@@ -3,6 +3,7 @@ import { getChannelByCode } from "@/lib/cache/rfi-channel-cache";
 import { getRfiChannelHandler } from "./channel-handler-registry";
 import { CreateOutboundRfiParams, CreateRfiResult, DispatchRfiResult, RfiContactDetails, RfiSendContext } from "./types";
 import { resolveChannel } from "./rfi-resolve";
+import { generateIdentifier } from "../helpers";
 
 // Side-effect import — populates the handler registry before any lookups
 import "./handlers/handler-index";
@@ -87,16 +88,6 @@ WHERE id = $1::uuid
 `;
 
 /**
- * Generate a human-readable RFI identifier.
- * Pattern: RFI-YYYYMMDD-XXXX (last 4 hex chars of the UUID, uppercased)
- */
-function generateIdentifier(uuid: string, now: Date): string {
-    const date = now.toISOString().slice(0, 10).replace(/-/g, '');
-    const suffix = uuid.replace(/-/g, '').slice(-4).toUpperCase();
-    return `RFI-${date}-${suffix}`;
-}
-
-/**
  * Persists an outbound RFI record with status 'Draft'.
  * Must be called within an active DB transaction.
  *
@@ -157,7 +148,7 @@ export async function createOutboundRfi(
     }
 
     const rfiId: string = rfiResult.rows[0].id;
-    const identifier = generateIdentifier(rfiId, now);
+    const identifier = generateIdentifier('RFI', rfiId, now);
 
     await client.query(query_update_identifier, [identifier, rfiId]);
 

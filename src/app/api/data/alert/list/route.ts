@@ -23,6 +23,7 @@ SELECT
     json_build_object(
         'entity_code', ab.entity_code,
         'entity_description', we.description,
+        'entity_indentifier', wes.entity_identifier,
         'date_time', to_char(wes.date_time, 'dd/mm/yyyy'),
         'action_code', wes.action_code,
         'action_name', wes.action_name,

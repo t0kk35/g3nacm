@@ -20,7 +20,8 @@ SELECT
     'id', rr.linked_entity_id,
     'code', rr.linked_entity_code,
     'description', wel.description,
-    'display_url', wel.display_url
+    'display_url', wel.display_url,
+    'identifier', wesl.entity_identifier
   ) AS "linked_entity",
   rr.parent_rfi_id AS "parent_rfi_id",
   rr.related_rfi_ids AS "related_rfi_ids",
@@ -52,6 +53,7 @@ SELECT
   jsonb_build_object(
     'entity_code', rr.entity_code,
     'entity_description', we.description,
+    'entity_identifier', wes.entity_identifier,
     'date_time', to_char(wes.date_time, 'dd/mm/yyyy'),
     'action_code', wes.action_code,
     'action_name', wes.action_name,
@@ -71,6 +73,7 @@ FROM rfi_request rr
 JOIN rfi_channel rc ON rc.id = rr.channel_id
 JOIN workflow_entity we on rr.entity_code = we.code
 JOIN workflow_entity wel on rr.linked_entity_code = wel.code
+JOIN workflow_entity_state wesl ON rr.linked_entity_code = wesl.entity_code AND rr.linked_entity_id = wesl.entity_id
 JOIN workflow_entity_state wes ON rr.entity_code = wes.entity_code and rr.id = wes.entity_id 
 JOIN org_unit ou ON ou.code = rr.org_unit_code
 JOIN v_user_org_access_path ouap ON ou.path = ouap.path OR ou.path LIKE CONCAT(ouap.path, '/%')

@@ -13,6 +13,7 @@ import { ArrowLeft, Plus } from 'lucide-react'
 import { widgetRegistry, WIDGET_CATEGORIES } from './widget-registry'
 import { DynamicScreenWidgetConfigForm } from './DynamicScreenWidgetConfigForm'
 import type { WidgetDefinition } from './widget-registry'
+import { useTranslations } from 'next-intl'
 
 interface AddWidgetDialogProps {
   open: boolean
@@ -27,12 +28,10 @@ interface AddWidgetDialogProps {
 
 type DialogStep = 'selection' | 'configuration'
 
-export function AddWidgetDialog({ 
-  open, 
-  onOpenChange, 
-  onAddWidget,
-  userPermissions = []
-}: AddWidgetDialogProps) {
+export function AddWidgetDialog({ open, onOpenChange, onAddWidget, userPermissions = [] }: AddWidgetDialogProps) {
+
+  const t = useTranslations('DynamicScreen.Framework.AddWidget');
+
   const [currentStep, setCurrentStep] = useState<DialogStep>('selection')
   const [selectedWidget, setSelectedWidget] = useState<WidgetDefinition | null>(null)
   const [widgetTitle, setWidgetTitle] = useState('')
@@ -116,12 +115,12 @@ export function AddWidgetDialog({
                 <ArrowLeft className="h-4 w-4" />
               </Button>
             )}
-            {currentStep === 'selection' ? 'Add Widget' : `Configure ${selectedWidget?.name}`}
+            {currentStep === 'selection' ? t('titleAdd') : t('titleConfigure', { widgetName: selectedWidget!.name })}
           </DialogTitle>
           <DialogDescription>
             {currentStep === 'selection' 
-              ? 'Choose a widget to add to your dashboard'
-              : 'Configure your widget settings'
+              ? t('descriptionAdd')
+              : t('descriptionConfigure')
             }
           </DialogDescription>
         </DialogHeader>
@@ -177,26 +176,26 @@ export function AddWidgetDialog({
           <div className="flex flex-col h-[60vh]">
             <div className="space-y-4 pb-4 border-b">
               <div className='space-y-2'>
-                <Label htmlFor="widget-title">Widget Title</Label>
+                <Label htmlFor="widget-title">{ t('titleField') }</Label>
                 <Input
                   id="widget-title"
                   value={widgetTitle}
                   onChange={(e) => setWidgetTitle(e.target.value)}
-                  placeholder="Enter widget title"
+                  placeholder={t('titlePlaceholder')}
                   className="mt-1"
                 />
               </div>
             </div>
             
             <div className="flex-1 flex flex-col overflow-hidden pt-4">
-              <h4 className="font-medium mb-3">Widget Configuration</h4>
+              <h4 className="font-medium mb-3">t('configTitle')</h4>
               <div className="flex-1 min-h-0">
                 <DynamicScreenWidgetConfigForm
                   schema={selectedWidget.configSchema}
                   defaultValues={selectedWidget.defaultConfig}
                   onSubmit={handleConfigSubmit}
                   onCancel={handleCancel}
-                  submitLabel="Add Widget"
+                  submitLabel={t('configSubmitLabel')}
                   isSubmitting={isSubmitting}
                 />
               </div>

@@ -1,6 +1,7 @@
 export type EntityState = {
     entity_code: string;
     entity_description: string;
+    entity_identifier: string;
     date_time: string;
     action_code: string;
     action_name: string;
@@ -15,6 +16,14 @@ export type EntityState = {
     assigned_to_team_name?: string;
     user_name: string;
     comment?: string;
+}
+
+export type LinkedEntity = {
+    id: string;
+    code: string;
+    description: string;
+    display_url: string;
+    identifier: string;
 }
 
 export enum EntityPriority {

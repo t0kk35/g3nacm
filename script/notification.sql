@@ -1,5 +1,6 @@
 CREATE TABLE notification (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    identifier TEXT NOT NULL,
     sender_user_id INTEGER NOT NULL,
     receiver_user_id INTEGER NOT NULL,
     sender_user_name TEXT NOT NULL,

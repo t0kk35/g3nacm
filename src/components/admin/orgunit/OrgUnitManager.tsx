@@ -1,6 +1,6 @@
 'use server'
 
-import { authorizedFetch } from "@/lib/org-filtering"
+import { authorizedFetch, authorizedGetJSON } from "@/lib/org-filtering"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { OrgUnitNode } from "@/app/api/data/org_unit/org_unit"
@@ -8,17 +8,11 @@ import { OrgUnitManagerClient } from "./OrgUnitManagerClient"
 
 export async function OrgUnitManager() {
 
-    const hierarchy = await authorizedFetch(`${process.env.DATA_URL}/api/data/org_unit/hierarchy`)
-        .then(res => {
-            if (!res.ok) throw new Error('Could not fetch Org Hierarchy');
-            else return res.json();
-        })
-        .then(j => j as OrgUnitNode[]);
+    const hierarchy = await authorizedGetJSON<OrgUnitNode[]>(`${process.env.DATA_URL}/api/data/org_unit/hierarchy?include_deleted=y`)
 
     return (
         <OrgUnitManagerClient orgUnits={hierarchy} />
     )
-
 }
 
 export async function OrgUnitManagerSkeleton() {

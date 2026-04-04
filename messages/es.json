@@ -1,0 +1,68 @@
+{
+  "Common": {
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "saving": "Guardando...",
+    "actions": "Acciones"
+  },
+  "Admin": {
+    "Agent": {
+      "Config": {
+    "pageTitle": "Configuración del agente",
+    "listDescription": "Crear una configuración de agente",
+    "formDescription": "Crear un nuevo agente y configurar los parámetros",
+
+    "backButton": "Volver a las configuraciones de agente",
+    "detailsCardTitle": "Detalles de la configuración del agente",
+
+    "fieldCode": "Código",
+    "fieldName": "Nombre",
+    "fieldDescription": "Descripción",
+    "fieldAgentType": "Tipo de agente",
+    "fieldModelConfig": "Configuración del modelo",
+    "fieldSystemPrompt": "Instrucción del sistema",
+    "fieldMaxSteps": "Pasos máximos",
+
+    "agentTypeStreaming": "Streaming",
+    "agentTypeText": "Texto",
+    "agentTypeObject": "Objeto",
+
+    "validationCodeRequired": "El código del agente es obligatorio",
+    "validationNameRequired": "El nombre del agente es obligatorio",
+    "validationDescriptionRequired": "La descripción del agente es obligatoria",
+
+    "toolsSectionTitle": "Herramientas del agente",
+    "toolsSectionDescription": "Seleccionar las herramientas disponibles para este agente",
+    "toolsSearchPlaceholder": "Buscar herramientas...",
+    "toolsSelectedCount": "{count} seleccionada(s)",
+    "toolsSelectAllGroup": "Seleccionar todas las herramientas {group}",
+    "toolsNoMatch": "No hay herramientas que coincidan con su búsqueda.",
+    "toolsNoneAvailable": "No hay herramientas disponibles.",
+
+    "submitCreate": "Crear configuración de agente",
+    "submitUpdate": "Actualizar configuración de agente",
+
+    "toastCreated": "Configuración de agente creada correctamente",
+    "toastUpdated": "Configuración de agente actualizada correctamente",
+    "toastSaveFailed": "Error al guardar la configuración. Por favor, inténtelo de nuevo.",
+
+    "searchPlaceholder": "Buscar configuración de agente...",
+    "newButtonLabel": "Nuevo agente",
+
+    "tableHeaderName": "Nombre",
+    "tableHeaderDescription": "Descripción",
+    "tableHeaderActions": "Acciones",
+
+    "emptyNoMatch": "No se encontraron configuraciones de agente para esta búsqueda",
+    "emptyNotFound": "No se encontraron configuraciones de agente",
+    "emptyCreateFirst": "Crear su primer agente",
+
+    "deleteDialogTitle": "Eliminar agente",
+    "deleteDialogMessage": "¿Está seguro de que desea eliminar el agente «{name}»? Esta acción no se puede deshacer.",
+
+    "toastDeleteSuccess": "Configuración de agente eliminada correctamente",
+    "toastDeleteFailed": "Error al eliminar la configuración. Mensaje: {message}"
+      }
+    }
+  }
+}

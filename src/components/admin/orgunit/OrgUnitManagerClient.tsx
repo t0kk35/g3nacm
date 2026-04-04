@@ -9,13 +9,18 @@ import { Plus, RefreshCw, Search } from "lucide-react"
 import { OrgUnitForm } from "./OrgUnitForm"
 import { OrgUnitEditTree } from "./OrgUnitEditTree";
 import { OrgUnitNode } from "@/app/api/data/org_unit/org_unit"
-import { filterOrgUnitHierarchy } from "./OrgUnitFilter";
+import { filterOrgUnitHierarchy, removeDeletedFromOrgUnitHierarchy } from "./OrgUnitFilter";
+import { useTranslations } from "next-intl";
 
 type Props = {
     orgUnits: OrgUnitNode[];
 }
 
 export function OrgUnitManagerClient({ orgUnits }: Props) {
+  
+  const t = useTranslations('Admin.OrgUnit.Manager');
+  const tc = useTranslations('Common');
+
   const router = useRouter();
   const [showForm, setShowForm] = useState(false)
   const [selectedUnit, setSelectedUnit] = useState<OrgUnitNode | null>(null)
@@ -48,7 +53,7 @@ export function OrgUnitManagerClient({ orgUnits }: Props) {
     handleRefresh()
   }
 
-  const filteredOrgUnits = searchQuery.trim() ? filterOrgUnitHierarchy(orgUnits, searchQuery) : orgUnits
+  const filteredOrgUnits = removeDeletedFromOrgUnitHierarchy((searchQuery.trim() ? filterOrgUnitHierarchy(orgUnits, searchQuery) : orgUnits))
 
   return (
     <div className="space-y-6">
@@ -56,7 +61,7 @@ export function OrgUnitManagerClient({ orgUnits }: Props) {
         <div className="relative w-full sm:w-64 md:w-80">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search organizational units..."
+            placeholder={ t('searchPlaceHolder') }
             className="pl-8"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -65,11 +70,11 @@ export function OrgUnitManagerClient({ orgUnits }: Props) {
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleRefresh}>
             <RefreshCw className="mr-2 h-4 w-4" />
-            Refresh
+            { tc('refresh') }
           </Button>
           <Button size="sm" onClick={() => handleAddNew()}>
             <Plus className="mr-2 h-4 w-4" />
-            Add Root Unit
+            { t('addRoot') }
           </Button>
         </div>
       </div>
@@ -77,8 +82,8 @@ export function OrgUnitManagerClient({ orgUnits }: Props) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Organisational Structure</CardTitle>
-            <CardDescription>View and manage your organisational hierarchy</CardDescription>
+            <CardTitle>{ t('title') }</CardTitle>
+            <CardDescription>{ t('description') }</CardDescription>
           </CardHeader>
           <CardContent>
             {orgUnits.length === 0 ? (

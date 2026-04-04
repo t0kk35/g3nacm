@@ -15,10 +15,13 @@ import { AgentModelConfig } from "@/lib/cache/agent-model-config-cache";
 import { AgentModelConfigAdmin } from "@/app/api/data/agent/types"
 import { toast } from "sonner"
 import { ApiError } from "next/dist/server/api-utils"
+import { useTranslations } from "next-intl"
 
 type Props = { agentConfigs : AgentModelConfigAdmin[]}
 
 export function AgentModelConfigListClient({ agentConfigs }: Props) {
+
+  const t = useTranslations('Admin.Agent.ModelConfig')
 
   const [modelConfigToDelete, setModelConfigToDelete] = useState<AgentModelConfig | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
@@ -43,11 +46,11 @@ export function AgentModelConfigListClient({ agentConfigs }: Props) {
       });
 
       if (response.ok) {
-        toast.success("Agent model config deleted successfully");
+        toast.success(t('toastDeleteSuccess'));
         setDeletedModelConfigCodes([...deletedModelConfigCodes, configCode]);
       } else {
         const err:ApiError = await response.json();
-        toast.error(`Failed to delete Agent model config. Message ${err.message}`);
+        toast.error(t('toastDeleteFailed', { message: err.message}));
       }
       setModelConfigToDelete(null);
     } catch (error) {
@@ -58,21 +61,21 @@ export function AgentModelConfigListClient({ agentConfigs }: Props) {
   return (
     <div className="space-y-4">
       <SearchAndActionsHeader
-        searchPlaceholder="Search Agent Model Configuration..."
+        searchPlaceholder={t('searchPlaceholder')}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         viewMode={viewMode}
         setViewMode={setViewMode}
-        newButtonLabel="New agent model"
+        newButtonLabel={t('newButtonLabel')}
         newButtonHref="/admin/agent/model_config/new"
       />
 
       {filteredAgentModelConfigs.length === 0 ? (
         <SearchNoMatch 
           searchQuery={searchQuery}
-          noMatchMessage="No agent model configs found matching your search"
-          notFoundMessage="No agent model configs found"
-          newButtonLabel="Create your first agent model config"
+          noMatchMessage={t('emptyNoMatch')}
+          notFoundMessage={t('emptyNotFound')}
+          newButtonLabel={t('emptyCreateFirst')}
           newButtonHref="/admin/agent/model_config/new"
         />
       ) : viewMode === "grid" ? (
@@ -103,7 +106,7 @@ export function AgentModelConfigListClient({ agentConfigs }: Props) {
                 editHref={`/admin/agent/model_config/edit/${config.code}`}  
                 onDelete={() => setModelConfigToDelete(config)}
                 deleteDisabled={config.agent_codes.length > 0}
-                deleteDisabledMessage={"Can not delete agent model config, there are agents using it"}
+                deleteDisabledMessage={t('deleteDisabled')}
               />
             </Card>
           ))}
@@ -113,8 +116,8 @@ export function AgentModelConfigListClient({ agentConfigs }: Props) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Code</TableHead>
-                <TableHead>Name</TableHead>
+                <TableHead>{t('tableHeaderCode')}</TableHead>
+                <TableHead>{t('tableHeaderName')}</TableHead>
                 <TableHead className="w-[180px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -135,8 +138,8 @@ export function AgentModelConfigListClient({ agentConfigs }: Props) {
       )}
 
       <DeleteDialog
-        title="Agent Model Delete"
-        message={`Are you sure you want to delete the agent model config "${modelConfigToDelete?.name}"? This action cannot be undone.`}
+        title={t('deleteDialogTitle')}
+        message={t('deleteDialogMessage', { name: modelConfigToDelete?.name ?? '' })}
         open={modelConfigToDelete !== null}
         onOpenChange={() => setModelConfigToDelete(null)}
         onConfirm={() => modelConfigToDelete && handleDeleteAgentModelConfig(modelConfigToDelete.code)}

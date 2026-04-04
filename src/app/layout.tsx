@@ -6,6 +6,8 @@ import { ThemeProvider } from "@/components/common/ThemeProvider";
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/common/AppSideBar";
 import { Toaster } from "@/components/ui/sonner";
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getMessages } from 'next-intl/server';
 
 import "./globals.css";
 import { Footer } from "@/components/common/Footer";
@@ -31,11 +33,14 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const user = session?.user
   const cookieStore = await cookies();
   const sideBarOpen = cookieStore.get("sidebar_state")?.value === 'true';
+  const locale = await getLocale();
+  const messages = await getMessages();
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             <SidebarProvider defaultOpen={sideBarOpen}>
               <AppSidebar userName={user?.name} />
               <SidebarInset>
@@ -49,7 +54,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
                 </div>
               </SidebarInset>
             </SidebarProvider>
-        </ThemeProvider>
+          </ThemeProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

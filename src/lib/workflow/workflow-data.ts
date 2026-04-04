@@ -6,6 +6,7 @@ import { getCachedWorkflowConfig } from "../cache/workflow-cache";
 export type WorkflowEntityState = {
     entity_id: string;
     entity_code: string;
+    entity_identifier: string;
     org_unit_code: string;
     date_time: string;
     action_code: string;
@@ -23,12 +24,13 @@ const query_entity_state = `
 SELECT 
   wes.entity_id AS "entity_id",
   wes.entity_code AS "entity_code",
+  wes.entity_identifier AS "entity_identifier",
   wes.org_unit_code AS "org_unit_code",
   wes.date_time AS "date_time",
   wes.action_code AS "action_code",
   wa.from_state AS "from_state_code",
   wa.to_state AS "to_state_code",
-  wa.to_state_is_active AS "to_state_is_active",
+  ws.is_active AS "to_state_is_active",
   wes.assigned_to_user_id AS "assinged_to_user_id",
   wes.assigned_to_user_name AS "assigned_to_user_name",
   wes.user_id AS "user_id",
@@ -36,6 +38,7 @@ SELECT
   wes.comment AS "comment"
 FROM workflow_entity_state wes
 JOIN workflow_action wa on wa.code = wes.action_code
+JOIN workflow_state ws on ws.code = wa.to_state
 WHERE entity_id = $1 and entity_code = $2
 `
 
@@ -54,9 +57,10 @@ export async function getEntityState(client: PoolClient, entityId: string, entit
 
 const insert_entity_state_log = `
 INSERT INTO workflow_entity_state_log
-( 
+(
   entity_id,
   entity_code,
+  entity_identifier,
   org_unit_code,
   date_time,
   action_code,
@@ -79,6 +83,7 @@ INSERT INTO workflow_entity_state_log
 SELECT 
   entity_id,
   entity_code,
+  entity_identifier,
   org_unit_code,
   date_time,
   action_code,
@@ -123,7 +128,7 @@ WITH action_details AS (
         ws_from.name AS from_state_name,
         ws_to.code AS to_state_code,
         ws_to.name AS to_state_name,
-        ws_to.is_active AS to_state_is_active,
+        ws_to.is_active AS to_state_is_active
     FROM workflow_action wa
     JOIN workflow_state ws_from ON wa.from_state = ws_from.code
     JOIN workflow_state ws_to ON wa.to_state = ws_to.code
@@ -212,7 +217,7 @@ export async function updateEntityAssignTeam(client: PoolClient, entityId: strin
 
 const query_insert_entity_state = `
 INSERT INTO workflow_entity_state (
-    entity_id, entity_code, org_unit_code,
+    entity_id, entity_code, entity_identifier, org_unit_code,
     date_time,
     action_code, action_name,
     from_state_code, from_state_name,
@@ -222,17 +227,17 @@ INSERT INTO workflow_entity_state (
     user_id, user_name
 )
 VALUES (
-    $1, $2, $3,
+    $1, $2, $3, $4,
     now(),
-    $4, $5,
-    $6, $7,
-    $8, $9, $10
-    $11, $12,
-    (SELECT id FROM users WHERE name = $13), $13,
-    (SELECT id FROM users WHERE name = $13), $13
+    $5, $6,
+    $7, $8,
+    $9, $10, $11,
+    $12, $13,
+    (SELECT id FROM users WHERE name = $14), $14,
+    (SELECT id FROM users WHERE name = $14), $14
 )
 `
-export async function createEntity(client: PoolClient, entityId: string, entityCode: string, orgUnitCode: string, userName: string) {
+export async function createEntity(client: PoolClient, entityId: string, entityCode: string, entityIdentifier: string, orgUnitCode: string, userName: string) {
     
     // Get the start action for this entity
     const workflowConfig = await getCachedWorkflowConfig(entityCode, orgUnitCode);
@@ -250,6 +255,7 @@ export async function createEntity(client: PoolClient, entityId: string, entityC
         values:[
             entityId, 
             entityCode,
+            entityIdentifier,
             orgUnitCode,
             start_action.code,
             start_action.name,

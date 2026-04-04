@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button"
 import { OrgUnitNode } from "@/app/api/data/org_unit/org_unit"
 import { toast } from "sonner"
 import { ApiError } from "next/dist/server/api-utils"
+import { useTranslations } from "next-intl"
 
 export function OrgUnitEditTree({
   units,
@@ -29,6 +30,10 @@ export function OrgUnitEditTree({
   onRefresh: () => void
   searchQuery?: string
 }) {
+
+  const t = useTranslations('Admin.OrgUnit.EditTree');
+  const tc = useTranslations('Common');
+
   const [deleteTarget, setDeleteTarget] = useState<OrgUnitNode | null>(null)
 
   const handleDelete = async () => {
@@ -38,15 +43,15 @@ export function OrgUnitEditTree({
         method: "DELETE",
       })
       if (response.ok) {
-        toast.success(`Organisational Unit ${deleteTarget.name} removed.`);
+        toast.success(t('deleteSuccessToast', {deleteTarget: deleteTarget.name}));
         onRefresh();
       } else {
         const err:ApiError = await response.json();
-        toast.error(`Could not delete the organisational unit ${deleteTarget}. Message ${err.message}`);
+        toast.error(t('deleteFailWMessageToast', { deleteTarget: deleteTarget.name, message: err.message}));
       };
       setDeleteTarget(null);
     } catch (err) {
-      toast.error("Could not delete organisational unit")
+      toast.error(t('deleteFailToast'))
     }
   }
 
@@ -79,25 +84,25 @@ export function OrgUnitEditTree({
       <AlertDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Organizational Unit</AlertDialogTitle>
+            <AlertDialogTitle>{t('diaglogTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete <strong>{deleteTarget?.name}</strong>? This cannot be undone.
+              {t('diaglogAreYouSure')} <strong>{deleteTarget?.name}</strong>{t('notBeUndone')}
               {deleteTarget && deleteTarget?.children.length > 0 && (
                 <div className="mt-2 flex items-center p-2 bg-amber-50 border border-amber-200 text-amber-800 rounded">
                   <AlertCircle className="h-4 w-4 mr-2" />
-                  This unit has children and cannot be deleted.
+                  {t('hasChildren')}
                 </div>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{tc('cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               className="bg-destructive text-destructive-foreground"
               disabled={deleteTarget ? deleteTarget?.children.length > 0 : undefined}
             >
-              Delete
+              {tc('delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

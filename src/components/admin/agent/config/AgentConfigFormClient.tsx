@@ -18,6 +18,7 @@ import { AgentModelConfig } from "@/lib/cache/agent-model-config-cache"
 import { useValidationForm, FormFieldSelect, FormFieldInput, FormFieldTemplateTextArea } from "@/components/ui/custom/form-field"
 import { formValidateTemplateText, formValidateNumber } from "@/components/ui/custom/form-field"
 import { SaveSubmitFormButton } from "../../SaveSubmitFormButton"
+import { useTranslations } from 'next-intl'
 
 type FormAgentTool = {
   code: string
@@ -34,6 +35,7 @@ type AgentConfigFormProps = {
 
 export function AgentConfigFormClient({ config, iTools, iModelConfig }: AgentConfigFormProps) {
   const router = useRouter()
+  const t = useTranslations('Admin.Agent.Config')
 
   const [tools, setTools] = useState<FormAgentTool[]>([])
   const [toolGroups, setToolGroups] = useState<string[]>([])
@@ -51,9 +53,9 @@ export function AgentConfigFormClient({ config, iTools, iModelConfig }: AgentCon
       maxSteps: (config && 'max_steps' in config) ? config.max_steps?.toString() || "" : "",
     },
     {
-      code: (v) => v.trim() ? undefined : "Agent code is required",
-      name: (v) => v.trim() ? undefined : "Agent name is required",
-      description: (v) => v.trim() ? undefined : "Agent description is required",
+      code: (v) => v.trim() ? undefined : t('validationCodeRequired'),
+      name: (v) => v.trim() ? undefined : t('validationNameRequired'),
+      description: (v) => v.trim() ? undefined : t('validationDescriptionRequired'),
       maxSteps: (v) => formValidateNumber(v, { min:1, required: false }),
       systemPrompt: (v) => formValidateTemplateText(v)
     }
@@ -148,12 +150,12 @@ export function AgentConfigFormClient({ config, iTools, iModelConfig }: AgentCon
       if (!response.ok) {
         throw new Error("Failed to save agent configuration")
       }
-      toast.success(isEditing ? "Agent configuration updated successfully" : "Agent configuration created successfully")
+      toast.success(isEditing ? t('toastUpdated') : t('toastCreated'))
       router.push("/admin/agent/config")
       router.refresh()
     } catch (error) {
       console.error("Error saving agent configuration:", error)
-      toast.error("Failed to save agent configuration. Please try again.")
+      toast.error(t('toastSaveFailed'))
     } finally {
       setSaving(false)
     }
@@ -199,61 +201,61 @@ export function AgentConfigFormClient({ config, iTools, iModelConfig }: AgentCon
           <CardContent>
             <Button type="button" variant="outline" onClick={() => router.push("/admin/agent/config")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Agent Configurations
+              {t('backButton')}
             </Button>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle>Agent Configuration Details</CardTitle>
+            <CardTitle>{t('detailsCardTitle')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <FormFieldInput
                 id="code"
-                label="Code"
+                label={t('fieldCode')}
                 value={form.values.code}
                 onChange={(v) => form.setField("code", v)}
                 error={form.errors.code}
-                placeholder="Enter agent code (e.g., alert-reviewer)"
+                placeholder={t('fieldCodePlaceHolder')}
                 disabled={isEditing}
                 required
               />
-              <FormFieldInput 
+              <FormFieldInput
                 id="name"
-                label="Name"
+                label={t('fieldName')}
                 value={form.values.name}
                 onChange={(v) => form.setField("name", v)}
                 error={form.errors.name}
-                placeholder="Enter agent name"
+                placeholder={t('fieldNamePlaceholder')}
                 required
               />
-              <FormFieldInput 
+              <FormFieldInput
                 id="description"
-                label="Description"
+                label={t('fieldDescription')}
                 value={form.values.description}
                 onChange={(v) => form.setField("description", v)}
                 error={form.errors.description}
-                placeholder="Enter agent description"
+                placeholder={t('fieldDescriptionPlaceholder')}
                 required
               />
-              <FormFieldSelect 
+              <FormFieldSelect
                 id="agentType"
-                label="Agent Type"
+                label={t('fieldAgentType')}
                 placeholder="Select agent type"
                 value={form.values.agentType}
                 onChange={(v) => form.setField("agentType", v)}
                 error={form.errors.agentType}
                 options={[
-                  { value : 'streaming', label: 'Streaming' },
-                  { value : 'text', label: 'Text'},
-                  { value : 'object', label: 'Object'}
+                  { value: 'streaming', label: t('agentTypeStreaming') },
+                  { value: 'text', label: t('agentTypeText') },
+                  { value: 'object', label: t('agentTypeObject') },
                 ]}
               />
               <FormFieldSelect
                 id="modelConfigCode"
-                label="Model Configuration"
+                label={t('fieldModelConfig')}
                 placeholder="Select model configuration"
                 value={form.values.modelConfigCode}
                 onChange={(v) => form.setField("modelConfigCode", v)}
@@ -264,20 +266,20 @@ export function AgentConfigFormClient({ config, iTools, iModelConfig }: AgentCon
                 }))}
                 required
               />
-              <FormFieldTemplateTextArea 
+              <FormFieldTemplateTextArea
                 id="systemPrompt"
-                label="System Prompt"
+                label={t('fieldSystemPrompt')}
                 value={form.values.systemPrompt}
                 onChange={(v) => form.setField("systemPrompt", v)}
-                placeholder="Enter system prompt for the agent. Use {{variableName}} for replacement variables."
+                placeholder={t('fieldSystemPromptPlaceholder')}
                 rows={8}
                 error={form.errors.systemPrompt}
-                description="Instructions for the agent. Type '{{' to access replacement variables."
+                description={t('fieldSystemPromptDescription')}
               />
               {showTools && (
-                <FormFieldInput 
+                <FormFieldInput
                   id="maxSteps"
-                  label="Max Steps"
+                  label={t('fieldMaxSteps')}
                   value={form.values.maxSteps}
                   onChange={(v) => form.setField("maxSteps", v)}
                   error={form.errors.maxSteps}
@@ -292,12 +294,12 @@ export function AgentConfigFormClient({ config, iTools, iModelConfig }: AgentCon
             <CardHeader className="pb-3">
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
                 <div>
-                  <CardTitle>Agent Tools</CardTitle>
+                  <CardTitle>{t('toolsSectionTitle')}</CardTitle>
                   <CardDescription className="flex items-center gap-2">
-                    Select tools available to this agent
+                    {t('toolsSectionDescription')}
                     {selectedToolCount > 0 && (
                       <Badge variant="secondary" className="ml-2">
-                        {selectedToolCount} selected
+                        {t('toolsSelectedCount', { count: selectedToolCount })}
                       </Badge>
                     )}
                   </CardDescription>
@@ -306,7 +308,7 @@ export function AgentConfigFormClient({ config, iTools, iModelConfig }: AgentCon
                   <div className="relative w-full sm:w-64">
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Search tools..."
+                      placeholder={t('toolsSearchPlaceholder')}
                       className="pl-8"
                       value={toolSearch}
                       onChange={(e) => setToolSearch(e.target.value)}
@@ -342,7 +344,7 @@ export function AgentConfigFormClient({ config, iTools, iModelConfig }: AgentCon
                           }
                         />
                         <Label htmlFor={`group-${group}`} className="font-semibold">
-                          Select All {group} Tools
+                          {t('toolsSelectAllGroup', { group })}
                         </Label>
                       </div>
 
@@ -371,16 +373,16 @@ export function AgentConfigFormClient({ config, iTools, iModelConfig }: AgentCon
                 </Tabs>
               ) : (
                 <p className="text-muted-foreground">
-                  {toolSearch ? "No tools match your search." : "No tools available."}
+                  {toolSearch ? t('toolsNoMatch') : t('toolsNoneAvailable')}
                 </p>
               )}
             </CardContent>
             <CardFooter>
-              <SaveSubmitFormButton 
+              <SaveSubmitFormButton
                 saving={saving}
                 isEditing={isEditing}
-                editText="Update Agent Configuration"
-                newText="Create Agent Configuration"
+                editText={t('submitUpdate')}
+                newText={t('submitCreate')}
               />
             </CardFooter>
           </Card>
@@ -389,11 +391,11 @@ export function AgentConfigFormClient({ config, iTools, iModelConfig }: AgentCon
         {!showTools && (
           <Card>
             <CardFooter className="pt-6">
-              <SaveSubmitFormButton 
+              <SaveSubmitFormButton
                 saving={saving}
                 isEditing={isEditing}
-                editText="Update Agent Configuration"
-                newText="Create Agent Configuration"
+                editText={t('submitUpdate')}
+                newText={t('submitCreate')}
               />
             </CardFooter>
           </Card>

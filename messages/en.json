@@ -1,0 +1,326 @@
+{
+  "Common": {
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "saving": "Saving...",
+    "actions": "Actions",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "error": "Error",
+    "retry": "Retry",
+    "refresh": "Refresh",
+    "update": "Update",
+    "create": "Create",
+    "questionMark": "?",
+    "validationNumberRequired": "This field is required.",
+    "validationNumberInvalid": "Please enter a valid number.",
+    "validationNumberMin": "Value must be at least {min}.",
+    "validationNumberMax": "Value must be at most {max}.",
+    "validationNumberStep": "Value must be in steps of {step}.",
+    "languageEnglish": "English",
+    "languageFrench": "French",
+    "languageSpanish": "Spanish"
+  },
+  "Admin" : {
+    "Agent": {
+      "Config": {
+        "pageTitle": "Agent Configuration",
+        "listDescription": "Create an agent configuration",
+        "formDescription": "Create a new agent and set-up the parameters",
+
+        "backButton": "Back to Agent Configurations",
+        "detailsCardTitle": "Agent Configuration Details",
+
+        "fieldCode": "Code",
+        "fieldCodePlaceHolder": "Enter agent code (e.g., alert-reviewer)",
+        "fieldName": "Name",
+        "fieldNamePlaceholder": "Enter agent name",
+        "fieldDescription": "Description",
+        "fieldDescriptionPlaceholder": "Enter agent description",
+        "fieldAgentType": "Agent Type",
+        "fieldModelConfig": "Model Configuration",
+        "fieldSystemPrompt": "System Prompt",
+        "fieldSystemPromptPlaceholder": "Enter system prompt for the agent. Use {{variableName}} for replacement variables.",
+        "fieldSystemPromptDescription": "Instructions for the agent. Type '{{' to access replacement variables.",
+        "fieldMaxSteps": "Max Steps",
+
+        "agentTypeStreaming": "Streaming",
+        "agentTypeText": "Text",
+        "agentTypeObject": "Object",
+
+        "validationCodeRequired": "Agent code is required",
+        "validationNameRequired": "Agent name is required",
+        "validationDescriptionRequired": "Agent description is required",
+
+        "toolsSectionTitle": "Agent Tools",
+        "toolsSectionDescription": "Select tools available to this agent",
+        "toolsSearchPlaceholder": "Search tools...",
+        "toolsSelectedCount": "{count} selected",
+        "toolsSelectAllGroup": "Select All {group} Tools",
+        "toolsNoMatch": "No tools match your search.",
+        "toolsNoneAvailable": "No tools available.",
+
+        "submitCreate": "Create Agent Configuration",
+        "submitUpdate": "Update Agent Configuration",
+
+        "toastCreated": "Agent configuration created successfully",
+        "toastUpdated": "Agent configuration updated successfully",
+        "toastSaveFailed": "Failed to save agent configuration. Please try again.",
+
+        "searchPlaceholder": "Search Agent Configuration...",
+        "newButtonLabel": "New agent",
+
+        "tableHeaderName": "Name",
+        "tableHeaderDescription": "Description",
+        "tableHeaderActions": "Actions",
+
+        "emptyNoMatch": "No agent configs found matching your search",
+        "emptyNotFound": "No agent configs found",
+        "emptyCreateFirst": "Create your first agent",
+
+        "deleteDisabled": "Can not delete agent config, there are agents using it",
+
+        "deleteDialogTitle": "Agent Delete",
+        "deleteDialogMessage": "Are you sure you want to delete the agent \"{name}\"? This action cannot be undone.",
+
+        "toastDeleteSuccess": "Agent config deleted successfully",
+        "toastDeleteFailed": "Failed to delete Agent config. Message {message}"
+      },
+      "ModelConfig" : {
+        "pageTitle": "Agent Model Configuration",
+        "listDescription": "Create an agent model configuration",
+        "formDescription": "Create a new agent model and set-up the parameters",   
+        
+        "backButton": "Back to Model Configurations",
+        "detailsCardTitle": "Basic Configuration",
+        "detailsCardDescription": "Configure the agent model settings",
+
+        "fieldCode": "Code",
+        "fieldCodePlaceholder": "Enter agent code (e.g., alert-reviewer)",
+        "fieldCodeDescription": "A short description for the Agent Model",
+        "fieldName": "Name",
+        "fieldNamePlaceholder": "Configuration Name",
+        "fieldProvider": "Provider",
+        "fieldProviderPlaceholder": "Select a provider",
+        "fieldModel": "Model",
+        "fieldModelPlaceholder": "Select a model",
+        "fieldAPIKey": "API Key",
+        "fieldAPIKeyPlaceholder": "(Optional) API key. If not provided, the keys in the env.local will be used",
+        "fieldTemperature": "Temperature",
+        "fieldTemperaturePlaceholder": "Controls randomness (0-2). Higher values make output more random.",
+        "fieldMaxTokens": "Max Tokens",
+        "fieldMaxTokensPlaceholder": "Maximum number of tokens to generate",
+        "fieldTopP": "Top P",
+        "fieldTopPPlaceholder": "Nucleus sampling parameter (0-1)",
+        "fieldEnableReasoning": "Enable Reasoning",
+        "fieldEnableReasoningAnthropic": "Enable extended thinking for more thoughtful responses",
+        "fieldEnableReasoningOther": "Enable reasoning mode for complex problem solving",
+        "fieldBudgetToken": "Budget Tokens",
+        "fieldBudgetTokenDescription": "Maximum tokens allocated for thinking (optional)",
+        "fieldInterleavedThinking": "Enable Interleaved Thinking",
+        "fieldInterleavedThinkingDescription": "Allow thinking to be interleaved with responses (experimental)",
+        "fieldReasoningEffort": "Reasoning Effort",
+        "fieldReasoningEffortPlaceholder": "Select effort level",
+        "fieldReasoningEffortDescription": "Amount of reasoning effort to apply",
+        "fieldReasoningSummary": "Reasoning Summary",
+        "fieldReasoningSummaryPlaceholder": "Select summary type",
+        "fieldReasoningSummaryDescription": "How to summarize reasoning process (optional)",
+
+        "reasoningEffortLow": "Low",
+        "reasoningEffortMedium": "Medium",
+        "reasoningEffortHigh": "High",
+        "reasoningSummaryAuto": "Auto",
+        "reasoningSummaryDetailed": "",
+
+        "modelSectionTitle": "Model Parameters",
+        "modelSectionDescriptionPart1": "Optional parameters to control model behavior ",
+        "modelSectionDescriptionPart2": "(If left blank the model standards are used)",
+        "reasoningSectionTitle": "Reasoning Configuration",
+        "reasoningSectionDescription": "Enable extended thinking capabilities",
+
+        "submitCreate": "Create Model Configuration",
+        "submitUpdate": "Update Model Configuration",
+
+        "toastCreated": "Agent Model configuration created successfully",
+        "toastUpdated": "Agent Model configuration updated successfully",
+        "toastSaveFailed": "Failed to save agent model configuration. Please try again.",
+
+        "validationCodeRequired": "Agent Model Config code is required",
+        "validationNameRequired": "Agent Model Config name is required",
+        "validationProviderRequired": "Agent Model provider is required",
+        "validationModelRequired": "Agent Model model is required",
+
+        "searchPlaceholder": "Search Agent Model Configuration...",
+        "newButtonLabel": "New agent model configuration",
+
+        "tableHeaderCode": "Code",
+        "tableHeaderName": "Name",
+        "tableHeaderActions": "Actions",
+        
+        "emptyNoMatch": "No agent model configs found matching your search",
+        "emptyNotFound": "No agent model configs found",
+        "emptyCreateFirst": "Create your first agent model",
+
+        "deleteDisabled": "Can not delete agent model config, there are agent configs using it",
+
+        "deleteDialogTitle": "Agent Config Delete",
+        "deleteDialogMessage": "Are you sure you want to delete the agent config \"{name}\"? This action cannot be undone.",
+
+        "toastDeleteSuccess": "Agent model config deleted successfully",
+        "toastDeleteFailed": "Failed to delete Agent Model config. Message {message}"
+      },
+      "UserPreference": {
+        "pageTitle": "Agent User Preferences",
+        "pageDscription": "Set-up preferences for AI Agent interaction",
+        "formDescriptionCreate": "Create Agent User Preference",
+        "formDescriptionChange": "Change Agent User Preference",
+
+        "fieldCommunicationStyle": "Communication Style",
+        "fieldCommunicationStyleDescription": "Go straight to the point vs full explanations",
+        "fieldExplanationDepth": "Explanation Depth",
+        "fieldExplanationDepthDescription": "How much reasoning to show",
+        "fieldRiskPerpsective": "Risk Perspective",
+        "fieldRiskPerspectiveDescription": "Threshold for flagging concerns",
+        "fieldOutputFormat": "Output Format",
+        "fieldOutputFormatDescription": "Preferred output style",
+        "fieldPreferredLanguage": "Preferred Language",
+        "fieldPreferredLanguageDescription": "The preferred output language",
+        "fieldUseOfVisuals": "Use of Visuals",
+        "fieldUseOfVisualsDescription": "Use of visuals such as charts and UI elements",
+        "fieldPlanningMode": "Planning Mode",
+        "fieldPlanningModeDescription": "Make a plan or not, with the option to stop after each step",
+
+        "communicationStyleConcise": "Concise",
+        "communicationStyleBalanced": "Balanced",
+        "communicationStyleDetailed": "Detailed",
+        "explantionDepthMinimal": "Minimal",
+        "explantionDepthStandard": "Standard",
+        "explantionDepthComprehensive": "Comprehensive", 
+        "riskPerspectiveConservative": "Conservative",
+        "riskPerspectiveBalanced": "Balanced",
+        "riskPerspectiveTolerant": "Risk Tolerant",
+        "outputFormatNarrative": "Narrative",
+        "outputFormatBulletPoints": "Bullet Points",
+        "outputFormatStructured": "Structured",
+        "useOfVisualsMinimal": "Minimal",
+        "useOfVisualsBalanced": "Balanced",
+        "useOfVisualsMaximal": "Maximal",
+        "planningModeNoExplicit": "No Explicit Planning",
+        "planningModeTodo": "Create a Todo List",
+        "planningModeTodoAndStop": "Create Todo List and stop at steps",
+
+        "submitCreate": "Create User Preferences",
+        "submitUpdate": "Update User Preferences",
+
+        "toastCreated": "User Preference created successfully",
+        "toastUpdated": "User Preference updated successfully",
+        "toastSaveFailed": "Failed to save user preference. Please try again.",
+        
+        "validationCommunicationStyleRequired": "Please select an option for communication style",
+        "validationExplanationDepthRequired": "Please select an option for explanation depth",
+        "validationRiskPerspectiveRequired": "Please select an option for risk persective",
+        "validationOutputFormatRequired": "Please select an option for output format",
+        "validationUseVisualRequired": "Please select an option for the use of visuals",
+        "validationPlanningModeRequired": "Please select an option for planning mode",
+        "validationPreferredLanguangeRequired": "Please select a preferred language"
+      }
+    },
+    "OrgUnit": {
+      "pageTitle": "Organisational Units",
+      "pageDescription": "Update Organisational Unit Hierarchy", 
+      "Manager": {
+        "searchPlaceHolder": "Search organizational units...",
+        "addRoot": "Add Root Unit",
+        "title": "Organisational Structure",
+        "description": "View and manage your organisational hierarchy",
+        "noOrgs": "No organisational units found",
+        "noSearchMatch": "No units match your search",
+        "clearSearch": "Clear Search",
+        
+        "createFirstButton": "Create your first unit",
+
+        "formEdit": "Edit Organisational Unit",
+        "formAdd": "Add Organisational Unit",
+        "formUpdateDetails": "Update the details of this organisational unit",
+        "formAddRoot": "Add a new root organisational unit",
+        "formAddChild": "Add a new unit under {orgUnitName}"
+      },
+      "Form": {
+        "toastUpdated": "{name} has been updated.",
+        "toastCreated": "{name} has been created.", 
+        "toastFailed": "Failed to save organisational unit. Please try again.",
+        "atLeast2CharsError": "Code must be at least 2 characters",
+        "noMorethan5CharsError": "Code must not be bigger than 5 characters",
+        "alreadyInUseError": "This code is already in use",
+        "parentUnit": "Parent Unit",
+        "path": "Path:",
+        "codeCanNotChange": "The org-unit code can not be changed",
+        
+        "codeFieldLabel": "Code",
+        "codeFieldPlaceholder": "Enter unit code",
+        "codeFieldDescription": "A short unique identifier for this unit (e.g., EUR, NA, APAC)",
+        "nameFieldLabel": "Name",
+        "nameFieldPlaceholder": "Enter unit name",
+        "nameFieldDescription": "The full name of this organisational unit",
+        "currentPath": "Current Path",
+        "pathIsSystem": "The path is automatically maintained by the system"
+      },
+      "EditTree": {
+        "deleteSuccessToast": "Organisational Unit ${deleteTarget} removed.",
+        "deleteFailWMessageToast" : "Could not delete the organisational unit ${deleteTarget}. Message {message}",
+        "deleteFailToast" : "Could not delete organisational unit",
+        "diaglogTitle": "Delete Organizational Unit",
+        "diaglogAreYouSure": "Are you sure you want to delete",
+        "notBeUndone": "? This cannot be undone.",
+        "hasChildren": "This unit has children and cannot be deleted."
+      },
+      "SelectTree": {
+        "selected": "selected"
+      }
+    }
+  },
+  "DynamicScreen": {
+    "Framework": {
+      "AddWidget" : {
+        "titleAdd": "Add Widget",
+        "titleConfigure": "Configure {widgetName}",
+        "descriptionAdd": "Choose a widget to add to your dashboard",
+        "descriptionConfigure": "Configure your widget settings",
+        "titleField" : "Widget Title",
+        "titlePlaceholder": "Enter widget title",
+        "configTitle": "Widget Configuration",
+        "configSubmitLabel": "Add Widget"
+      },
+
+      "Grid": {
+        "loading": "Loading ...",
+        "unlockButton": "Edit Mode",
+        "lockButton": "Lock",
+        "addWidgetButton": "Add Widget",
+        "addFirstWidgetButton": "Add Your First Widget",
+        "noWidgets": "No widgets configured"
+      },
+
+      "confFormselectKeyPlaceholder": "Select {key}",
+      "confFormArrayTextAreaPlaceholder": "Enter values separated by commas",
+
+      "Wrapper": {
+        "widgetFail": "Failed to load widget",
+        "refresh": "Refresh Page",
+        "errorTitle": "Widget Error",
+        "widgetFailRetry": "This widget failed to load. Please try refreshing or contact support."
+      },
+
+      "Container": {
+        "toastLayoutSaveSuccess": "Saved new layout",
+        "toastLayoutSaveError": "Failed to update layout",
+        "toastWidgetDeleteSuccess": "Deleted widget {widgetId}",
+        "toastWidgetDeleteError": "Error Deleting widget {widgetId}",
+        "toastWidgetAddSuccess": "Added widget: {widgetName}",
+        "toastWidgetAddError": "Failed to add widget: {widgetName}"       
+      }
+    },
+    "Widgets": {
+    }
+  }
+}

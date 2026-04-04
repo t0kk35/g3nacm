@@ -11,6 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
 import { CardHeader, CardContent } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Separator } from '@/components/ui/separator'
 import { PenOff, AlertCircle, Globe, UserCheck, FileSearch, RefreshCw, List, LayoutGrid } from 'lucide-react';
 import { Markdown } from '@/components/ui/custom/markdown';
@@ -342,8 +343,48 @@ export function AlertUserDetection({ alert }: AlertUserDetectionProps) {
           errors={screenData.errors}
         />
       ) : (
-        <div>Loading</div>
+        <AlertUserDetectionTableSkeleton />
       )}
+    </div>
+  )
+}
+
+function AlertUserDetectionTableSkeleton() {
+  return (
+    <div className="space-y-4">
+      {/* Header */}
+      <Skeleton className="h-6 w-48" />
+
+      {/* Separator */}
+      <Separator className="my-2" />
+
+      {/* Table */}
+      <div className="border rounded-md">
+        {/* Table Header */}
+        <div className="flex border-b px-4 py-3">
+          <Skeleton className="h-4 w-1/3" />
+          <Skeleton className="h-4 w-1/3 ml-4" />
+          <Skeleton className="h-4 w-1/3 ml-4" />
+        </div>
+
+        {/* Table Rows */}
+        {[...Array(2)].map((_, i) => (
+          <div key={i} className="flex px-4 py-4 border-b last:border-0">
+            <Skeleton className="h-4 w-1/3" />
+            <Skeleton className="h-4 w-1/3 ml-4" />
+            <Skeleton className="h-4 w-1/3 ml-4" />
+          </div>
+        ))}
+      </div>
+
+      {/* Pagination */}
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-4 w-24" />
+        <div className="flex gap-2">
+          <Skeleton className="h-8 w-16 rounded-md" />
+          <Skeleton className="h-8 w-16 rounded-md" />
+        </div>
+      </div>
     </div>
   )
 }

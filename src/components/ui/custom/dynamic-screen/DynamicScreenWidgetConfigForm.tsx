@@ -5,12 +5,13 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
+import { useTranslations } from 'next-intl'
 
 interface WidgetConfigFormProps {
   schema: z.ZodType<any, any, any>
@@ -30,12 +31,10 @@ export function DynamicScreenWidgetConfigForm({
   isSubmitting = false
 }: WidgetConfigFormProps) {
   
-  const form = useForm({
-    resolver: zodResolver(schema),
-    defaultValues
-  })
-
-  const renderField = (key: string, fieldSchema: z.ZodTypeAny, value: any) => {
+    const t = useTranslations('DynamicScreen.Framework');
+    const tc = useTranslations('Common');
+    const form = useForm({ resolver: zodResolver(schema), defaultValues })
+    const renderField = (key: string, fieldSchema: z.ZodTypeAny, value: any) => {
     
     const fieldType = fieldSchema._def
 
@@ -78,7 +77,7 @@ export function DynamicScreenWidgetConfigForm({
                           onCheckedChange={field.onChange}
                         />
                         <span className="text-sm text-muted-foreground">
-                          {field.value ? 'Enabled' : 'Disabled'}
+                          {field.value ? tc('enabled') : tc('disabled')}
                         </span>
                       </div>
                     )
@@ -87,7 +86,7 @@ export function DynamicScreenWidgetConfigForm({
                     return (
                       <Select onValueChange={field.onChange} value={field.value}>
                         <SelectTrigger>
-                          <SelectValue placeholder={`Select ${key}`} />
+                          <SelectValue placeholder={ t('confFormselectKeyPlaceholder', { key: key})} />
                         </SelectTrigger>
                         <SelectContent>
                           {fieldSchema._def.values.map((option: string) => (
@@ -136,7 +135,7 @@ export function DynamicScreenWidgetConfigForm({
                           const value = e.target.value.split(',').map(v => v.trim()).filter(v => v)
                           field.onChange(value)
                         }}
-                        placeholder="Enter values separated by commas"
+                        placeholder={ t('confFormArrayTextAreaPlaceholder') }
                       />
                     )
 
@@ -194,11 +193,11 @@ export function DynamicScreenWidgetConfigForm({
         <div className="flex justify-end space-x-2 pt-4 border-t mt-4">
           {onCancel && (
             <Button type="button" variant="outline" onClick={onCancel}>
-              Cancel
+              { tc('cancel') }
             </Button>
           )}
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Saving...' : submitLabel}
+            {isSubmitting ?  tc('saving') : submitLabel}
           </Button>
         </div>
       </form>

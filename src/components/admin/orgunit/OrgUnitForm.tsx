@@ -5,12 +5,11 @@ import type React from "react"
 import { useRouter } from 'next/navigation';
 import { useState, useMemo } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { toast } from "sonner";
-import { FormError } from "@/components/ui/custom/form-error";
 import { OrgUnit, OrgUnitNode } from "@/app/api/data/org_unit/org_unit"
+import { useValidationForm, FormFieldInput } from "@/components/ui/custom/form-field"
 import { OrgUnitRequest } from "@/app/api/action/org_unit/org-unit";
+import { useTranslations } from "next-intl";
 
 type OrgUnitFormProps = {
   allOrgUnits: OrgUnitNode[];
@@ -21,13 +20,29 @@ type OrgUnitFormProps = {
 }
 
 export function OrgUnitForm({ allOrgUnits, parentUnit, unitToEdit, onClose, onSubmit }: OrgUnitFormProps) {
+  
+  const t = useTranslations('Admin.OrgUnit.Form');
+  const tc = useTranslations('Common');
+  
   const router = useRouter();
-  const [code, setCode] = useState(unitToEdit?.code || "")
-  const [codeError, setCodeError] = useState("")
-  const [name, setName] = useState(unitToEdit?.name || "")
   const [submitting, setSubmitting] = useState(false)
 
   const isEditing = !!unitToEdit
+
+  const form = useValidationForm(
+    {
+      code: unitToEdit?.code || "",
+      name: unitToEdit?.name || ""
+    },
+    {
+      code: (v) => {
+        if (v.length < 2) return t('atLeast2CharsError');
+        if (v.length > 5) return t('noMorethan5CharsError');
+        if (checkCodeExists(v)) return t('alreadyInUseError');
+        return undefined
+      }
+    }
+  )
 
   const flatOrgList = useMemo(() => {
     const result: OrgUnit[] = [];
@@ -47,14 +62,13 @@ export function OrgUnitForm({ allOrgUnits, parentUnit, unitToEdit, onClose, onSu
 
   }, [allOrgUnits])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = async () => {
     setSubmitting(true)
 
     try {
       const orgData:OrgUnitRequest = {
-        code,
-        name,
+        code: form.values.code,
+        name: form.values.name,
         parent_id: isEditing ? unitToEdit.parent_id : parentUnit?.id || null,
       }
 
@@ -74,13 +88,13 @@ export function OrgUnitForm({ allOrgUnits, parentUnit, unitToEdit, onClose, onSu
         throw new Error(errorData.message || "Failed to save organisational unit")
       }
 
-      toast.success(isEditing ? `${name} has been updated.` : `${name} has been created.`);
+      toast.success(isEditing ? t('toastUpdated', { name: form.values.name }) : t('toastCreated', { name: form.values.name }));
       // Refresh will reload the entire page.
       router.refresh();
       onSubmit()
     } catch (error) {
       console.error("Error saving org unit:", error)
-      toast.error(error instanceof Error ? error.message : "Failed to save organisational unit. Please try again.")
+      toast.error(error instanceof Error ? error.message : t('toastFailed'))
     } finally {
       setSubmitting(false)
     }
@@ -92,96 +106,70 @@ export function OrgUnitForm({ allOrgUnits, parentUnit, unitToEdit, onClose, onSu
       return false
     }
 
-    console.log('All Org units ' + JSON.stringify(allOrgUnits));
     return flatOrgList.some(
       (unit) => unit.code.toLowerCase() === codeToCheck.toLowerCase() && (!isEditing || unit.id !== unitToEdit?.id),
     )
   }
 
-  const validateCode = (newCode: string) => {
-    setCode(newCode.toUpperCase())
-
-    if (newCode.length < 2) {
-      setCodeError("Code must be at least 2 characters");
-      return;
-    }
-
-    if (newCode.length > 5) {
-      setCodeError("Code must not be bigger than 5 characters");
-      return;
-    }
-
-    if (checkCodeExists(newCode)) {
-      setCodeError("This code is already in use");
-      return;
-    }
-
-    setCodeError("");
-  }
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
       {parentUnit && (
         <div className="p-3 bg-muted rounded-md mb-4">
-          <p className="text-sm font-medium">Parent Unit</p>
+          <p className="text-sm font-medium">{t('parentUnit')}</p>
           <p className="text-sm">
             {parentUnit.name} ({parentUnit.code})
           </p>
-          <p className="text-xs text-muted-foreground mt-1">Path: {parentUnit.path}</p>
+          <p className="text-xs text-muted-foreground mt-1">{t('path')} {parentUnit.path}</p>
         </div>
       )}
 
       {isEditing ? (
         <div className="p-3 bg-muted rounded-md">
-          <p className="text-sm font-medium">Code</p>
+          <p className="text-sm font-medium">{t('codeFieldLabel')}</p>
           <p className="text-sm font-mono font-bold text-chart-1">{unitToEdit.code}</p>
-          <p className="text-xs text-muted-foreground mt-1">The org-unit code can not be changed</p>
+          <p className="text-xs text-muted-foreground mt-1">{t('codeCanNotChange')}</p>
         </div>
       ) : (
-      <div className="space-y-2">
-        <Label htmlFor="code">Code</Label>
-        <Input
+        <FormFieldInput
           id="code"
-          value={code}
-          onChange={(e) => validateCode(e.target.value)}
-          placeholder="Enter unit code"
-          maxLength={10}
+          label={t('codeFieldLabel')}
+          value={form.values.code}
+          onChange={(v) => form.setField("code", v)}
+          error={form.errors.code}
+          placeholder={t('codeFieldPlaceholder')}
+          disabled={isEditing}
           required
-        />
-        <FormError error={codeError} />
-        <p className="text-xs text-muted-foreground">A short unique identifier for this unit (e.g., EUR, NA, APAC)</p>
-      </div>        
+          description={t('codeFieldDescription')}
+        />    
       )}
-
-      <div className="space-y-2">
-        <Label htmlFor="name">Name</Label>
-        <Input
-          id="name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Enter unit name"
-          required
-        />
-        <p className="text-xs text-muted-foreground">The full name of this organisational unit</p>
-      </div>
+      <FormFieldInput
+        id="name"
+        label={t('nameFieldLabel')}
+        value={form.values.name}
+        onChange={(v) => form.setField("name", v)}
+        error={form.errors.name}
+        placeholder={t('nameFieldPlaceholder')}
+        required
+        description={t('nameFieldDescription')}
+      />
 
       {isEditing && (
         <div className="p-3 bg-muted rounded-md">
-          <p className="text-sm font-medium">Current Path</p>
+          <p className="text-sm font-medium">{t('currentPath')}</p>
           <p className="text-sm font-mono font-bold">{unitToEdit.path}</p>
-          <p className="text-xs text-muted-foreground mt-1">The path is automatically maintained by the system</p>
+          <p className="text-xs text-muted-foreground mt-1">{t('pathIsSystem')}</p>
         </div>
       )}
 
       <div className="flex justify-end gap-2 pt-2">
         <Button type="button" variant="outline" onClick={onClose}>
-          Cancel
+          {tc('cancel')}
         </Button>
-        <Button type="submit" disabled={submitting || !!codeError || code.length < 2 || name.length < 3}>
+        <Button type="submit" disabled={submitting || !!form.errors.code || form.values.code.length < 2 || form.values.name.length < 3}>
           {submitting && (
             <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
           )}
-          {isEditing ? "Update" : "Create"}
+          {isEditing ? tc('update') : tc('create')}
         </Button>
       </div>
     </form>

@@ -1,6 +1,7 @@
 import { CardHeader, CardContent } from "../../card"
 import { Button } from "../../button"
 import { AlertTriangle, RefreshCw } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 type DynamicScreenErrorProps = {
     title: string;
@@ -9,11 +10,14 @@ type DynamicScreenErrorProps = {
 }
 
 export function DynamicScreenError({title, error, onClick}: DynamicScreenErrorProps) {
+    
+    const tc = useTranslations('Common');
+  
     return (
       <>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-destructive">{title} - Error</h3>
+            <h3 className="text-lg font-semibold text-destructive">{title} - {tc('error')}</h3>
             <AlertTriangle className="h-5 w-5 text-destructive" />
           </div>
         </CardHeader>
@@ -21,7 +25,7 @@ export function DynamicScreenError({title, error, onClick}: DynamicScreenErrorPr
           <p className="text-sm text-muted-foreground mb-4">{error}</p>
           <Button onClick={onClick} variant="outline" size="sm">
             <RefreshCw className="h-4 w-4 mr-2" />
-              Retry
+              { tc('retry') }
           </Button>
         </CardContent>
       </>

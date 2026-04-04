@@ -12,12 +12,17 @@ import { AgentModelConfig } from "@/lib/cache/agent-model-config-cache"
 import { modelProviders, modelProviderModels } from "@/lib/ai-tools/types"
 import { useValidationForm, formValidateNumber, FormFieldSelect, FormFieldInput, FormFieldCheckBox, FormFieldTextArea } from "@/components/ui/custom/form-field"
 import { SaveSubmitFormButton } from "../../SaveSubmitFormButton"
+import { useTranslations } from "next-intl"
 
 type AgentModelConfigFormProps = {
   config?: AgentModelConfig;
 }
 
 export function AgentModelConfigFormClient({ config }: AgentModelConfigFormProps) {
+  
+  const t = useTranslations('Admin.Agent.ModelConfig')
+  const tc = useTranslations('Common')
+  
   const router = useRouter()
   const isEditing = !!config
 
@@ -37,15 +42,46 @@ export function AgentModelConfigFormClient({ config }: AgentModelConfigFormProps
       reasoningSummary: ""
     },
     {
-      code: (v) => v.trim() ? undefined : "Agent Model code is required",
-      name: (v) => v.trim() ? undefined : "Agent Model name is required",
-      provider: (v) => v.trim() ? undefined : "Agent Model provider is required",
-      model: (v) => v.trim() ? undefined: "Agent Model model is required",
-      temperature: (v) => formValidateNumber(v, { min: 0, max: 2 }),
-      maxTokens: (v) => formValidateNumber(v, { min: 1, step: 1 }),
-      topP: (v) => formValidateNumber(v, { min: 0, max: 1 }),
+      code: (v) => v.trim() ? undefined : t('validationCodeRequired'),
+      name: (v) => v.trim() ? undefined : t('validationNameRequired'),
+      provider: (v) => v.trim() ? undefined : t('validationProviderRequired'),
+      model: (v) => v.trim() ? undefined: t('validationModelRequired'),
+      temperature: (v) => formValidateNumber(v, {
+        min: 0, max: 2,
+        messages: {
+          invalidNumber: tc('validationNumberInvalid'),
+          min: (min) => tc('validationNumberMin', { min }),
+          max: (max) => tc('validationNumberMax', { max }),
+        }
+      }),
+      maxTokens: (v) => formValidateNumber(v, { 
+        min: 1, step: 1,
+        messages: {
+          invalidNumber: tc('validationNumberInvalid'),
+          min: (min) => tc('validationNumberMin', { min }),
+          step: (step) => tc('validationNumberStep', { step })
+        }
+      }),
+      topP: (v) => formValidateNumber(v, { 
+        min: 0, max: 1,
+        messages: {
+          invalidNumber: tc('validationNumberInvalid'),
+          min: (min) => tc('validationNumberMin', { min }),
+          max: (max) => tc('validationNumberMax', { max }),          
+        }
+      }),
       budgetTokens: (v, av) => {
-        if (av.provider === 'anthropic' && reasoningEnabled) return formValidateNumber(v, { min: 1000, step: 1000, required: true })
+        if (av.provider === 'anthropic' && reasoningEnabled) {
+          return formValidateNumber(v, { 
+            min: 1000, step: 1000, required: true,
+            messages: {
+              required: tc('validationNumberRequired'),
+              invalidNumber: tc('validationNumberInvalid'),
+              min: (min) => tc('validationNumberMin', { min }),
+              step: (step) => tc('validationNumberStep', { step })
+            }
+          })
+        }
         else return undefined
       }
     }
@@ -204,12 +240,12 @@ export function AgentModelConfigFormClient({ config }: AgentModelConfigFormProps
         throw new Error("Failed to save agent model configuration")
       }
 
-      toast.success(isEditing ? "Configuration updated successfully" : "Configuration created successfully")
+      toast.success(isEditing ? t('toastUpdated') : t('toastCreated'))
       router.push("/admin/agent/model_config")
       router.refresh()
     } catch (error) {
       console.error("Error saving configuration:", error)
-      toast.error("Failed to save configuration. Please try again.")
+      toast.error(t('toastSaveFailed'))
     } finally {
       setSaving(false)
     }
@@ -233,42 +269,42 @@ export function AgentModelConfigFormClient({ config }: AgentModelConfigFormProps
           <CardContent>
             <Button type="button" variant="outline" onClick={() => router.push("/admin/agent/model_config")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Model Configurations
+              {t('backButton')}
             </Button>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle>Basic Configuration</CardTitle>
-            <CardDescription>Configure the agent model settings</CardDescription>
+            <CardTitle>{t('detailsCardTitle')}</CardTitle>
+            <CardDescription>{t('detailsCardDescription')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <FormFieldInput 
                 id="code"
-                label="Configuration Code"
+                label={t('fieldCode')}
                 value={form.values.code}
                 onChange={(v) => {form.setField("code", v)}}
                 error={form.errors.code}
-                placeholder="e.g., claude-4-5-reasoni"
-                description="Unique identifier for this configuration"
+                placeholder={t('fieldCodePlaceholder')}
+                description={t('fieldCodeDescription')}
                 disabled={isEditing}
                 required
               />
               <FormFieldInput 
                 id="name"
-                label="Configuration Name"
+                label={t('fieldName')}
                 value={form.values.name}
                 onChange={(v) => {form.setField("name", v)}}
                 error={form.errors.name}
-                placeholder="e.g., Claude 4.5 with Extended Reasoning"
+                placeholder={t('fieldNamePlaceholder')}
                 required
               />
               <FormFieldSelect 
                 id="provider"
-                label="Provider"
-                placeholder="Select a provider"
+                label={t('fieldProvider')}
+                placeholder={t('fieldProviderPlaceholder')}
                 value={form.values.provider}
                 onChange={(v) => {form.setField("provider", v)}}
                 error={form.errors.provider}
@@ -281,8 +317,8 @@ export function AgentModelConfigFormClient({ config }: AgentModelConfigFormProps
               {form.values.provider && (
                 <FormFieldSelect 
                   id="model"
-                  label="Model"
-                  placeholder="Select a model"
+                  label={t('fieldModel')}
+                  placeholder={t('fieldModelPlaceholder')}
                   value={form.values.model}
                   onChange={(v) => {form.setField("model", v)}}
                   error={form.errors.model}
@@ -300,56 +336,56 @@ export function AgentModelConfigFormClient({ config }: AgentModelConfigFormProps
         {form.values.provider && form.values.model && (
           <Card ref={modelParametersRef}>
             <CardHeader className="pb-2">
-              <CardTitle>Model Parameters</CardTitle>
-              <CardDescription>Optional parameters to control model behavior <span className="text-sm text-muted-foreground">(If left blank the model standards are used)</span> </CardDescription>
+              <CardTitle>{t('modelSectionTitle')}</CardTitle>
+              <CardDescription>{t('modelSectionDescriptionPart1')} <span className="text-sm text-muted-foreground">{t('modelSectionDescriptionPart2')}</span> </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <FormFieldTextArea
                   id="apiKey"
-                  label="API Key"
+                  label={t('fieldAPIKey')}
                   value={form.values.apiKey}
                   onChange={(v) => {form.setField("apiKey", v)}}
                   error={form.errors.apiKey}
                   rows={3}
-                  description="(Optional) API key. If not provided, the keys in the env.local will be used"
+                  description={t('fieldAPIKeyPlaceholder')}
                 />
                 <FormFieldInput 
                   id="temperature"
-                  label="Temperature"
+                  label={t('fieldTemperature')}
                   value={form.values.temperature}
                   onChange={(v) => {form.setField("temperature", v)}}
                   error={form.errors.temperature}
-                  description="Controls randomness (0-2). Higher values make output more random."
+                  description={t('fieldTemperaturePlaceholder')}
                 />
                 <FormFieldInput 
                   id="maxTokens"
-                  label="Max Tokens"
+                  label={t('fieldMaxTokens')}
                   value={form.values.maxTokens}
                   onChange={(v) => {form.setField("maxTokens", v)}}
                   error={form.errors.maxTokens}
-                  description="Maximum number of tokens to generate"
+                  description={t('fieldMaxTokensPlaceholder')}
                 />
                 <FormFieldInput 
                   id="topP"
-                  label="Top P"
+                  label={t('fieldTopP')}
                   value={form.values.topP}
                   onChange={(v) => {form.setField("topP", v)}}
                   error={form.errors.topP}
-                  description="Nucleus sampling parameter (0-1)"
+                  description={t('fieldTopPPlaceholder')}
                 />
 
                 {showReasoningOptions() && (
                   <Card className="border-2">
                     <CardHeader className="pb-3">
-                      <CardTitle className="text-base">Reasoning Configuration</CardTitle>
-                      <CardDescription>Enable extended thinking capabilities</CardDescription>
+                      <CardTitle className="text-base">{t('reasoningSectionTitle')}</CardTitle>
+                      <CardDescription>{t('reasoningSectionDescription')}</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
                         <FormFieldCheckBox 
                           id="reasoning"
-                          label="Enable Reasoning"
+                          label={t('fieldEnableReasoning')}
                           checked={reasoningEnabled}
                           onCheckedChange={(checked) => {
                             setReasoningEnabled(!!checked)
@@ -358,8 +394,8 @@ export function AgentModelConfigFormClient({ config }: AgentModelConfigFormProps
                             }
                           }}
                           description={form.values.provider === 'anthropic'
-                            ? "Enable extended thinking for more thoughtful responses"
-                            : "Enable reasoning mode for complex problem solving"
+                            ? t('fieldEnableReasoningAnthropic')
+                            : t('fieldEnableReasoningOther')
                           }
                         />
 
@@ -368,19 +404,19 @@ export function AgentModelConfigFormClient({ config }: AgentModelConfigFormProps
                             <div className="ml-6">
                               <FormFieldInput 
                                 id="budgetTokens"
-                                label="Budget Tokens"
+                                label={t('fieldBudgetToken')}
                                 value={form.values.budgetTokens}
                                 onChange={(v) => {form.setField("budgetTokens", v)}}
                                 error={form.errors.budgetTokens}
-                                description="Maximum tokens allocated for thinking (optional)"
+                                description={t('fieldBudgetTokenDescription')}
                               />
 
                               <FormFieldCheckBox 
                                 id="interleavedThinking"
-                                label="Enable Interleaved Thinking"
+                                label={t('fieldInterleavedThinking')}
                                 checked={interleavedThinkingEnabled}
                                 onCheckedChange={(checked) => setInterleavedThinkingEnabled(!!checked)}
-                                description="Allow thinking to be interleaved with responses (experimental)"
+                                description={t('fieldInterleavedThinkingDescription')}
                               />
                             </div>
                           </>
@@ -391,30 +427,30 @@ export function AgentModelConfigFormClient({ config }: AgentModelConfigFormProps
                             <div className="ml-6">
                               <FormFieldSelect 
                                 id="reasoningEffort"
-                                label="Reasoning Effort"
-                                placeholder="Select effort level"
+                                label={t('fieldReasoningEffort')}
+                                placeholder={t('fieldReasoningEffortPlaceholder')}
                                 value={form.values.reasoningEffort}
                                 onChange={(v) => {form.setField("reasoningEffort", v)}}
                                 error={form.errors.reasoningEffort}
                                 options={([
-                                  {value: "low", label: "Low"},
-                                  {value: "medium", label: "Medium"},
-                                  {value: "high", label: "High"}
+                                  {value: "low", label: t('reasoningEffortLow')},
+                                  {value: "medium", label: t('reasoningEffortMedium')},
+                                  {value: "high", label: t('reasoningEffortHigh')}
                                 ])}
-                                description=" Amount of reasoning effort to apply"
+                                description={(t('fieldReasoningEffortDescription'))}
                               />
                               <FormFieldSelect 
                                 id="reasoningSummary"
-                                label="Reasoning Summary"
-                                placeholder="Select summary type"
+                                label={t('fieldReasoningSummary')}
+                                placeholder={t('fieldReasoningSummaryPlaceholder')}
                                 value={form.values.reasoningSummary}
                                 onChange={(v) => {form.setField("reasoningSummary", v)}}
                                 error={form.errors.reasoningSummary}
                                 options={([
-                                  { label: "auto", value: "Auto"},
-                                  { label: "detailed", value: "Detailed"}
+                                  { label: "auto", value: t('reasoningSummaryAuto')},
+                                  { label: "detailed", value: t('reasoningSummaryDetailed')}
                                 ])}
-                                description="How to summarize reasoning process (optional)"
+                                description={t('fieldReasoningSummaryDescription')}
                               />
                             </div>
                           </>
@@ -429,8 +465,8 @@ export function AgentModelConfigFormClient({ config }: AgentModelConfigFormProps
               <SaveSubmitFormButton 
                 saving={saving}
                 isEditing={isEditing}
-                editText="Update Model Configuration"
-                newText="Create Model Configuration"
+                editText={t('submitUpdate')}
+                newText={t('submitCreate')}
               />
             </CardFooter>
           </Card>

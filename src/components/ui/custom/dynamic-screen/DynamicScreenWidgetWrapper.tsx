@@ -4,11 +4,17 @@ import { Component, ErrorInfo, ReactNode } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { AlertCircle, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useTranslations } from 'next-intl'
 
 interface WidgetErrorBoundaryProps {
   children: ReactNode
   widgetId: string
   fallback?: ReactNode
+  labels?: {
+    errorTitle: string
+    errorMessage: string
+    retryLabel: string
+  }
 }
 
 interface WidgetErrorBoundaryState {
@@ -32,22 +38,27 @@ class WidgetErrorBoundary extends Component<WidgetErrorBoundaryProps, WidgetErro
 
   render() {
     if (this.state.hasError) {
+      const { errorTitle, errorMessage, retryLabel } = this.props.labels ?? {
+        errorTitle: 'Widget Error',
+        errorMessage: 'This widget failed to load. Please try refreshing or contact support.',
+        retryLabel: 'Retry',
+      }
       return (
         this.props.fallback || (
           <Card className="h-full">
             <CardContent className="flex flex-col items-center justify-center h-full p-6">
               <AlertCircle className="h-8 w-8 text-destructive mb-2" />
-              <h3 className="text-sm font-medium text-destructive mb-2">Widget Error</h3>
+              <h3 className="text-sm font-medium text-destructive mb-2">{errorTitle}</h3>
               <p className="text-xs text-muted-foreground text-center mb-4">
-                This widget failed to load. Please try refreshing or contact support.
+                {errorMessage}
               </p>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={() => this.setState({ hasError: false })}
               >
                 <RefreshCw className="h-3 w-3 mr-2" />
-                Retry
+                {retryLabel}
               </Button>
             </CardContent>
           </Card>
@@ -74,6 +85,10 @@ export function DynamicScreenWidgetWrapper({
   onError,
   className = ''
 }: DynamicScreenWidgetWrapperProps) {
+
+  const tc = useTranslations('Common');
+  const t = useTranslations('DynamicScreen.Framework.Wrapper');
+
   const handleError = (error: Error) => {
     console.error(`Widget wrapper error for ${widgetId}:`, error)
     onError?.(error)
@@ -81,20 +96,25 @@ export function DynamicScreenWidgetWrapper({
 
   return (
     <div className={`dashboard-widget-wrapper ${className}`} data-widget-id={widgetId}>
-      <WidgetErrorBoundary 
+      <WidgetErrorBoundary
         widgetId={widgetId}
+        labels={{
+          errorTitle: t('errorTitle'),
+          errorMessage: t('widgetFailRetry'),
+          retryLabel: tc('retry'),
+        }}
         fallback={
           <Card className="h-full">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium text-destructive">{title} - Error</h3>
+                <h3 className="text-sm font-medium text-destructive">{title} - { tc('error') }</h3>
                 <AlertCircle className="h-4 w-4 text-destructive" />
               </div>
             </CardHeader>
             <CardContent className="flex items-center justify-center h-full">
               <div className="text-center">
                 <p className="text-xs text-muted-foreground mb-2">
-                  Failed to load widget
+                  { t('widgetFail') }
                 </p>
                 <Button 
                   variant="outline" 
@@ -102,7 +122,7 @@ export function DynamicScreenWidgetWrapper({
                   onClick={() => window.location.reload()}
                 >
                   <RefreshCw className="h-3 w-3 mr-2" />
-                  Refresh Page
+                  { t('refresh') }
                 </Button>
               </div>
             </CardContent>

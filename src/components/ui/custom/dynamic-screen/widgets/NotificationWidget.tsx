@@ -162,7 +162,7 @@ export function NotificationWidget({
               </div>
             ) : (
               <div className="space-y-2">
-                { notifications.map((notification) => {
+                { notifications.sort((a,b) => new Date(b.create_date_time).getTime() - new Date(a.create_date_time).getTime()).map((notification) => {
                   const isUnread = !notification.read_date_time
                   const isMarking = markingRead.has(notification.id)
 
@@ -222,7 +222,7 @@ export function NotificationWidget({
 
 function NotificationDetailContent({ notification }: { notification: Notification }) {
 
-  const linked_entity_link = notification.linked_entity_id ? notification.linked_entity_display_url + '/' + notification.linked_entity_id : undefined
+  const linked_entity_link = notification.linked_entity.id ? notification.linked_entity.display_url + '/' + notification.linked_entity.id : undefined
 
   return (
     <div className="space-y-3">
@@ -238,11 +238,11 @@ function NotificationDetailContent({ notification }: { notification: Notificatio
         <>
           <Separator />
           <div className="text-xs text-muted-foreground">
-            <p><strong>Linked to: </strong>{notification.linked_entity_description}</p>
+            <p><strong>Linked to: </strong>{notification.linked_entity.description}</p>
             <p>
               <strong>ID: </strong>
               <Link href={linked_entity_link} className='hover:underline'>
-                {notification.linked_entity_id}
+                {notification.linked_entity.identifier}
               </Link>
             </p>
           </div>

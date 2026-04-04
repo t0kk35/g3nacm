@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from "react"
-import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DeleteDialog } from "../../DeleteDiaglog"
 import { SearchAndActionsHeader } from "../../SearchAndActionHeader"
 import { SearchNoMatch } from "../../SearchNoMatch"
@@ -12,10 +12,13 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { toast } from "sonner"
 import { ApiError } from "next/dist/server/api-utils"
 import { AgentConfigAdmin } from "@/app/api/data/agent/types"
+import { useTranslations } from 'next-intl'
 
 type Props = { agentConfigs : AgentConfigAdmin[]}
 
-export function AgentConfigListClient({ agentConfigs }: Props) { 
+export function AgentConfigListClient({ agentConfigs }: Props) {
+
+	const t = useTranslations('Admin.Agent.Config')
 
 	const [agentToDelete, setAgentToDelete] = useState<AgentConfigAdmin | null>(null)
 	const [searchQuery, setSearchQuery] = useState("")
@@ -24,7 +27,7 @@ export function AgentConfigListClient({ agentConfigs }: Props) {
 
 	const filteredAgentConfigs = useMemo(()=>{
 		if (!searchQuery.trim() && deletedConfigCodes.length === 0) return agentConfigs
-		return agentConfigs.filter(c=> 
+		return agentConfigs.filter(c=>
 			(
 				c.code.toLocaleLowerCase().includes(searchQuery.toLocaleLowerCase()) ||
 				c.name.toLocaleLowerCase().includes(searchQuery.toLocaleLowerCase()) ||
@@ -41,11 +44,11 @@ export function AgentConfigListClient({ agentConfigs }: Props) {
 			});
 
 			if (response.ok) {
-				toast.success("Agent config deleted successfully");
+				toast.success(t('toastDeleteSuccess'));
 				setDeletedConfigCodes([...deletedConfigCodes, configCode]);
 			} else {
 				const err:ApiError = await response.json();
-				toast.error(`Failed to delete Agent config. Message ${err.message}`);
+				toast.error(t('toastDeleteFailed', { message: err.message }));
 			}
 			setAgentToDelete(null);
 		} catch (error) {
@@ -56,21 +59,21 @@ export function AgentConfigListClient({ agentConfigs }: Props) {
   return (
     <div className="space-y-4">
       <SearchAndActionsHeader
-        searchPlaceholder="Search Agent Configuration..."
+        searchPlaceholder={t('searchPlaceholder')}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         viewMode={viewMode}
         setViewMode={setViewMode}
-        newButtonLabel="New agent"
+        newButtonLabel={t('newButtonLabel')}
         newButtonHref="/admin/agent/config/new"
       />
 
       {filteredAgentConfigs.length === 0 ? (
-        <SearchNoMatch 
+        <SearchNoMatch
           searchQuery={searchQuery}
-          noMatchMessage="No agent configs found matching your search"
-          notFoundMessage="No agent configs found"
-          newButtonLabel="Create your first agent"
+          noMatchMessage={t('emptyNoMatch')}
+          notFoundMessage={t('emptyNotFound')}
+          newButtonLabel={t('emptyCreateFirst')}
           newButtonHref="/admin/agent/config/new"
         />
       ) : viewMode === "grid" ? (
@@ -91,14 +94,14 @@ export function AgentConfigListClient({ agentConfigs }: Props) {
                         <p className="max-w-xs text-sm">{config.description}</p>
                       </TooltipContent>
                     </Tooltip>
-                  </TooltipProvider>                                   
+                  </TooltipProvider>
                 </CardDescription>
               </CardHeader>
-              <EditDeleteCardFooter 
-                editHref={`/admin/agent/config/edit/${config.code}`}  
+              <EditDeleteCardFooter
+                editHref={`/admin/agent/config/edit/${config.code}`}
                 onDelete={() => setAgentToDelete(config)}
                 deleteDisabled={false}
-                deleteDisabledMessage={"Can not delete agent config, there are agents using it"}
+                deleteDisabledMessage={t('deleteDisabled')}
               />
             </Card>
           ))}
@@ -108,9 +111,9 @@ export function AgentConfigListClient({ agentConfigs }: Props) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-								<TableHead>Description</TableHead>
-                <TableHead className="w-[180px]">Actions</TableHead>
+                <TableHead>{t('tableHeaderName')}</TableHead>
+								<TableHead>{t('tableHeaderDescription')}</TableHead>
+                <TableHead className="w-[180px]">{t('tableHeaderActions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -119,8 +122,8 @@ export function AgentConfigListClient({ agentConfigs }: Props) {
                   <TableCell className="font-medium">{config.name}</TableCell>
                   <TableCell>{config.description}</TableCell>
                   <EditDeleteTableCell
-                    editHref={`/admin/agent/config/edit/${config.code}`} 
-                    onDelete={() => setAgentToDelete(config)} 
+                    editHref={`/admin/agent/config/edit/${config.code}`}
+                    onDelete={() => setAgentToDelete(config)}
                   />
                 </TableRow>
               ))}
@@ -130,8 +133,8 @@ export function AgentConfigListClient({ agentConfigs }: Props) {
       )}
 
       <DeleteDialog
-        title="Agent Delete"
-        message={`Are you sure you want to delete the agent "${agentToDelete?.name}"? This action cannot be undone.`}
+        title={t('deleteDialogTitle')}
+        message={t('deleteDialogMessage', { name: agentToDelete?.name ?? '' })}
         open={agentToDelete !== null}
         onOpenChange={() => setAgentToDelete(null)}
         onConfirm={() => agentToDelete && handleDeleteAgentModelConfig(agentToDelete.code)}

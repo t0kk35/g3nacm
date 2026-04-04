@@ -3,6 +3,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { OrgUnitTreeBase } from "./OrgUnitTreeBase"
 import { OrgUnitNode } from "@/app/api/data/org_unit/org_unit"
 import { filterOrgUnitHierarchy } from "./OrgUnitFilter"
+import { useTranslations } from "next-intl"
 
 export function OrgUnitSelectTree({
   units,
@@ -15,6 +16,8 @@ export function OrgUnitSelectTree({
   onToggle: (id: number) => void
   searchQuery?: string
 }) {
+
+  const t = useTranslations('Admin.OrgUnit.SelectTree');
 
   // Count how many selected nodes exist in the subtree
   function countSelectedDescendants(unit: OrgUnitNode): number {
@@ -44,7 +47,7 @@ export function OrgUnitSelectTree({
       renderActions={(unit) => {
         const count = countSelectedDescendants(unit);
         return count > 0 ? (
-          <Badge variant="secondary" className="ml-2 text-xs">{count} selected</Badge>
+          <Badge variant="secondary" className="ml-2 text-xs">{count} {t('selected')}</Badge>
         ) : null;
       }}
     />

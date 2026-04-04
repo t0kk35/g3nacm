@@ -17,11 +17,11 @@ SELECT
     path,
     deleted
 FROM org_unit
-WHERE NOT deleted
+WHERE (deleted = FALSE OR ($1 AND deleted = TRUE)) 
 ORDER BY path
 `
 
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
     const useMockData = process.env.USE_MOCK_DATA === "true";
     
     // Check the user
@@ -30,10 +30,21 @@ export async function GET(_request: NextRequest) {
     const user = session.user;
     if (!user?.name) return ErrorCreators.auth.missingUser(origin);
     
+    // See if we have an optional param
+    const searchParams = request.nextUrl.searchParams;
+    const include_del_string = searchParams.get("include_deleted");
+    const include_del = (
+        include_del_string?.toLocaleLowerCase() == 'true' || include_del_string?.toLocaleLowerCase() == 'y'
+    ) ? true : false
+
     if (!useMockData) {
-        const orgs = await db.pool.query(query);
-        const hierarchy = buildTree(orgs.rows)
-        return NextResponse.json(hierarchy);       
+        try {
+            const orgs = await db.pool.query(query, [include_del]);
+            const hierarchy = buildTree(orgs.rows)
+            return NextResponse.json(hierarchy);       
+        } catch (error) {
+            return ErrorCreators.db.queryFailed(origin,'get org_unit_hierarchy', error as Error)
+        }
     }
 }
 

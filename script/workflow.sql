@@ -116,6 +116,7 @@ CREATE INDEX idx_wafs_action_function on workflow_action_function_setting(action
 CREATE TABLE workflow_entity_state(
   entity_id UUID NOT NULL,
   entity_code TEXT NOT NULL,
+  entity_identifier TEXT NOT NULL, ----- User friendly identifier
   org_unit_code TEXT NOT NULL,
   date_time TIMESTAMP NOT NULL,
   action_code TEXT NOT NULL,
@@ -157,6 +158,7 @@ CREATE INDEX idx_wes_user_id on workflow_entity_state(user_id);
 CREATE TABLE workflow_entity_state_log(
   entity_id UUID NOT NULL,
   entity_code TEXT NOT NULL,
+  entity_identifier TEXT NOT NULL, ----- User friendly identifier
   org_unit_code TEXT NOT NULL,
   date_time TIMESTAMP NOT NULL,
   action_code TEXT NOT NULL,

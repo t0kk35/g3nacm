@@ -24,6 +24,7 @@ SELECT
     json_build_object(
         'entity_code', ab.entity_code,
         'entity_description', we.description,
+        'entity_indentifier', wes.entity_identifier,
         'date_time', wes.date_time,
         'action_code', wes.action_code,
         'action_name', wes.action_name,
@@ -54,6 +55,7 @@ LEFT JOIN LATERAL (
 ) ai ON TRUE
 LEFT JOIN LATERAL (
     SELECT
+        wes.entity_identifier,
         wes.date_time,
         wes.action_name,
         wes.action_code,
@@ -77,6 +79,7 @@ LEFT JOIN LATERAL (
         jsonb_build_object(
             'entity_code', ab.entity_code,
             'entity_description', we.description,
+            'entity_identifier', wesli.entity_identifier, 
             'date_time', wesli.date_time,
             'action_code', wesli.action_code,
             'action_name', wesli.action_name,

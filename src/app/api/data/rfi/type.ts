@@ -1,5 +1,5 @@
 // types.ts
-import { EntityState } from "../entity_state/entity-state";
+import { EntityState, LinkedEntity } from "../entity_state/entity-state";
 
 /* =========================
    ENUMS
@@ -88,12 +88,7 @@ export type RfiRequest = {
   entity_code: string;
   org_unit_code: string;
   direction: RfiDirection;
-  linked_entity: {
-    id: string;
-    code: string;
-    description: string;
-    display_url: string;
-  };
+  linked_entity: LinkedEntity;
   parent_rfi_id?: string;
   related_rfi_ids?: string[];
   title: string;

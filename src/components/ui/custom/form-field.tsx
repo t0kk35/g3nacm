@@ -341,6 +341,13 @@ type NumberValidationOptions = {
   max?: number;
   step?: number;
   required?: boolean;
+  messages?: {
+    required?: string;
+    invalidNumber?: string;
+    min?: (min: number) => string;
+    max?: (max: number) => string;
+    step?: (step: number) => string;
+  };
 };
 
 /**
@@ -351,8 +358,10 @@ type NumberValidationOptions = {
  */
 export function formValidateNumber(value: string, options: NumberValidationOptions): string | undefined {
 
+  const m = options.messages;
+
   if (options.required && value.trim() === "") {
-    return "This field is required.";
+    return m?.required ?? "This field is required.";
   }
 
   if (value === "") return undefined;
@@ -360,22 +369,22 @@ export function formValidateNumber(value: string, options: NumberValidationOptio
   const num = Number(value);
 
   if (Number.isNaN(num)) {
-    return "Please enter a valid number.";
+    return m?.invalidNumber ?? "Please enter a valid number.";
   }
 
   if (options.min !== undefined && num < options.min) {
-    return `Value must be at least ${options.min}.`;
+    return m?.min?.(options.min) ?? `Value must be at least ${options.min}.`;
   }
 
   if (options.max !== undefined && num > options.max) {
-    return `Value must be at most ${options.max}.`;
+    return m?.max?.(options.max) ?? `Value must be at most ${options.max}.`;
   }
 
   if (
     options.step !== undefined &&
     ((num - (options.min ?? 0)) % options.step !== 0)
   ) {
-    return `Value must be in steps of ${options.step}.`;
+    return m?.step?.(options.step) ?? `Value must be in steps of ${options.step}.`;
   }
 
   return undefined;

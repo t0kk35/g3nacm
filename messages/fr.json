@@ -1,0 +1,68 @@
+{
+  "Common": {
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "saving": "Enregistrement...",
+    "actions": "Actions"
+  },
+  "Admin": {
+    "Agent": {
+      "Config": {
+        "pageTitle": "Configuration de l'agent",
+        "listDescription": "Créer une configuration d'agent",
+        "formDescription": "Créer un nouvel agent et configurer les paramètres",
+
+        "backButton": "Retour aux configurations d'agent",
+        "detailsCardTitle": "Détails de la configuration de l'agent",
+
+        "fieldCode": "Code",
+        "fieldName": "Nom",
+        "fieldDescription": "Description",
+        "fieldAgentType": "Type d'agent",
+        "fieldModelConfig": "Configuration du modèle",
+        "fieldSystemPrompt": "Invite système",
+        "fieldMaxSteps": "Étapes maximales",
+
+        "agentTypeStreaming": "Streaming",
+        "agentTypeText": "Texte",
+        "agentTypeObject": "Objet",
+
+        "validationCodeRequired": "Le code de l'agent est requis",
+        "validationNameRequired": "Le nom de l'agent est requis",
+        "validationDescriptionRequired": "La description de l'agent est requise",
+
+        "toolsSectionTitle": "Outils de l'agent",
+        "toolsSectionDescription": "Sélectionner les outils disponibles pour cet agent",
+        "toolsSearchPlaceholder": "Rechercher des outils...",
+        "toolsSelectedCount": "{count} sélectionné(s)",
+        "toolsSelectAllGroup": "Sélectionner tous les outils {group}",
+        "toolsNoMatch": "Aucun outil ne correspond à votre recherche.",
+        "toolsNoneAvailable": "Aucun outil disponible.",
+
+        "submitCreate": "Créer la configuration de l'agent",
+        "submitUpdate": "Mettre à jour la configuration de l'agent",
+
+        "toastCreated": "Configuration de l'agent créée avec succès",
+        "toastUpdated": "Configuration de l'agent mise à jour avec succès",
+        "toastSaveFailed": "Échec de la sauvegarde de la configuration. Veuillez réessayer.",
+
+        "searchPlaceholder": "Rechercher une configuration d'agent...",
+        "newButtonLabel": "Nouvel agent",
+
+        "tableHeaderName": "Nom",
+        "tableHeaderDescription": "Description",
+        "tableHeaderActions": "Actions",
+
+        "emptyNoMatch": "Aucune configuration d'agent trouvée pour cette recherche",
+        "emptyNotFound": "Aucune configuration d'agent trouvée",
+        "emptyCreateFirst": "Créer votre premier agent",
+
+        "deleteDialogTitle": "Suppression de l'agent",
+        "deleteDialogMessage": "Êtes-vous sûr de vouloir supprimer l'agent « {name} » ? Cette action est irréversible.",
+
+        "toastDeleteSuccess": "Configuration d'agent supprimée avec succès",
+        "toastDeleteFailed": "Échec de la suppression. Message : {message}"        
+      }
+    }
+  }
+}

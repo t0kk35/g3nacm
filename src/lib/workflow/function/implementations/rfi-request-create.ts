@@ -34,7 +34,7 @@ export class FunctionRfiRequestCreate implements IWorkflowFunction {
         const { rfi_id, identifier } = await createOutboundRfi(parms, client);
 
         // Create workflow_entity_state for the RFI. Assign to the current user.
-        await createEntity(client, rfi_id, rfiEntityCode, ctx.system.orgUnitCode, ctx.system.userName);
+        await createEntity(client, rfi_id, rfiEntityCode, identifier, ctx.system.orgUnitCode, ctx.system.userName);
 
         return {
             function : {

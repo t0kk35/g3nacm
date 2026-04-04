@@ -83,12 +83,14 @@ export function RfiAssignmentWidget({
     <div className="h-full">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">{title}</h3>
-          { activeCount > 0 && (
-            <Badge variant="destructive" className="h-5 min-w-5 rounded-full">
-              {activeCount}
-            </Badge>
-          )}
+          <div className="flex items-center space-x-2">
+            <h3 className="text-lg font-semibold">{title}</h3>
+            { activeCount > 0 && (
+              <Badge variant="destructive" className="h-5 min-w-5 rounded-full">
+                {activeCount}
+              </Badge>
+            )}
+          </div>
           <TimeRangeSelector
             value={selectedTimeRange}
             onChange={setSelectedTimeRange}
@@ -114,7 +116,7 @@ export function RfiAssignmentWidget({
                 </div> 
               ) : (
                 <div className="space-y-2">
-                  { rfis.map((rfi) => {
+                  { rfis.sort((a,b) => new Date(b.create_datetime).getTime() - new Date(a.create_datetime).getTime()).map((rfi) => {
                     const isActive = rfi.entity_state.to_state_is_active
 
                     return (
@@ -206,7 +208,7 @@ function RfiDetailContent({ rfi }: { rfi: RfiRequest }) {
             <p>
               <strong>ID: </strong>
               <Link href={linked_entity_link} className='hover:underline'>
-                {rfi.linked_entity.id}
+                {rfi.linked_entity.identifier}
               </Link>
             </p>
           </div>

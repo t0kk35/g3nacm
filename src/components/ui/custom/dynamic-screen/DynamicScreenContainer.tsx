@@ -7,6 +7,7 @@ import { createDynamicScreenWidget } from '@/components/ui/custom/dynamic-screen
 import { DynamicScreenLayoutUpdate } from '@/app/api/action/dynamic_screen/types'
 import { DynamicScreenWidgetDelete, DynamicScreenWidgetCreate } from '@/app/api/action/dynamic_screen/types'
 import { APIError } from '@/lib/api-error-handling'
+import { useTranslations } from 'next-intl'
 
 interface DynamicScreenContainerProps {
   userName: string;
@@ -15,6 +16,8 @@ interface DynamicScreenContainerProps {
 
 export function DynamicScreenContainer({ userName, dynamicScreenConfig }: DynamicScreenContainerProps) {
   
+  const t = useTranslations('DynamicScreen.Framework.Container');
+
   const layouts = dynamicScreenConfig.layout
   const widgets = dynamicScreenConfig.widget_config.map(c => createDynamicScreenWidget(c.code, c.id, c.title, c.config ))
 
@@ -36,10 +39,10 @@ export function DynamicScreenContainer({ userName, dynamicScreenConfig }: Dynami
         const msg: APIError = await response.json();
         throw new Error("Failed to save layout Message : " + msg)
       }
-      toast.success("Saved new layout.")
+      toast.success(t('toastLayoutSaveSuccess'))
     } catch (error) {
       console.log('Error Updating layout for screen ' + dynamicScreenConfig.name + ' Error ' + error);
-      toast.error('Failed to update layout')
+      toast.error(t('toastLayoutSaveError'))
     }
   }
 
@@ -62,10 +65,10 @@ export function DynamicScreenContainer({ userName, dynamicScreenConfig }: Dynami
         const msg: APIError = await response.json();
         throw new Error("Failed to save layout Message : " + msg)
       }
-    toast.success(`Deleted widget ${widgetId}`)
+    toast.success(t('toastWidgetDeleteSuccess', {widgetId: widgetId}))
     } catch (error) {
       console.log('Error Deleting widget' + error);
-      toast.error(`Error Delting widget ${widgetId}`);
+      toast.error(t('toastWidgetDeleteError', {widgetId: widgetId}));
     }
   }
 
@@ -95,10 +98,10 @@ export function DynamicScreenContainer({ userName, dynamicScreenConfig }: Dynami
         throw new Error("Failed to create widget: " + msg)
       }
       
-      toast.success(`Added widget: ${widgetData.widgetName}`)
+      toast.success(t('toastWidgetAddSuccess', {widgetName: widgetData.widgetName}))
     } catch (error) {
       console.log('Error creating widget:', error);
-      toast.error(`Failed to add widget: ${widgetData.widgetName}`);
+      toast.error(t('toastWidgetAddError', {widgetName: widgetData.widgetName}));
       throw error // Re-throw so Grid can handle the error
     }
   }

@@ -1,4 +1,5 @@
 import { OrgUnitNode } from "@/app/api/data/org_unit/org_unit"
+import { nodeServerAppPaths } from "next/dist/build/webpack/plugins/pages-manifest-plugin"
 
 // This function filters the org unit tree based on a search query
 // It returns a new tree with only the matching nodes and their ancestors
@@ -44,4 +45,19 @@ if (!query.trim()) {
   }
 
   return filterTree(units)
+}
+
+export function removeDeletedFromOrgUnitHierarchy(units: OrgUnitNode[]): OrgUnitNode[] { 
+
+  const removeDeleted = (nodes: OrgUnitNode[]): OrgUnitNode[] => {
+    return nodes.filter(n => !n.deleted).map((node) => {
+      return {
+        ...node,
+        children: removeDeleted(node.children)
+      }
+    })
+  }
+
+  return removeDeleted(units)
+
 }
