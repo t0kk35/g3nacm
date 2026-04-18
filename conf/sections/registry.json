@@ -13,6 +13,13 @@
       "enabled": true,
       "entityCode": "aml.rule.alert",
       "last_updated": "2026-02-15T00:00:00Z"
+    },    
+    {
+      "code": "subject.IND.details",
+      "path": "subject/IND/details",
+      "enabled": true,
+      "entityCode": "",
+      "last_updated": "2026-02-15T00:00:00Z"
     }
   ]
 }

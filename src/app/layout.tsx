@@ -33,7 +33,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const user = session?.user
   const cookieStore = await cookies();
   const sideBarOpen = cookieStore.get("sidebar_state")?.value === 'true';
-  const locale = await getLocale();
+  // Use user local, revert to system if not available
+  const locale = user?.locale ? user?.locale : await getLocale();
   const messages = await getMessages();
 
   return (

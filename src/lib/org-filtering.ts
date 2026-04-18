@@ -115,6 +115,23 @@ export async function authorizedGetJSON<T>(url: string) {
     return result.json() as Promise<T>;
 }
 
+export async function authorizedPostJSON<T>(url: string, body: string) {
+    const authcookie = (await cookies()).get('authjs.session-token')
+    const result = await fetch(url, {
+        method: "POST",
+        body: body,
+        headers: {
+            'Content-type': 'application/json',
+            Cookie: `authjs.session-token=${authcookie?.value}`,
+        }
+      })
+    if (!result.ok) {
+        const err: APIError = await result.json();
+        throw new Error(`Error POSTING URL '${url}' Error Code: ${err.errorCode}. Error Message ${err.message}`);
+    }
+    return result.json() as Promise<T>;
+}
+
 export async function authorizedPost(url: string, body: string) {
     const authcookie = (await cookies()).get('authjs.session-token')
     const result = fetch(url, {

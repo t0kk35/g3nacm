@@ -5,6 +5,7 @@ CREATE TABLE alert_base (
     entity_code TEXT NOT NULL,
     create_date_time TIMESTAMP,
     description TEXT,
+    schema_version VARCHAR(20) NOT NULL DEFAULT '1.0.0',
     CONSTRAINT fk_org_unit FOREIGN KEY (org_unit_code) REFERENCES org_unit(code),
     CONSTRAINT fk_entity_type FOREIGN KEY (entity_code) REFERENCES workflow_entity(code)
 );
@@ -31,7 +32,6 @@ CREATE TABLE alert_detection (
     id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     alert_id         UUID NOT NULL,
     detection_data   JSONB NOT NULL,
-    schema_version   VARCHAR(20) NOT NULL DEFAULT '1.0.0',
     create_datetime  TIMESTAMPTZ DEFAULT NOW(),
     update_datetime  TIMESTAMPTZ DEFAULT NOW(),
     CONSTRAINT fk_alert_base FOREIGN KEY (alert_id) REFERENCES alert_base(id)

@@ -1,0 +1,44 @@
+{
+  "code": "subject.CRP.details",
+  "name": "Subject Corporate Details",
+  "version": "1.0.0",
+  "permissions": [],
+  "apiCalls": [
+    {
+      "name": "subject_detail",
+      "endpoint": "/api/data/subject/detail",
+      "params": {"subject_id": "{{entity_id}}"},
+      "required": true,
+      "variable_name": "subject"
+    }
+  ],
+  "rootComponent": {
+    "id": "root",
+    "type": "grid",
+    "dataMode": "reference",
+    "props": {
+      "columns": 2,
+      "gap": 4
+    },
+    "children": [      
+      {
+        "id": "status",
+        "type": "field",
+        "dataMode": "reference",
+        "props": {
+            "label": "Status",
+            "value": "{{subject.status}}"
+        }
+      },
+      {
+        "id": "aquisition_date",
+        "type": "field",
+        "dataMode": "reference",
+        "props": {
+            "label": "Acquisition Date",
+            "value": "{{subject.acquisition_date}}"
+        }
+      }
+    ]
+  }
+}

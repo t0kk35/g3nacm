@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth";
 import * as db from "@/db"
-import { authorizedFetch } from "@/lib/org-filtering";
+import { authorizedGetJSON } from "@/lib/org-filtering";
 import { NextRequest, NextResponse } from 'next/server';
 import { UserRequest } from '../types';
 import { ErrorCreators } from '@/lib/api-error-handling';
@@ -10,6 +10,7 @@ import { requirePermissions } from '@/lib/permissions/check';
 import { UserAdmin } from "@/app/api/data/user/user";
 import { AuditData } from "@/lib/audit/types";
 import { createAuditEntry } from "@/lib/audit/audit-log";
+import { parse } from "path";
 
 type Props = {params: Promise<{ userId: string }>}
 
@@ -25,7 +26,7 @@ DELETE FROM user_team_link
 WHERE user_id = $1
 ` 
 
-const quert_org_link_delete = `
+const query_org_link_delete = `
 DELETE FROM org_unit_user_access
 WHERE user_id = $1
 `
@@ -33,7 +34,8 @@ WHERE user_id = $1
 const query_update_user = `
 UPDATE users SET 
     first_name = $2,
-    last_name = $3
+    last_name = $3,
+    locale = $4
 WHERE id = $1
 `
 
@@ -72,9 +74,11 @@ export async function PUT(request: NextRequest, { params }: Props) {
     // Get before state for audit
     let beforeData:UserAdmin;
     try {
-        beforeData = await getBeforeData(userId)
+        const before = await authorizedGetJSON<UserAdmin[]>(`${process.env.DATA_URL}/api/data/user/user_admin?user_id=${userId}`)
+        if (before.length < 1) return ErrorCreators.user.notFound(origin, parseInt(userId))
+        beforeData = before[0]
     } catch(error) {
-        return ErrorCreators.user.notFound(origin, parseInt(userId))
+        return ErrorCreators.api.failedCall(origin, error as Error)
     }
 
     // Set up a connection and transactions
@@ -88,7 +92,7 @@ export async function PUT(request: NextRequest, { params }: Props) {
         await Promise.all([
             client.query(query_role_link_delete, [userId]), 
             client.query(query_team_link_delete, [userId]),
-            client.query(quert_org_link_delete, [userId])
+            client.query(query_org_link_delete, [userId])
         ]);
         
         // Then recreate them
@@ -127,7 +131,12 @@ export async function PUT(request: NextRequest, { params }: Props) {
         if (insert_queries.length > 0) await Promise.all(insert_queries)
         
         // Update user data. Though it might not have changed.
-        await client.query(query_update_user, [userId, userRequest.first_name, userRequest.last_name])
+        await client.query(query_update_user, [
+            userId, 
+            userRequest.first_name, 
+            userRequest.last_name,
+            userRequest.locale
+        ])
 
         // Audit our changes
         const auditData: AuditData = {
@@ -140,6 +149,7 @@ export async function PUT(request: NextRequest, { params }: Props) {
                 name: beforeData.name,
                 firstName: beforeData.first_name,
                 lastName: beforeData.last_name,
+                locale: beforeData.locale,
                 roleIds: beforeData.role_ids,
                 teamInfos: beforeData.team_infos,
                 orgUnitIds: beforeData.org_ids
@@ -149,6 +159,7 @@ export async function PUT(request: NextRequest, { params }: Props) {
                 name: userRequest.name,
                 firstName: userRequest.first_name,
                 lastName: userRequest.last_name,
+                locale: userRequest.locale,
                 roleIds: userRequest.role_ids,
                 teamInfos: userRequest.team_infos,
                 orgUnitIds: userRequest.org_unit_ids
@@ -181,12 +192,14 @@ export async function DELETE(_request: NextRequest, { params }: Props) {
     const userId = (await params).userId;
     if (!userId) return ErrorCreators.param.urlMissing(origin, 'userId');
 
-    // Get before state for audit
+     // Get before state for audit
     let beforeData:UserAdmin;
     try {
-        beforeData = await getBeforeData(userId)
+        const before = await authorizedGetJSON<UserAdmin[]>(`${process.env.DATA_URL}/api/data/user/user_admin?user_id=${userId}`)
+        if (before.length < 1) return ErrorCreators.user.notFound(origin, parseInt(userId))
+        beforeData = before[0]
     } catch(error) {
-        return ErrorCreators.user.notFound(origin, parseInt(userId))
+        return ErrorCreators.api.failedCall(origin, error as Error)
     }
 
     // Set up a connection and transactions
@@ -200,7 +213,7 @@ export async function DELETE(_request: NextRequest, { params }: Props) {
         await Promise.all([
             client.query(query_role_link_delete, [userId]),
             client.query(query_team_link_delete, [userId]),
-            client.query(quert_org_link_delete, [userId])
+            client.query(query_org_link_delete, [userId])
         ])
         // Then logically delete the user
         await client.query(query_delete_user, [userId]);
@@ -216,6 +229,7 @@ export async function DELETE(_request: NextRequest, { params }: Props) {
                 name: beforeData.name,
                 firstName: beforeData.first_name,
                 lastName: beforeData.last_name,
+                locale: beforeData.locale,
                 roleIds: beforeData.role_ids,
                 teamInfos: beforeData.team_infos,
                 orgUnitIds: beforeData.org_ids
@@ -232,12 +246,4 @@ export async function DELETE(_request: NextRequest, { params }: Props) {
     } finally {
         if (client) client.release();
     }
-}
-
-async function getBeforeData(userId: string) {
-    const before =  await authorizedFetch(`${process.env.DATA_URL}/api/data/user/user_admin?user_id=${userId}`)
-        .then(res => { if (!res.ok) throw new Error('Error fetching user audit'); else return res.json() })
-        .then(j => j as UserAdmin[])
-    if (before.length < 1) throw new Error ('Got empty user audit')
-    return before[0]
 }

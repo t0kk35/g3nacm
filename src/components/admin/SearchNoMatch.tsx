@@ -12,26 +12,26 @@ type Props = {
 }
 
 export function SearchNoMatch ({ 
-    noMatchMessage, 
-    notFoundMessage, 
-    searchQuery, 
-    newButtonLabel, 
-    newButtonHref } : Props) {
+  noMatchMessage, 
+  notFoundMessage, 
+  searchQuery, 
+  newButtonLabel, 
+  newButtonHref } : Props) {
     
-    return (
-        <Card>
-          <CardContent className="py-10">
-            <div className="text-center space-y-3">
-              <p className="text-muted-foreground">
-                {searchQuery ? noMatchMessage : notFoundMessage}
-              </p>
-              {!searchQuery && (
-                <Button asChild>
-                  <Link href={newButtonHref}>{newButtonLabel}</Link>
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-    );    
+  return (
+    <Card>
+      <CardContent className="py-10">
+        <div className="text-center space-y-3">
+          <p className="text-muted-foreground">
+            {searchQuery ? noMatchMessage : notFoundMessage}
+          </p>
+          {!searchQuery && (
+            <Button asChild>
+              <Link href={newButtonHref}>{newButtonLabel}</Link>
+            </Button>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );    
 }

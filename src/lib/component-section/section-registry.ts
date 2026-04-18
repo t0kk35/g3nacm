@@ -13,6 +13,14 @@ import type { SectionConfig, SectionDefinition, SectionRegistry, SectionRegistry
  * Section Registry class
  * Singleton for managing section configurations
  */
+// Returns the internal Map key for an entry.
+// Versioned entries use "code@schema_version"; unversioned (wildcard) use just "code".
+function registryKey(code: string, schema_version?: string): string {
+  return schema_version && schema_version !== '*'
+    ? `${code}@${schema_version}`
+    : code;
+}
+
 export class SectionRegistryClass {
   private sections: Map<string, SectionDefinition> = new Map();
   private initialized: boolean = false;
@@ -50,7 +58,7 @@ export class SectionRegistryClass {
 
         try {
           const definition = await this.loadSectionFromFile(entry);
-          this.sections.set(entry.code, definition);
+          this.sections.set(registryKey(entry.code, entry.schema_version), definition);
         } catch (error) {
           console.error(`Failed to load section ${entry.code}:`, error);
         }
@@ -92,11 +100,36 @@ export class SectionRegistryClass {
   }
 
   /**
-   * Get a section by code
-   * Auto-initializes if not already initialized
+   * Get a section by code (returns the wildcard/unversioned entry).
+   * Auto-initializes if not already initialized.
    */
   async getSection(code: string): Promise<SectionDefinition | undefined> {
     if (!this.initialized) await this.initialize();
+    return this.sections.get(code);
+  }
+
+  /**
+   * Get the best-matching section for a given code and data schema version.
+   *
+   * Resolution order:
+   * 1. Exact versioned match  → entry registered with schema_version === schema_version
+   * 2. Wildcard fallback      → entry registered without a schema_version (or "*")
+   *
+   * Auto-initializes if not already initialized.
+   */
+  async getSectionForVersion(
+    code: string,
+    schema_version?: string | null
+  ): Promise<SectionDefinition | undefined> {
+    if (!this.initialized) await this.initialize();
+
+    // Try exact version match first
+    if (schema_version && schema_version !== '*') {
+      const versioned = this.sections.get(registryKey(code, schema_version));
+      if (versioned) return versioned;
+    }
+
+    // Fall back to the unversioned (wildcard) entry
     return this.sections.get(code);
   }
 
@@ -145,13 +178,15 @@ export class SectionRegistryClass {
       throw new Error(`Section ${code} not found in registry`);
     }
 
+    const key = registryKey(entry.code, entry.schema_version);
+
     if (!entry.enabled) {
-      this.sections.delete(code);
+      this.sections.delete(key);
       return;
     }
 
     const definition = await this.loadSectionFromFile(entry);
-    this.sections.set(code, definition);
+    this.sections.set(key, definition);
   }
 
   /**

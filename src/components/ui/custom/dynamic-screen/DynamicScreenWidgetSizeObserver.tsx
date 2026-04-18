@@ -16,7 +16,6 @@ export function DynamicScreenWidgetSizeObserver({ children }: WidgetContainerPro
   const [size, setSize] = useState<{ width: number, height: number } | null>(null);
 
   useEffect(() => {
-    console.log('In Observer ref.current is' + ref.current)
     if (!ref.current) return;
 
     const observed = ref.current;

@@ -23,6 +23,7 @@ VALUES
     ('User', 'user.change_password', 'Allows a user to change their own password'),
     ('User', 'user.agent.preference', 'Allows a user to change their AI Agent preferences'),
     ('Data', 'data.alert', 'Base permission for the back-end access to alert data. Needed by end-users as well as as APIs.'),
+    ('Data', 'data.subject', 'Base permission for the back-end access to subject data. Needed by end-users as well as as APIs.'),
     ('Data', 'data.attachment', 'Permission needed to read attachments from workflow entities'),
     ('Action', 'action.rfi.send', 'Send an RFI via the API endpoint'),
     ('Reporting', 'reporting.agent.usage.all', 'Agent usage and cost reporting for all users');

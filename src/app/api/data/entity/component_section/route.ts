@@ -24,7 +24,7 @@ const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
  */
 async function handleRequest(
   request: NextRequest,
-  params: { entity_id: string | null; section_code: string | null; initial_context?: Record<string, unknown> }
+  params: { entity_id: string | null; section_code: string | null; schema_version?: string | null; initial_context?: Record<string, unknown> }
 ) {
   const origin = request.headers.get('origin') || '';
 
@@ -34,14 +34,14 @@ async function handleRequest(
   if (!user?.name) return ErrorCreators.auth.missingUser(origin);
 
   // Get Parameters and check
-  const { entity_id, section_code, initial_context } = params;
+  const { entity_id, section_code, schema_version, initial_context } = params;
 
   if (!entity_id) return ErrorCreators.param.urlMissing(origin, 'entity_id');
   if (!section_code) return ErrorCreators.param.urlMissing(origin, 'section_code');
   if (!UUID_REGEX.test(entity_id)) return ErrorCreators.param.typeInvalid(origin, 'entity_id', 'UUID', typeof entity_id);
 
   try {
-    const sectionDefinition = await sectionRegistry.getSection(section_code);
+    const sectionDefinition = await sectionRegistry.getSectionForVersion(section_code, schema_version);
     if (!sectionDefinition) return ErrorCreators.componentSection.notFound(origin, section_code)
 
     const sectionConfig = sectionDefinition.config;
@@ -112,6 +112,7 @@ export async function GET(request: NextRequest) {
   return handleRequest(request, {
     entity_id: searchParams.get('entity_id'),
     section_code: searchParams.get('section_code'),
+    schema_version: searchParams.get('schema_version'),
   });
 }
 
@@ -136,7 +137,7 @@ export async function GET(request: NextRequest) {
  * ```
  */
 export async function POST(request: NextRequest) {
-  let body: { entity_id?: string; section_code?: string; initial_context?: Record<string, unknown> };
+  let body: { entity_id?: string; section_code?: string; schema_version?: string; initial_context?: Record<string, unknown> };
   try {
     body = await request.json();
   } catch {
@@ -145,6 +146,7 @@ export async function POST(request: NextRequest) {
   return handleRequest(request, {
     entity_id: body.entity_id ?? null,
     section_code: body.section_code ?? null,
+    schema_version: body.schema_version ?? null,
     initial_context: body.initial_context,
   });
 }

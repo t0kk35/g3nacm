@@ -4,6 +4,7 @@ export type UserRequest = {
     name: string;
     first_name: string;
     last_name: string;
+    locale?: string;
     role_ids: number[];
     team_infos: {
         team_id: number;

@@ -15,6 +15,7 @@ A powerful, configurable UI system that enables:
 ✅ **API Orchestration** - Reuses existing API orchestrator for data fetching
 ✅ **Error Boundaries** - Graceful error handling per component
 ✅ **Permission-Based** - Integrated with existing permission system
+✅ **Schema Versioning** - Multiple section versions can coexist, matched to alert data versions
 
 ---
 
@@ -95,8 +96,10 @@ src/app/api/data/entity/component_section/
 
 conf/sections/
 ├── registry.json                 # Section registry
-└── [entity_code]/
-    └── config.json              # Section configuration
+└── [entity_type]/
+    └── [entity_code]/
+        └── [section_name]/
+            └── config.json      # Section configuration (one per version)
 ```
 
 ---
@@ -175,8 +178,8 @@ Add to `/conf/sections/registry.json`:
 {
   "sections": [
     {
-      "code": "aml.rule.alert",
-      "path": "alert/aml.rule.alert",
+      "code": "aml.rule.alert.details",
+      "path": "alert/aml.rule.alert/details",
       "enabled": true,
       "entityCode": "aml.rule.alert",
       "last_updated": "2026-02-15T00:00:00Z"
@@ -189,7 +192,7 @@ Add to `/conf/sections/registry.json`:
 
 ```typescript
 const response = await fetch(
-  `/api/data/entity/component_section?entity_id=${uuid}&section_code=aml.rule.alert`
+  `/api/data/entity/component_section?entity_id=${uuid}&section_code=aml.rule.alert.details`
 );
 const data = await response.json();
 
@@ -228,7 +231,82 @@ export function EntityDetailPage() {
 
 ---
 
-### 2. AI-Generated Sections (Inline Mode)
+### 2. Schema Version–Matched Sections
+
+The section registry supports multiple versions of the same logical section running side by side. This enables zero-downtime schema upgrades: add fields to the detection JSON, create a new section version for those fields, and both old and new alerts render correctly without any data migration.
+
+#### How Version Resolution Works
+
+When a section is requested the registry resolves in this order:
+
+1. **Exact version match** — a registry entry whose `schema_version` equals the alert's `schema_version`
+2. **Wildcard fallback** — a registry entry with no `schema_version` (or `"*"`)
+
+Callers pass `schema_version` in the request body (POST) or as a query parameter (GET). `AlertDetailsGeneric` passes `alert.schema_version` automatically.
+
+#### Creating a New Section Version
+
+**Step 1: Add the new section config in a separate directory**
+
+```
+conf/sections/alert/aml.rule.alert/details-v2/config.json
+```
+
+The config is identical in structure to v1 but references the new fields you added to `detection_data`.
+
+**Step 2: Register both versions in `registry.json`**
+
+```json
+{
+  "sections": [
+    {
+      "code": "aml.rule.alert.details",
+      "path": "alert/aml.rule.alert/details",
+      "enabled": true,
+      "entityCode": "aml.rule.alert",
+      "last_updated": "2026-02-15T00:00:00Z"
+    },
+    {
+      "code": "aml.rule.alert.details",
+      "path": "alert/aml.rule.alert/details-v2",
+      "enabled": true,
+      "entityCode": "aml.rule.alert",
+      "schema_version": "2.0.0",
+      "last_updated": "2026-04-07T00:00:00Z"
+    }
+  ]
+}
+```
+
+The first entry (no `schema_version`) is the wildcard — used for all alerts that don't match a more specific version. The second entry is used only when `schema_version === "2.0.0"`.
+
+**Step 3: Stamp new alerts with the new schema version**
+
+New alerts written with the expanded detection schema should have `schema_version = '2.0.0'` in `alert_base`. Existing alerts keep their old version and continue rendering with the original section.
+
+#### Upgrading Over Time
+
+| Alert `schema_version` | Section rendered |
+|---|---|
+| `1.0.0` (or any unmatched version) | wildcard entry (`details/`) |
+| `2.0.0` | versioned entry (`details-v2/`) |
+
+Once all alerts have been migrated to v2 you can promote the v2 section to the wildcard entry and remove the old one.
+
+#### POST body example with explicit version
+
+```json
+{
+  "entity_id": "550e8400-e29b-41d4-a716-446655440000",
+  "section_code": "aml.rule.alert.details",
+  "schema_version": "2.0.0",
+  "initial_context": { "alert": { ... } }
+}
+```
+
+---
+
+### 3. AI-Generated Sections (Inline Mode)
 
 **Workflow:**
 
@@ -523,6 +601,7 @@ All errors are:
 - Migrate section configs to database
 - UI for editing configurations
 - Version history and rollback
+- Semver range matching for `schema_version` (currently exact-match only)
 
 ### Phase 7: Advanced Features
 - Conditional rendering (data-driven)
@@ -553,6 +632,14 @@ All errors are:
 ### Section Not Found
 **Problem:** 404 error for section code
 **Solution:** Verify section is registered in `/conf/sections/registry.json` with `enabled: true`.
+
+### Wrong Section Version Rendered
+**Problem:** Alert renders with the old section even though a new version exists
+**Solution:** Check that the alert's `schema_version` in `alert_base` matches the `schema_version` field on the registry entry exactly. Version matching is a strict string equality check — `"2.0.0"` will not match `"2"` or `"v2.0.0"`.
+
+### Versioned Section Falls Back to Wildcard Unexpectedly
+**Problem:** A versioned registry entry exists but the wildcard is being used
+**Solution:** Confirm that `schema_version` is being passed in the request. `AlertDetailsGeneric` passes it automatically from `alert.schema_version`. For custom callers, include `"schema_version"` in the POST body or as a `schema_version` query parameter.
 
 ---
 

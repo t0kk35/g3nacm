@@ -1,0 +1,107 @@
+{
+  "code": "subject.IND.details",
+  "name": "Subject Individual Details",
+  "version": "1.0.0",
+  "permissions": [],
+  "i18nNamespace": "ComponentSection.Sections.SubjectIND",
+  "apiCalls": [
+    {
+      "name": "subject_detail",
+      "endpoint": "/api/data/subject/detail",
+      "params": {"subject_id": "{{entity_id}}"},
+      "required": true,
+      "variable_name": "subject"
+    }
+  ],
+  "rootComponent": {
+    "id": "root",
+    "type": "grid",
+    "dataMode": "reference",
+    "props": {
+      "columns": 2,
+      "gap": 4
+    },
+    "children": [
+      {
+        "id": "status",
+        "type": "field",
+        "dataMode": "reference",
+        "props": {
+            "label": "Status",
+            "i18nKey": "fieldStatus",
+            "value": "{{subject.status}}"
+        }
+      },
+      {
+        "id": "aquisition_date",
+        "type": "field",
+        "dataMode": "reference",
+        "props": {
+            "label": "Acquisition Date",
+            "i18nKey": "fieldAcquisitionDate",
+            "value": "{{subject.acquisition_date}}"
+        }
+      },
+      {
+        "id": "dob",
+        "type": "field",
+        "dataMode": "reference",
+        "props": {
+            "label": "Date Of Birth",
+            "i18nKey": "fieldDateOfBirth",
+            "value": "{{subject.type_specific.date_of_birth}}"
+        }
+      },
+      {
+        "id": "gender",
+        "type": "field",
+        "dataMode": "reference",
+        "props": {
+            "label": "Gender",
+            "i18nKey": "fieldGender",
+            "value": "{{subject.type_specific.gender}}"
+        }
+      },
+      {
+        "id": "employment",
+        "type": "field",
+        "dataMode": "reference",
+        "props": {
+            "label": "Employment Status",
+            "i18nKey": "fieldEmploymentStatus",
+            "value": "{{subject.type_specific.employment_status}}"
+        }
+      },
+      {
+        "id": "profession",
+        "type": "field",
+        "dataMode": "reference",
+        "props": {
+            "label": "Profession",
+            "i18nKey": "fieldProfession",
+            "value": "{{subject.type_specific.profession}}"
+        }
+      },
+      {
+        "id": "nationality",
+        "type": "field",
+        "dataMode": "reference",
+        "props": {
+            "label": "Nationality",
+            "i18nKey": "fieldNationality",
+            "value": "{{subject.type_specific.nationality}}"
+        }
+      },
+      {
+        "id": "residence",
+        "type": "field",
+        "dataMode": "reference",
+        "props": {
+            "label": "Residence",
+            "i18nKey": "fieldResidence",
+            "value": "{{subject.type_specific.residence}}"
+        }
+      }
+    ]
+  }
+}

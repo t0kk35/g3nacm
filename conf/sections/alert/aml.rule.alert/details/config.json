@@ -2,6 +2,7 @@
   "code": "aml.rule.alert.details",
   "name": "AML TM Retail Alert Detail",
   "version": "1.0.0",
+  "i18nNamespace": "ComponentSection.Sections.AmlRuleAlert.Details",
   "permissions": ["data.alert"],
   "apiCalls": [
     {
@@ -17,7 +18,7 @@
     "type": "tabs",
     "props": {
       "tabs": [
-        { "id": "det-tab1", "label": "Detections" }
+        { "id": "det-tab1", "label": "Detections", "i18nKey": "tabDetections" }
       ]
     },
     "children": [
@@ -27,10 +28,10 @@
         "dataMode": "reference",
         "props": {
           "columns": [
-            {"id": "name", "label": "Detection Name", "accessor": "name"},
-            {"id": "info", "label": "Info", "accessor": "info"},                
-            {"id": "score", "label": "Score", "accessor": "score"},
-            {"id": "time_frame", "label": "Time Frame", "accessor": "time_frame"}
+            {"id": "name", "label": "Detection Name", "accessor": "name", "i18nKey": "colName"},
+            {"id": "info", "label": "Info", "accessor": "info", "i18nKey": "colInfo"},                
+            {"id": "score", "label": "Score", "accessor": "score", "i18nKey": "colScore"},
+            {"id": "time_frame", "label": "Time Frame", "accessor": "time_frame", "i18nKey": "colTimeFrame"}
           ],
           "data": "{{alert.detections}}",
           "pagination": true

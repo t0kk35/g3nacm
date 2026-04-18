@@ -150,6 +150,15 @@ export interface SectionConfig {
   /** Cache TTL in seconds (optional) */
   cacheTtl?: number;
 
+  /**
+   * Root i18n namespace for this section (e.g. "ComponentSection.Sections.SubjectIND").
+   * When set, it is automatically injected into component props as `i18nNamespace`
+   * so components like `field` can resolve labels via next-intl without repeating
+   * the namespace in every prop block.  Individual components can still override
+   * this by supplying their own `i18nNamespace` prop directly.
+   */
+  i18nNamespace?: string;
+
   /** Metadata */
   metadata?: {
     /** Entity code this section is for (optional) */
@@ -230,6 +239,15 @@ export interface SectionRegistryEntry {
 
   /** Last update timestamp */
   last_updated: string;
+
+  /**
+   * Data schema version this section targets (e.g. "1.0.0").
+   * Omit (or use "*") to match any version — acts as a wildcard/default.
+   * When multiple entries share the same code, the one whose schema_version
+   * exactly matches the requested version is preferred; the wildcard entry
+   * is used as a fallback.
+   */
+  schema_version?: string;
 }
 
 /**

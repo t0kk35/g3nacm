@@ -5,13 +5,16 @@ import * as db from '@/db'
 import { Subject } from '../types';
 import { NextRequest, NextResponse } from 'next/server';
 import { ErrorCreators } from '@/lib/api-error-handling';
+import { requirePermissions } from '@/lib/permissions/check';
 
 const origin = 'api/data/subject/detail'
 
 const query_text = `
-SELECT 
+SELECT
   sb.id,
-  sb.subject_type as "type",
+  sb.subject_type AS "type",
+  stc.display_name AS "type_name",
+  stc.description AS "type_description", 
   sb.version,
   sb.identifier,
   sb.org_unit_code,
@@ -20,60 +23,25 @@ SELECT
   sb.name,
   sb.mail,
   sb.phone,
-  sb.kyc_risk,
   sb.acquisition_date,
   jsonb_build_object(
-    'id', a.id,
-    'street', a.street,
-    'number', a.number,
-    'city', a.city,
+    'id',          a.id,
+    'street',      a.street,
+    'number',      a.number,
+    'city',        a.city,
     'postal_code', a.postal_code,
-    'country', a.country
-  ) as "address",
-  CASE 
-      WHEN sb.subject_type = 'IND' THEN COALESCE(si.ind_specific, '{}'::json)
-      WHEN sb.subject_type = 'CRP' THEN COALESCE(sc.crp_specific, '{}'::json)
-  END as "type_specific"
+    'country',     a.country
+  ) AS "address",
+  sd.schema_version,
+  COALESCE(sd.detail_data, '{}'::jsonb) AS "type_specific"
 FROM subject_base sb
 JOIN org_unit ou ON ou.code = sb.org_unit_code
 JOIN v_user_org_access_path ouap ON ou.path = ouap.path OR ou.path LIKE CONCAT(ouap.path, '/%')
 JOIN users u ON ouap.user_id = u.id
-LEFT JOIN LATERAL (
-    SELECT ai.id, ai.street, ai.number, ai.city, ai.postal_code, ai.country
-    FROM address ai    
-    WHERE sb.address_id = ai.id
-    LIMIT 1
-) a ON TRUE
-LEFT JOIN LATERAL (
-    SELECT json_build_object(
-        'gender', sii.gender,
-        'first_name', sii.first_name,
-        'last_name', sii.last_name,
-        'middle_name', sii.middle_name,
-        'date_of_birth', to_char(sii.date_of_birth, 'dd/mm/yyyy'),
-        'profession', sii.profession,
-        'employment_status', sii.employment_status,
-        'nationality', sii.nationality,
-        'residence', sii.residence
-    ) AS "ind_specific"
-    FROM subject_individual sii 
-    WHERE sb.subject_type = 'IND' 
-    AND sii.id = sb.id
-) si ON TRUE
-LEFT JOIN LATERAL (
-    SELECT json_build_object(
-        'incorporation_date', sci.incorporation_date,
-        'incorporation_country', sci.incorporation_country,
-        'incorporation_type', sci.incorporation_type,
-        'registration_number', sci.registration_number,
-        'segment', sci.segment,
-        'tax_number', sci.tax_number
-    ) AS "crp_specific"
-    FROM subject_corporate sci
-    WHERE sb.subject_type = 'CRP'
-    AND sci.id = sb.id
-) sc on TRUE
-WHERE u.name=$1 and sb.id = $2
+JOIN subject_detail sd ON sd.id = sb.id
+JOIN subject_type_config stc ON sb.subject_type = stc.code
+LEFT JOIN address a  ON a.id = sb.address_id
+WHERE u.name=$1 AND sb.id = $2
 `
 
 export async function GET(request: NextRequest) {
@@ -83,6 +51,8 @@ export async function GET(request: NextRequest) {
     if (!session) return ErrorCreators.auth.missingSession(origin);
     const user = session.user;
     if (!user?.name) return ErrorCreators.auth.missingUser(origin);
+    const permissionCheck = await requirePermissions(user.name, origin, ['data.subject']);
+    if (permissionCheck) return permissionCheck; 
     
     // Get the URL params. Throw errors if we can't find the mandatory ones.
     const searchParams = request.nextUrl.searchParams;

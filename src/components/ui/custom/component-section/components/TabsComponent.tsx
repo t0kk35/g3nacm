@@ -4,11 +4,11 @@
  * A tabbed interface for organizing content into multiple panels.
  * Wraps shadcn/ui Tabs components with a simplified API.
  */
-
 'use client';
 
 import React from 'react';
 import { z } from 'zod';
+import { useTranslations } from 'next-intl';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 /**
@@ -16,9 +16,11 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
  */
 export const TabDefinitionSchema = z.object({
   id: z.string().describe('Unique tab identifier'),
-  label: z.string().describe('Tab label text'),
+  label: z.string().describe('Tab label text (used as fallback when i18nKey is not provided)'),
   icon: z.string().optional().describe('Icon (emoji or icon name)'),
   disabled: z.boolean().default(false).describe('Disable this tab'),
+  /** next-intl message key relative to the active namespace (e.g. "status") */
+  i18nKey: z.string().optional().describe('next-intl message key for the label'),
 });
 
 /**
@@ -35,6 +37,11 @@ export const TabsPropsSchema = z.object({
     .default('horizontal')
     .describe('Tab orientation'),
   className: z.string().optional().describe('Additional CSS classes'),
+  /**
+   * next-intl namespace override for this specific field.
+   * Falls back to the section-level i18nNamespace injected by ComponentSectionRenderer.
+   */
+  i18nNamespace: z.string().optional().describe('next-intl namespace for the label'),
 });
 
 /**
@@ -56,8 +63,14 @@ export function TabsComponent({
   defaultTab,
   orientation = 'horizontal',
   className = '',
+  i18nNamespace,
   children,
 }: TabsProps & { children?: React.ReactNode }) {
+  // Always call the hook; namespace may be undefined (resolves from root).
+  // Cast to `any` because the namespace comes from a runtime config file and
+  // cannot be narrowed to next-intl's statically-inferred NamespaceKeys type.
+  // Typing `t` explicitly avoids the cascading `never` inference on the key arg.
+  const t = useTranslations(i18nNamespace as any) as (key: string) => string;
   // Convert children to array for index-based mapping
   const childArray = React.Children.toArray(children);
 
@@ -78,7 +91,7 @@ export function TabsComponent({
             disabled={tab.disabled}
           >
             {tab.icon && <span className="mr-2">{tab.icon}</span>}
-            {tab.label}
+            {tab.i18nKey ? t(tab.i18nKey) : tab.label}
           </TabsTrigger>
         ))}
       </TabsList>

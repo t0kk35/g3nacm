@@ -6,11 +6,17 @@ type Address = {
     city: string;
     postal_code: string;
     country: string;
-  };
+};
 
+// Base fields common to all subject types.
+// `type` is an open string — values are config-driven via subject_type_config.
+// `kyc_risk` has moved to type_specific (it is not universal across all subject types).
 export type BaseSubject = OrgUnitFilter & {
     id: string;
-    type: "IND" | "CRP";
+    type: string;
+    type_name: string;
+    type_description: string;
+    version: number;
     identifier: string;
     segment: string;
     status: string;
@@ -18,73 +24,44 @@ export type BaseSubject = OrgUnitFilter & {
     address: Address;
     mail: string;
     phone: string;
-    kyc_risk: string;
     acquisition_date: string;
-  };
-  
-export type IndividualSubject = BaseSubject & {
-    type: "IND";
-    type_specific: {
-      gender: string;
-      first_name: string;
-      last_name: string;
-      middle_name: string;
-      date_of_birth: string;
-      profession: string;
-      employment_status: string;
-      nationality: string;
-      residence: string;
-    };
-  };
-  
-export type CorporateSubject = BaseSubject & {
-    type: "CRP";
-    type_specific: {
-      incorporation_date: string;
-      incorporation_country: string;
-      incorporation_type: string;
-      registration_number: string;
-      segment: string;
-      tax_number: string;
-    };
-  };
-  
-export type Subject = IndividualSubject | CorporateSubject;
+    schema_version: string;
+    type_specific: Record<string, unknown>;
+};
 
-//Type guard for IndividualSubject
-export function IndividualSubject(subject: BaseSubject): subject is IndividualSubject {
-  return (subject as IndividualSubject).type === 'IND'
-}
+// Subject is the open base type. Components that previously relied on the
+// discriminated union should use the type guards below to narrow.
+export type Subject = BaseSubject;
 
 export type SubjectEvent = {
-  id: string
-  title: string
-  description: string
-  date_time: string;
-  type: string;
-}
+    id: string;
+    title: string;
+    description: string;
+    date_time: string;
+    type: string;
+};
 
 export type SubjectHistory = OrgUnitFilter & {
-    valid_from: string, 
-    valid_to: string,
-    subject_history: Subject
-}
+    valid_from: string;
+    valid_to: string;
+    subject_history: Subject;
+};
 
 export enum NetworkNodeType {
     SUBJECT = "subject",
     PRODUCT = "product",
-    ALERT = "alert",
-    CASE = "case",
+    ALERT   = "alert",
+    CASE    = "case",
 }
 
 export type NetworkNode = {
     id: string;
-    type: NetworkNodeType
+    type: NetworkNodeType;
     name: string;
     date_time: string;
-    details?: Record<string, any>;
-}
-  
+    details?: Record<string, unknown>;
+};
+
 export type NetworkLink = {
     source_id: string;
     source_type: NetworkNodeType;
@@ -93,7 +70,7 @@ export type NetworkLink = {
     role: string;
     date_time: string;
 };
-  
+
 export type NetworkData = {
     nodes: NetworkNode[];
     links: NetworkLink[];

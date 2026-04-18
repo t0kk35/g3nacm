@@ -16,6 +16,7 @@ SELECT
     ab.create_date_time,
     ab.org_unit_code,
     ab.description,
+    ab.schema_version,
     jsonb_build_object(
         'id', ai.item_id,
         'type', ai.item_type,
@@ -100,7 +101,7 @@ LEFT JOIN LATERAL (
 ) wesl on TRUE
 LEFT JOIN LATERAL (
     SELECT jsonb_agg(
-        jsonb_build_object('id', ad.id) || ad.detection_data || jsonb_build_object('schema_version', ad.schema_version)
+        jsonb_build_object('id', ad.id) || ad.detection_data
         ORDER BY ad.create_datetime
     ) AS detections
     FROM alert_detection ad

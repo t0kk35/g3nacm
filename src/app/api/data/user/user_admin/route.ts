@@ -15,6 +15,7 @@ SELECT
     name,
     first_name,
     last_name,
+    locale,
     ARRAY_REMOVE(ARRAY_AGG(DISTINCT url.role_id), NULL) AS "role_ids",
     COALESCE(
         jsonb_agg(DISTINCT

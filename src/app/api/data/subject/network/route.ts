@@ -59,18 +59,19 @@ SELECT
     sb.name AS "name",
     sb.acquisition_date AS "date_time",
     jsonb_build_object(
-        'Identifier', sb.identifier,
-        'Name', sb.name,
-        'KYC Risk', sb.kyc_risk,
-        'Segment', sb.segment,
-        'Aquisition Date', TO_CHAR(sb.acquisition_date, 'YYYY-MM-DD'),
-        'Status', sb.status,
+        'Identifier',        sb.identifier,
+        'Name',              sb.name,
+        'KYC Risk',          sd.detail_data->>'kyc_risk',
+        'Segment',           sb.segment,
+        'Aquisition Date',   TO_CHAR(sb.acquisition_date, 'YYYY-MM-DD'),
+        'Status',            sb.status,
         'Organisational Unit', sb.org_unit_code
     ) AS "details"
 FROM subject_base sb
 JOIN org_unit ou ON ou.code = sb.org_unit_code
 JOIN v_user_org_access_path ouap ON ou.path = ouap.path OR ou.path LIKE CONCAT(ouap.path, '/%')
 JOIN users u ON ouap.user_id = u.id
+LEFT JOIN subject_detail sd ON sd.id = sb.id
 WHERE sb.id = ANY($2)
 AND u.name = $1
 UNION

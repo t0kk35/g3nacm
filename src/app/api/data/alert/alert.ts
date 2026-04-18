@@ -18,6 +18,7 @@ export type AlertBase = OrgUnitFilter & {
     alert_identifier: string;
     create_date_time: string;
     description: string;
+    schema_version: string;
     alert_item: AlertItem;
     entity_state: EntityState;
 };

@@ -19,15 +19,16 @@ SELECT
     x.date_time,
     x.type
 FROM (
-  SELECT 
+  SELECT
     'Aquired' AS "title",
-    'Acuired customer ' || sb.name || ' initial Riskscore ' || sb.kyc_risk AS "description",
+    'Acuired customer ' || sb.name || ' initial Riskscore ' || COALESCE(sd.detail_data->>'kyc_risk', 'N/A') AS "description",
     acquisition_date AS "date_time",
     'data' AS "type"
   FROM subject_base sb
   JOIN org_unit ou ON ou.code = sb.org_unit_code
   JOIN v_user_org_access_path ouap ON ou.path = ouap.path OR ou.path LIKE CONCAT(ouap.path, '/%')
   JOIN users u ON ouap.user_id = u.id
+  LEFT JOIN subject_detail sd ON sd.id = sb.id
   WHERE u.name = $1
   AND sb.id = $2
   UNION 

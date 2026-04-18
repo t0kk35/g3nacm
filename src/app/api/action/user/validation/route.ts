@@ -10,7 +10,11 @@ import { checkLoginRateLimit } from "@/lib/auth/rate-limit";
 
 const origin = 'api/action/user/validation'
 
-const query_password_text = 'SELECT password FROM users WHERE name = $1'
+const query_password_text = `
+SELECT 
+    password,
+    locale
+FROM users WHERE name = $1`
 
 const query_update_user_text = `
 UPDATE users 
@@ -127,7 +131,7 @@ export async function POST(req: NextRequest) {
         }
         createAuditEntry(client, userName, logData);
         await client.query('COMMIT');
-        return NextResponse.json({ name: userName });
+        return NextResponse.json({ name: userName, locale: pwd.rows[0].locale });
     } catch (error) {
         if (client && transactionStarted) await client.query('ROLLBACK');
         return ErrorCreators.db.queryFailed(origin, 'validating user', error as Error);

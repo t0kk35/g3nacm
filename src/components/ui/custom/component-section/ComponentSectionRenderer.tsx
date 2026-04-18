@@ -81,6 +81,13 @@ export function ComponentSectionRenderer({
         context
       );
 
+      // Inject section-level i18nNamespace when the component doesn't already
+      // specify its own.  Components that don't use it will have it stripped
+      // during Zod validation; those that do (e.g. field) will keep it.
+      if (sectionConfig.i18nNamespace && resolvedProps.i18nNamespace === undefined) {
+        resolvedProps = { ...resolvedProps, i18nNamespace: sectionConfig.i18nNamespace };
+      }
+
       // Validate props
       const validation = componentRegistry.validate(config.type, resolvedProps);
       if (!validation.success) {

@@ -21,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Loader2, ChevronLeft, ChevronRight, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { User } from "@/app/api/data/user/user"
+import { useTranslations } from "next-intl"
 
 type UserRevokeEntityTableProps = {
   entityId: number
@@ -41,6 +42,9 @@ export function UserRevokeEntityTable({
   requestBuilder,
   entityLabel = "Role"
 }: UserRevokeEntityTableProps) {
+  const t = useTranslations('Admin.User.RevokeEntity')
+  const tc = useTranslations('Common')
+
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [revoking, setRevoking] = useState<number | null>(null)
@@ -71,7 +75,7 @@ export function UserRevokeEntityTable({
         setUsers(userData)
         setTotalPages(Math.ceil(userData.length / usersPerPage))
       } catch (error) {
-        toast.error("Failed to load user details")
+        toast.error(t('toastLoadFailed'))
       } finally {
         setLoading(false)
       }
@@ -116,9 +120,9 @@ export function UserRevokeEntityTable({
       setBulkRevoking(true)
       await revokeUsers(selectedUsers)
       setSelectedUsers([])
-      toast.success(`Successfully revoked ${entityLabel.toLowerCase()} from ${selectedUsers.length} user(s)`)
+      toast.success(t('toastBulkRevokeSuccess', {entityLabel: entityLabel.toLowerCase(), userCount: selectedUsers.length}))
     } catch (error) {
-      toast.error(`Failed to revoke ${entityLabel.toLowerCase()}`)
+      toast.error(t('toastBulkRevokeFailed', {entityLabel: entityLabel.toLowerCase()}))
     } finally {
       setBulkRevoking(false)
     }
@@ -128,9 +132,9 @@ export function UserRevokeEntityTable({
     try {
       setRevoking(userId)
       await revokeUsers([userId])
-      toast.success(`Revoked ${entityLabel.toLowerCase()} from ${userName}`)
+      toast.success(t('toastSingleRevokeSuccess', {entity_label: entityLabel.toLowerCase(), userName: userName}))
     } catch {
-      toast.error(`Failed to revoke ${entityLabel.toLowerCase()}`)
+      toast.error(t('toastSingleRevokeFailed', {entity_label: entityLabel.toLowerCase()}))
     } finally {
       setRevoking(null)
     }
@@ -146,10 +150,10 @@ export function UserRevokeEntityTable({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Users with {entityLabel} "{entityName}"</CardTitle>
-          <CardDescription>No users currently have this {entityLabel.toLowerCase()}</CardDescription>
+          <CardTitle>{t('cardTitle', {entity_label: entityLabel, entity_name: entityName})}</CardTitle>
+          <CardDescription>{t('cardDescription', {entity_label: entityLabel.toLowerCase()})}</CardDescription>
         </CardHeader>
-        <CardContent className="text-center py-8 font-semibold text-muted-foreground">No users to display</CardContent>
+        <CardContent className="text-center py-8 font-semibold text-muted-foreground">{t('cardContentNoUsers')}</CardContent>
       </Card>
     )
   }
@@ -163,8 +167,8 @@ export function UserRevokeEntityTable({
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Users with '{entityName}' {entityLabel}</CardTitle>
-            <CardDescription>{users.length} total users</CardDescription>
+            <CardTitle>{t('cardTitle', {entityName: entityName, entityLabel: entityLabel})}</CardTitle>
+            <CardDescription>{t('cardDescriptionCount', {userCount: users.length})}</CardDescription>
           </div>
           {selectedUsers.length > 0 && (
             <AlertDialog>
@@ -175,24 +179,23 @@ export function UserRevokeEntityTable({
                   ) : (
                     <Trash2 className="h-4 w-4 mr-2" />
                   )}
-                  Revoke from {selectedUsers.length} user(s)
+                  {t('revokeButton', {selectedUsers: selectedUsers.length})}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Revoke {entityLabel}</AlertDialogTitle>
+                  <AlertDialogTitle>{t('revokeDialogTitle', {entityLabel: entityLabel})}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to revoke the "{entityName}" {entityLabel.toLowerCase()} from{" "}
-                    {selectedUsers.length} user{selectedUsers.length !== 1 && "s"}?
+                    {t('revokeDiaglogBulkDescription', {entityName: entityName, entityLabel: entityLabel.toLowerCase(), userCount: selectedUsers.length})}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>{tc('cancel')}</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleBulkRevoke}
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >
-                    Revoke
+                    {tc('revoke')}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -212,10 +215,10 @@ export function UserRevokeEntityTable({
                     onCheckedChange={handleSelectAll}
                   />
                 </TableHead>
-                <TableHead>User</TableHead>
-                <TableHead>First/Last Name</TableHead>
-                <TableHead>Deleted</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="font-semibold">{t('tableHeaderUserName')}</TableHead>
+                <TableHead className="font-semibold">{t('tableHeaderNames')}</TableHead>
+                <TableHead className="font-semibold">{t('tableHeaderDeleted')}</TableHead>
+                <TableHead className="text-right font-semibold">{t('tableHeaderActions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -230,7 +233,7 @@ export function UserRevokeEntityTable({
                   <TableCell>{user.name}</TableCell>
                   <TableCell>{user.firstName} {user.lastName}</TableCell>
                   <TableCell>
-                    <Badge className={user.deleted ? "bg-chart-1" : ""}>{user.deleted ? "Y" : "N"}</Badge>
+                    <Badge className={user.deleted ? "bg-chart-1" : ""}>{user.deleted ? tc('yesChar') : tc('noChar')}</Badge>
                   </TableCell>
                   <TableCell className="text-right">
                     <AlertDialog>
@@ -246,23 +249,23 @@ export function UserRevokeEntityTable({
                           ) : (
                             <Trash2 className="h-4 w-4" />
                           )}
-                          <span className="ml-2">Revoke</span>
+                          <span className="ml-2">{tc('revoke')}</span>
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Revoke {entityLabel}</AlertDialogTitle>
+                          <AlertDialogTitle>{t('revokeDialogTitle', {entityLabel: entityLabel.toLocaleLowerCase()})}</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Are you sure you want to revoke {entityLabel.toLowerCase()} from {user.name}?
+                            {t('revokeDiaglogSingleDescription', {entityLabel: entityLabel.toLowerCase(), userName: user.name})}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogCancel>{tc('cancel')}</AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => handleSingleRevoke(user.id, user.name)}
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                           >
-                            Revoke
+                            {tc('revoke')}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
@@ -278,12 +281,12 @@ export function UserRevokeEntityTable({
         {totalPages > 1 && (
           <div className="flex items-center justify-between mt-4">
             <div className="text-sm text-muted-foreground">
-              Showing {startIndex + 1} to {Math.min(endIndex, users.length)} of {users.length} users
+              {t('tablePaging', {start: startIndex + 1, end: Math.min(endIndex, users.length), userCount: users.length})}
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>
                 <ChevronLeft className="h-4 w-4" />
-                Previous
+                {tc('previous')}
               </Button>
               {Array.from({ length: totalPages }, (_, i) => (
                 <Button
@@ -296,7 +299,7 @@ export function UserRevokeEntityTable({
                 </Button>
               ))}
               <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>
-                Next
+                {tc('next')}
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>

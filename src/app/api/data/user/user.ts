@@ -3,6 +3,7 @@ export type User = {
     name: string;
     firstName: string;
     lastName:string;
+    locale:string;
     deleted: boolean;
 }
 
@@ -10,7 +11,8 @@ export type UserAdmin = {
     id: number;
     name: string;
     first_name: string;
-    last_name:string;
+    last_name: string;
+    locale: string;
     role_ids: number[];
     team_infos: { 
             team_id: number;

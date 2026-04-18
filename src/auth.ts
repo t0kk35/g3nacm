@@ -1,7 +1,25 @@
-import NextAuth from "next-auth"
+import NextAuth, { DefaultSession } from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 
-type User = { name: string }
+type User = {
+    name: string;
+    locale?: string;
+}
+
+declare module "next-auth" {
+  interface User {
+    locale?: string;
+  }
+  interface Session {
+    user: DefaultSession["user"] & { locale?: string };
+  }
+}
+
+declare module "@auth/core/jwt" {
+  interface JWT {
+    locale?: string;
+  }
+}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     session: {
@@ -11,7 +29,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     pages: {
         signIn: "/login",
     },
-    providers: [Credentials({
+    callbacks: {
+    jwt({ token, user }) {
+      if (user?.locale) token.locale = user.locale;
+      return token;
+    },
+    session({ session, token }) {
+      if (session.user) session.user.locale = token.locale;
+      return session;
+    },
+  },
+  providers: [Credentials({
         credentials: {
             name: {},
             password: {}

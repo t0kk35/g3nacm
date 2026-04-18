@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { useTranslations } from "next-intl"
 
 type DeleteDialogProps = {
   title: string
@@ -13,6 +14,8 @@ type DeleteDialogProps = {
 
 export function DeleteDialog({ title, message, open, onOpenChange, onConfirm }: DeleteDialogProps) {
   if (!message) return null
+
+  const tc = useTranslations('Common')
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -27,10 +30,10 @@ export function DeleteDialog({ title, message, open, onOpenChange, onConfirm }: 
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {tc('cancel')}
           </Button>
           <Button variant="destructive" onClick={onConfirm}>
-            Delete
+            {tc('delete')}
           </Button>
         </DialogFooter>
       </DialogContent>

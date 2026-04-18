@@ -1,48 +1,50 @@
 'use client'
 
 import { useState, useMemo } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { FormUserRoles } from "./UserFormCient"
+import { useTranslations } from "next-intl"
 
 type Props = {
-    roles: FormUserRoles[]; 
-    toggleRole: (id: number) => void
+  roles: FormUserRoles[]; 
+  toggleRole: (id: number) => void
 }
 
 export function UserFormRoleTab({ roles, toggleRole }: Props) {
+	const t = useTranslations('Admin.User.RoleTab')
 
-    const [roleSearch, setRoleSearch] = useState("");    
+  const [roleSearch, setRoleSearch] = useState("");    
 
-    // Filter roles based on search query
-    const filteredRoles = useMemo(() => {
-        if (!roleSearch.trim()) return roles
+  // Filter roles based on search query
+  const filteredRoles = useMemo(() => {
+    if (!roleSearch.trim()) return roles
 
-        return roles.filter(
-            (r) => 
-                r.name.toLowerCase().includes(roleSearch.toLowerCase()) ||
-                r.description.toLocaleLowerCase().includes(roleSearch.toLocaleLowerCase())
-        )
-    }, [roles, roleSearch])
+    return roles.filter(
+      (r) => 
+        r.name.toLowerCase().includes(roleSearch.toLowerCase()) ||
+        r.description.toLocaleLowerCase().includes(roleSearch.toLocaleLowerCase())
+      )
+  }, [roles, roleSearch])
 
-    // Count selected roles
-    const selectedRoleCount = roles.filter((r) => r.selected).length
+  // Count selected roles
+  const selectedRoleCount = roles.filter((r) => r.selected).length
 
-    return (
+  return (
 		<>
 			<CardHeader className="pb-3">
 				<div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
 					<div>
-						<CardTitle>Roles</CardTitle>
+						<CardTitle>{t('tabTitle')}</CardTitle>
 						<CardDescription className="flex items-center gap-2">
-							Select roles for this user
+							{t('tabDescription')}
 							{selectedRoleCount > 0 && (
 								<Badge variant="secondary" className="ml-2">
-									{selectedRoleCount} selected
+									{t('rolesSelectedCount', {count: selectedRoleCount})}
 								</Badge>
 							)}
 						</CardDescription>
@@ -51,7 +53,7 @@ export function UserFormRoleTab({ roles, toggleRole }: Props) {
 						<div className="relative w-full sm:w-64">
 							<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
 							<Input
-								placeholder="Search roles..."
+								placeholder={t('searchRoles')}
 								className="pl-8"
 								value={roleSearch}
 								onChange={(e) => setRoleSearch(e.target.value)}
@@ -83,10 +85,10 @@ export function UserFormRoleTab({ roles, toggleRole }: Props) {
 					</div>
 				) : (
 					<p className="text-muted-foreground"> 
-						{roleSearch ? "No roles match your search." : "No roles available."}
+						{roleSearch ? t('emptyNoMatch') : t('emptyNotFound')}
 					</p>
 				)}
 			</CardContent>
 		</>
-    )
+  )
 }

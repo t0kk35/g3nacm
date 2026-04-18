@@ -1,6 +1,6 @@
 'use server'
 
-import { authorizedPost } from "@/lib/org-filtering"
+import { authorizedPostJSON } from "@/lib/org-filtering"
 import { ComponentSection } from "@/app/api/data/entity/types"
 import { getTypeIcon } from "../AlertTypeIcon"
 import { AlertPriorityBadgeAndText } from "../AlertPriority"
@@ -15,22 +15,22 @@ import { Separator } from "@/components/ui/separator"
 import { EntityState } from "@/app/api/data/entity_state/entity-state"
 import { ComponentSectionRenderer } from "@/components/ui/custom/component-section/ComponentSectionRenderer"
 import { ClipboardList } from "lucide-react"
+import { getTranslations } from "next-intl/server"
 
 export async function AlertDetailsGeneric({ alert }: { alert: Alert }) {
   
+  const t = await getTranslations('Alert.GenericDetails')
+
   const componentBody = {
     "entity_id": alert.id,
     "section_code": `${alert.entity_state.entity_code}.details`,
+    "schema_version": alert.schema_version,
     "initial_context": {
       "alert": { ...alert }
     }
   }
 
-  const screenData = await authorizedPost(
-    `${process.env.DATA_URL}/api/data/entity/component_section`,
-    JSON.stringify(componentBody)).
-  then(res => res.json()).
-  then(j=> j as ComponentSection)
+  const screenData = await authorizedPostJSON<ComponentSection>(`${process.env.DATA_URL}/api/data/entity/component_section`, JSON.stringify(componentBody))
   
   return (
     <Card className="w-full">
@@ -42,12 +42,12 @@ export async function AlertDetailsGeneric({ alert }: { alert: Alert }) {
         </CardTitle>
         <div className="text-sm">
           <p>
-            <strong>Description:</strong> {alert.description}
+            <strong>(t('descriptionField')): </strong>{alert.description}
           </p>
         </div>
         <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
           <p>
-            <strong>OrgUnit :</strong> {alert.org_unit_code}
+            <strong>{t('orgUnitField')}: </strong>{alert.org_unit_code}
           </p>
         </div>
         <Separator className="my-2" />

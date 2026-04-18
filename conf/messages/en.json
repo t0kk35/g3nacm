@@ -1,7 +1,10 @@
 {
   "Common": {
+    "yesChar" : "Y",
+    "noChar": "N",
     "cancel": "Cancel",
     "delete": "Delete",
+    "edit": "Edit",
     "saving": "Saving...",
     "actions": "Actions",
     "enabled": "Enabled",
@@ -11,6 +14,10 @@
     "refresh": "Refresh",
     "update": "Update",
     "create": "Create",
+    "previous": "Previous",
+    "next": "Next",
+    "unknown": "Unknown",
+    "revoke": "Revoke",
     "questionMark": "?",
     "validationNumberRequired": "This field is required.",
     "validationNumberInvalid": "Please enter a valid number.",
@@ -277,6 +284,117 @@
       "SelectTree": {
         "selected": "selected"
       }
+    },
+    "User": {
+      "pageTitle": "Users",
+      "listDescription": "Create User",
+      "formDescriptionNew": "Create a new User and assign roles",
+      "formDescriptionEdit": "Change User details",
+      
+      "backButton": "Back to Users",
+      "changePasswordButton": "Change Password",
+      "detailsTitle": "User Details",
+      "fieldNameLabel": "User Name",
+      "fieldFirstNameLabel": "First Name",
+      "fieldLastNameLabel": "Last Name",
+      "fieldLocaleLabel": "Locale",
+      "fieldLocalePlaceholder": "Locale of the user",
+
+      "searchPlaceholder": "Search users...",
+      "newButtonLabel": "New User",
+
+      "tableHeaderRoleName": "Role Name",
+      "tableHeaderFirstLastName": "First and Last Name",
+      "tableHeaderActions": "Actions",
+
+      "emptyNoMatch": "No users found matching your search",
+      "emptyNotFound": "No users found",
+      "emptyCreateFirst": "Create your first user",
+
+      "deleteDialogTitle": "User Delete",
+      "deleteDialogMessage": "Are you sure you want to delete the user \"{name}\"? This action cannot be undone.",
+
+      "submitCreate": "Create User",
+      "submitUpdate": "Update User",
+
+      "tabRoles": "Roles",
+      "tabTeams": "Teams",
+      "tabOrgs": "Org Units",
+
+      "toastCreateSuccess": "User updated successfully",
+      "toastUpdateSuccess": "User updated successfully",
+      "toastUpdateFailed": "Failed to save user. Please try again.",
+      "toastDeleteSuccess": "User deleted successfully",
+      "toastDeleteFailed": "Failed to delete user. Message {message}",
+
+      "validationNameRequired": "User name is required",
+      "validationFirstNameRequired": "User first name is required",
+      "validationLastNameRequired": "User last name is required",
+
+      "OrgTab": {
+        "tabTitle": "Org Unit",
+        "tabDescription": "Select Organsisational Units for this user",
+        "orgsSelectedCount": "{count} selected",
+        "searchOrgs": "Search Organisational Units..."
+      },
+
+      "RoleTab": {
+        "tabTitle": "Roles",
+        "tabDescription": "Select roles for this user",
+        "rolesSelectedCount": "{count} selected",
+        "searchRoles": "Search roles...",
+        "emptyNoMatch": "No roles match your search",
+        "emptyNotFound": "No roles available"
+      },
+
+      "TeamTab": {
+        "tabTitle": "Teams",
+        "tabDescription": "Select teams for this user and set their rank",
+        "teamsSelectedCount": "{count} selected",
+        "searchTeams": "Search teams...",
+        "selectedTeams": "Selected Teams (by rank)",
+        "rank": "Rank",
+        "availableTeams": "Available Teams",
+        "emptyNoMatch": "No teams match your search",
+        "emptyNotFound": "No teams available"
+      },
+
+      "RevokeEntity": {
+        "cardTitle": "Users with {entityLabel} \"{entityName}\"",
+        "cardDescription": "No users currently have this {entityLabel}",
+        "cardDescriptionCount": "{userCount} total users",
+        "cardContentNoUsers": "No users to display",
+
+        "revokeButton": "Revoke from {selectedUsers} user(s)",
+
+        "revokeDialogTitle": "Revoke {entityLabel}",
+        "revokeDiaglogBulkDescription": "Are you sure you want to revoke the {entityName} {entityLabel} from {userCount} {userCount, plural, =0 {user} other {users}}?",
+        "revokeDiaglogSingleDescription": "Are you sure you want to revoke {entityLabel} from {userName}?",
+
+        "tableHeaderUserName": "User",
+        "tableHeaderNames": "First/Last Name",
+        "tableHeaderDeleted": "Deleted",
+        "tableHeaderActions": "Actions",
+        "tablePaging": "Showing {start} to {end} of {userCount} users",
+
+        "toastLoadFailed": "Failed to load user details",
+        "toastBulkRevokeSuccess": "Successfully revoked {entityLabel} from {userCount} user(s)",
+        "toastBulkRevokeFailed": "Failed to revoke {entityLabel}",
+        "toastSingleRevokeSuccess": "Revoked {entityLabel} from {userName}",
+        "toastSingleRevokeFailed": "Failed to revoke {entityLabel}"
+      }
+
+    }
+  },
+  "Alert": {
+    "GenericDetails": {
+      "descriptionField": "Description",
+      "orgUnitField": "Org-Unit"
+    }
+  },
+  "Subject": {
+    "GenericDetails" : {
+      "BadgeRisk": "Risk"
     }
   },
   "DynamicScreen": {
@@ -321,6 +439,39 @@
       }
     },
     "Widgets": {
+    }
+  },
+  "ComponentSection": {
+    "Sections": {
+      "SubjectIND": {
+        "fieldStatus": "Status",
+        "fieldAcquisitionDate": "Acquisition Date",
+        "fieldDateOfBirth": "Date of Birth",
+        "fieldGender": "Gender",
+        "fieldEmploymentStatus": "Employment Status",
+        "fieldProfession": "Profession",
+        "fieldNationality": "Nationality",
+        "fieldResidence": "Residence"
+      },
+      "SubjectCRP": {
+        "status": "Status",
+        "acquisitionDate": "Acquisition Date",
+        "legalName": "Legal Name",
+        "registrationNumber": "Registration Number",
+        "incorporationDate": "Incorporation Date",
+        "businessType": "Business Type",
+        "industry": "Industry",
+        "jurisdiction": "Jurisdiction"
+      },
+      "AmlRuleAlert" : {
+        "Details" : {
+          "tabDetections" : "Detections",
+          "colName": "Detection Name",
+          "colInfo": "Info",
+          "colScore": "Score",
+          "colTimeFrame": "Time Frame"
+        }
+      }
     }
   }
 }

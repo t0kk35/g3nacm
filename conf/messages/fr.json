@@ -61,7 +61,31 @@
         "deleteDialogMessage": "Êtes-vous sûr de vouloir supprimer l'agent « {name} » ? Cette action est irréversible.",
 
         "toastDeleteSuccess": "Configuration d'agent supprimée avec succès",
-        "toastDeleteFailed": "Échec de la suppression. Message : {message}"        
+        "toastDeleteFailed": "Échec de la suppression. Message : {message}"
+      }
+    }
+  },
+  "ComponentSection": {
+    "Sections": {
+      "SubjectIND": {
+        "fieldStatus": "Statut",
+        "fieldAcquisitionDate": "Date d'acquisition",
+        "fieldDateOfBirth": "Date de naissance",
+        "fieldGender": "Genre",
+        "fieldEmploymentStatus": "Situation professionnelle",
+        "fieldProfession": "Profession",
+        "fieldNationality": "Nationalité",
+        "fieldResidence": "Résidence"
+      },
+      "SubjectCRP": {
+        "status": "Statut",
+        "acquisitionDate": "Date d'acquisition",
+        "legalName": "Raison sociale",
+        "registrationNumber": "Numéro d'immatriculation",
+        "incorporationDate": "Date de constitution",
+        "businessType": "Forme juridique",
+        "industry": "Secteur d'activité",
+        "jurisdiction": "Juridiction"
       }
     }
   }

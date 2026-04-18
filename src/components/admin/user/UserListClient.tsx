@@ -11,10 +11,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { UserAdmin } from "@/app/api/data/user/user"
 import { toast } from "sonner"
 import { ApiError } from "next/dist/server/api-utils"
+import { useTranslations } from 'next-intl'
 
 type Props = { users : UserAdmin[]}
 
 export function UserListClient({ users }: Props) {
+
+  const t = useTranslations('Admin.User')
+  const tc = useTranslations('Common')
 
   const [userToDelete, setUserToDelete] = useState<UserAdmin | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
@@ -40,11 +44,11 @@ export function UserListClient({ users }: Props) {
       });
 
       if (response.ok) {
-        toast.success("User deleted successfully");
+        toast.success(t('toastDeleteSuccess'));
         setDeletedUserIds([...deletedUserIds, userId])
       } else {
         const err:ApiError = await response.json();
-        toast.error(`Failed to delete user. Message ${err.message}`); 
+        toast.error(t('toastDeleteFailed', {message: err.message})); 
       }
       setUserToDelete(null);       
     } catch (error) {
@@ -55,21 +59,21 @@ export function UserListClient({ users }: Props) {
   return (
     <div className="space-y-4">
       <SearchAndActionsHeader
-        searchPlaceholder="Search users..."
+        searchPlaceholder={t('searchPlaceholder')}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         viewMode={viewMode}
         setViewMode={setViewMode}
-        newButtonLabel="New User"
+        newButtonLabel={t('newButtonLabel')}
         newButtonHref="/admin/user/new"
       />
 
       {filteredUsers.length === 0 ? (
         <SearchNoMatch 
           searchQuery={searchQuery}
-          noMatchMessage="No users found matching your search"
-          notFoundMessage="No users found"
-          newButtonLabel="Create your first user"
+          noMatchMessage={t('emptyNoMatch')}
+          notFoundMessage={t('emptyNotFound')}
+          newButtonLabel={t('emptyCreateFirst')}
           newButtonHref="/admin/user/new"
         />
       ) : viewMode === "grid" ? (
@@ -96,9 +100,9 @@ export function UserListClient({ users }: Props) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Role Name</TableHead>
-                <TableHead>First and Last Name</TableHead>
-                <TableHead className="w-45">Actions</TableHead>
+                <TableHead>{t('tableHeaderRoleName')}</TableHead>
+                <TableHead>{t('tableHeaderFirstLastName')}</TableHead>
+                <TableHead className="w-45">{t('tableHeaderActions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -114,8 +118,8 @@ export function UserListClient({ users }: Props) {
         </div>
       )}
       <DeleteDialog
-        title="User Delete"
-        message={`Are you sure you want to delete the user "${userToDelete?.name}"?`}
+        title={t('deleteDialogTitle')}
+        message={t('deleteDialogTitle',{name: userToDelete?.name || tc('unknown')})}
         open={userToDelete !== null}
         onOpenChange={() => setUserToDelete(null)}
         onConfirm={() => userToDelete && handleDeleteUser(userToDelete.id)}

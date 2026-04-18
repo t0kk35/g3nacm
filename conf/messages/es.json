@@ -64,5 +64,29 @@
     "toastDeleteFailed": "Error al eliminar la configuración. Mensaje: {message}"
       }
     }
+  },
+  "ComponentSection": {
+    "Sections": {
+      "SubjectIND": {
+        "fieldStatus": "Estado",
+        "fieldAcquisitionDate": "Fecha de adquisición",
+        "filedDateOfBirth": "Fecha de nacimiento",
+        "fieldGender": "Género",
+        "fieldEmploymentStatus": "Situación laboral",
+        "fieldProfession": "Profesión",
+        "fieldNationality": "Nacionalidad",
+        "fieldResidence": "Residencia"
+      },
+      "SubjectCRP": {
+        "status": "Estado",
+        "acquisitionDate": "Fecha de adquisición",
+        "legalName": "Razón social",
+        "registrationNumber": "Número de registro",
+        "incorporationDate": "Fecha de constitución",
+        "businessType": "Tipo de empresa",
+        "industry": "Sector",
+        "jurisdiction": "Jurisdicción"
+      }
+    }
   }
 }

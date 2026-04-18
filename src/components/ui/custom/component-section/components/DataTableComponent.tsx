@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { z } from 'zod';
+import { useTranslations } from 'next-intl';
 import { ColumnDef } from '@tanstack/react-table';
 import { TanStackTable } from '@/components/ui/custom/tanstack-table';
 
@@ -25,6 +26,8 @@ export const DataTableColumnSchema = z.object({
     .enum(['left', 'center', 'right'])
     .default('left')
     .describe('Text alignment'),
+  /** next-intl message key relative to the active namespace (e.g. "status") */
+  i18nKey: z.string().optional().describe('next-intl message key for the label'),
 });
 
 /**
@@ -43,6 +46,11 @@ export const DataTablePropsSchema = z.object({
     .string()
     .default('No data available')
     .describe('Message when table is empty'),
+    /**
+   * next-intl namespace override for this specific field.
+   * Falls back to the section-level i18nNamespace injected by ComponentSectionRenderer.
+   */
+  i18nNamespace: z.string().optional().describe('next-intl namespace for the label'),
 });
 
 /**
@@ -61,12 +69,18 @@ export function DataTableComponent({
   pageSize = 10,
   filterColumn,
   emptyMessage = 'No data available',
+  i18nNamespace,
 }: DataTableProps) {
+  // Always call the hook; namespace may be undefined (resolves from root).
+  // Cast to `any` because the namespace comes from a runtime config file and
+  // cannot be narrowed to next-intl's statically-inferred NamespaceKeys type.
+  // Typing `t` explicitly avoids the cascading `never` inference on the key arg.
+  const t = useTranslations(i18nNamespace as any) as (key: string) => string;
   // Convert simple column definitions to TanStack ColumnDef format
   const tanStackColumns: ColumnDef<any>[] = columns.map((col) => ({
     id: col.id,
     accessorKey: col.accessor,
-    header: col.label,
+    header: col.i18nKey ? t(col.i18nKey) : col.label,
     enableSorting: col.sortable,
     cell: ({ row }) => {
       const value = row.getValue(col.id);

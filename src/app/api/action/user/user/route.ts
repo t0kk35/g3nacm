@@ -16,9 +16,10 @@ const query_user = `
     INSERT INTO users(
         name,
         first_name,
-        last_name
+        last_name,
+        locale
     )
-    VALUES ($1, $2, $3)
+    VALUES ($1, $2, $3, $4)
     RETURNING 
         id
 `;
@@ -56,7 +57,8 @@ export async function POST(request: NextRequest) {
         const newUser = await client.query(query_user, [
           userRequest.name, 
           userRequest.first_name,   
-          userRequest.last_name
+          userRequest.last_name,
+          userRequest.locale
         ]);
         if (newUser.rows.length === 0) {
             await client.query('ROLLBACK');
@@ -100,6 +102,7 @@ export async function POST(request: NextRequest) {
                 name: userRequest.name,
                 firstName: userRequest.first_name,
                 lastName: userRequest.last_name,
+                locale: userRequest.locale,
                 roleIds: userRequest.role_ids,
                 teamInfos: userRequest.team_infos,
                 orgUnitIds: userRequest.org_unit_ids

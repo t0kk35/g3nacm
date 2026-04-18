@@ -15,6 +15,7 @@ SELECT
     name,
     first_name AS "firstName",
     last_name AS "lastName",
+    locale AS "locale",
     deleted AS "deleted"
 FROM users u
 WHERE (
