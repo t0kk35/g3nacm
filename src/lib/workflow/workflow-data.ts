@@ -112,9 +112,11 @@ export async function copyToEntityStateLog(client: PoolClient, entityId: string,
         text: insert_entity_state_log,
         values:[entityId, entityCode]
     }
-    client.query(query, (err) => {
-        if (err) throw new Error(`Error Updating workflow_entity_state_log for entityId ${entityId} and entityCode ${entityCode}. Err=${err}`)
-    });
+    try {
+        await client.query(query);
+    } catch (err) {
+        throw new Error(`Error Updating workflow_entity_state_log for entityId ${entityId} and entityCode ${entityCode}. Err=${err}`)
+    }
 }
 
 /* Query to update entity state log. This has some logic to make sure the current from and to state are not 
@@ -160,9 +162,11 @@ export async function updateEntityState(client: PoolClient, entityId: string, en
         text: update_entity_state_log,
         values:[entityId, entityCode, actionCode, userName, isAnyActive(fromStateCode), comment]
     }
-    client.query(query).catch((err) => {
-        throw new Error(`Error Updating workflow_entity_state for entityId ${entityId} and entityCode ${entityCode}. Err=${err}`)    
-    })
+    try {
+        await client.query(query)
+    } catch(err) {
+        throw new Error(`Error Updating workflow_entity_state for entityId ${entityId} and entityCode ${entityCode}. Err=${err}`)
+    }
 }
 
 const update_entity_state_log_assign_user = `
@@ -186,9 +190,11 @@ export async function updateEntityAssignUser(client: PoolClient, entityId: strin
         text: update_entity_state_log_assign_user,
         values:[entityId, entityCode, assignUserName]
     }
-    client.query(query).catch((err) => {
-        throw new Error(`Error Updating workflow_entity_state_assing_user for entityId ${entityId} and entityCode ${entityCode}. Err=${err}`)    
-    })
+    try {
+        await client.query(query)    
+    } catch (err) {
+        throw new Error(`Error Updating workflow_entity_state_assing_user for entityId ${entityId} and entityCode ${entityCode}. Err=${err}`) 
+    }
 };
 
 const update_entity_state_log_assign_team = `
@@ -210,9 +216,11 @@ export async function updateEntityAssignTeam(client: PoolClient, entityId: strin
         text: update_entity_state_log_assign_team,
         values:[entityId, entityCode, assignTeamName]
     }
-    client.query(query).catch((err) => {
-        throw new Error(`Error Updating workflow_entity_state_assing_user for entityId ${entityId} and entityCode ${entityCode}. Err=${err}`)    
-    })
+    try {
+        await client.query(query)    
+    } catch (err) {
+        throw new Error(`Error Updating workflow_entity_state_assing_user for entityId ${entityId} and entityCode ${entityCode}. Err=${err}`)
+    }
 };
 
 const query_insert_entity_state = `
@@ -249,7 +257,7 @@ export async function createEntity(client: PoolClient, entityId: string, entityC
     const start_to_state = workflowConfig.states.find(s => s.code === start_action.to_state_code);
     if (!start_to_state) throw new Error (`Could not find to_state for action '${start_action.code}'`)
 
-        const query = {
+    const query = {
         name: 'workflow_create_entity_state',
         text: query_insert_entity_state,
         values:[
@@ -270,8 +278,9 @@ export async function createEntity(client: PoolClient, entityId: string, entityC
         ]
     } 
 
-    client.query(query).catch((err) => {
+    try {
+        await client.query(query)
+    } catch (err) {
         throw new Error(`Error creating workflow_entity_state for entityId ${entityId}, entityCode ${entityCode} and action code ${start_action.code}. Err=${err}`)    
-    });
-
+    }
 }

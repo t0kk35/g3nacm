@@ -123,10 +123,58 @@ SQL schema files are located in the `script/` directory and should be run in dep
 - User-customizable layouts per screen size (desktop, tablet, mobile)
 - Database-backed widget configuration and layout persistence
 
+**Background Job Framework** (`src/lib/jobs/`)
+- Provider-agnostic background task processing for agents, reports, emails, aggregation, etc.
+- Jobs are persisted in PostgreSQL (`job` table, `script/job.sql`) before being enqueued — full audit trail independent of the queue
+- Queue backend is swappable via `JOB_QUEUE_PROVIDER` env var; current implementations: `bullmq` (Redis, local/dev) and `memory` (in-process, tests)
+- Four priority tiers (HIGH/NORMAL/LOW/BACKGROUND) each map to a separate named queue with configurable concurrency — prevents low-priority floods from starving high-priority work
+- Jobs carry the submitting user's identity (`user_name`, `org_unit_code`) through to the handler
+- Standalone worker process (`npm run worker`) for local dev; serverless deployments receive jobs via HTTP push to `POST /api/action/job/process`
+- See `src/lib/jobs/README.md` for full documentation, including how to add new job types
+
 ### Design Principles ###
 - All interaction between the UI and database goes through the API routes, either /api/data or /api/action
 - Run as much logic as possible in UI server components with 'use server' marker
 - API's should use the ErrorCreators from the lib/api-error-handling.ts file for standardized API error handling
+
+## Background Job Framework Architecture
+
+### Overview
+The job framework provides asynchronous background processing with a consistent interface across local (Redis/BullMQ) and cloud (SQS, Cloud Tasks, Service Bus) queue backends.
+
+### Core Components
+- **`src/lib/jobs/types.ts`** — `JobPriority` enum, `JobContext`, `JobResult`, `JobHandler`, `EnqueueOptions`
+- **`src/lib/jobs/registry.ts`** — `JobRegistry`: maps job type strings to handler functions
+- **`src/lib/jobs/processor.ts`** — `processJob(jobId)`: claims the job in the DB, dispatches to the registered handler, updates status to `completed` or `failed`
+- **`src/lib/jobs/producer.ts`** — `createJob(params)`: inserts the job row then enqueues via the configured adapter
+- **`src/lib/jobs/index.ts`** — bootstrap file; import all handler files here so they self-register
+- **`src/lib/jobs/queue/`** — `IQueueAdapter` interface + `BullMQAdapter`, `MemoryAdapter`, factory
+- **`src/lib/jobs/handlers/`** — one file per job type
+- **`src/worker/index.ts`** — standalone BullMQ worker process (`npm run worker`)
+
+### Database Schema (`script/jobs.sql`)
+- **`job`** — tracks every job: type, status, priority, payload, result, user, org unit, timestamps, retry count
+
+### API Endpoints
+- **`POST /api/action/job/submit`** — submit a job (session auth); body: `{ jobType, payload, orgUnitCode?, priority?, maxRetries?, delayMs? }`; returns `{ jobId }`
+- **`GET /api/data/job`** — list jobs; users see only their own unless they hold `admin.jobs` permission
+- **`POST /api/action/job/process`** — HTTP push entry point for cloud queue delivery; secured with `Authorization: Bearer $JOB_WORKER_SECRET`
+
+### Adding a New Job Type
+1. Create `src/lib/jobs/handlers/<name>.ts` and call `JobRegistry.register('<type>', handler)`
+2. Add one import line to `src/lib/jobs/index.ts`
+
+### Priority and Concurrency
+Four named queues (one per tier) with per-tier worker concurrency caps. Configurable via `JOB_WORKER_CONCURRENCY_HIGH/NORMAL/LOW/BACKGROUND` env vars (defaults: 5/3/2/1).
+
+### Environment Variables
+```env
+JOB_QUEUE_PROVIDER=bullmq        # bullmq | memory
+JOB_WORKER_SECRET=<secret>       # for /api/worker/process
+REDIS_HOST=localhost              # BullMQ only
+REDIS_PORT=6379
+```
+Worker reads from `.env.worker`; Next.js app reads from `.env.local`.
 
 ## AI Chat Auditing Architecture
 

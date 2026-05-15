@@ -16,6 +16,7 @@ INSERT INTO rfi_request (
     direction,
     linked_entity_id,
     linked_entity_code,
+    create_user_name,
     title,
     body,
     purpose,
@@ -30,11 +31,11 @@ INSERT INTO rfi_request (
     $1, $2, $3,
     'Outbound'::rfi_direction,
     $4::uuid, $5,
-    $6, $7, $8,
-    $9::uuid, $10::jsonb,
-    $11,
-    $12::uuid, $13, $14,
-    $15::timestamptz
+    $6, $7, $8, $9,
+    $10::uuid, $11::jsonb,
+    $12,
+    $13::uuid, $14, $15,
+    $16::timestamptz
 )
 RETURNING id AS "id"
 `;
@@ -131,16 +132,17 @@ export async function createOutboundRfi(
         params.org_unit_code,                   // $3
         params.linked_entity_id,                // $4
         params.linked_entity_code,              // $5
-        params.title,                           // $6
-        params.body ?? null,                    // $7
-        params.purpose ?? null,                 // $8
-        params.recipient_subject_id,            // $9
-        JSON.stringify(contactDetails),         // $10
-        channel.id,                             // $11
-        params.template_id ?? null,             // $12
-        params.ai_generated_draft ?? false,     // $13
-        params.ai_confidence_score ?? null,     // $14
-        params.due_datetime                     // $15
+        params.create_user_name,                // $6
+        params.title,                           // $7
+        params.body ?? null,                    // $8
+        params.purpose ?? null,                 // $9
+        params.recipient_subject_id,            // $10
+        JSON.stringify(contactDetails),         // $11
+        channel.id,                             // $12
+        params.template_id ?? null,             // $13
+        params.ai_generated_draft ?? false,     // $14
+        params.ai_confidence_score ?? null,     // $15
+        params.due_datetime                     // $16
     ]);
 
     if (rfiResult.rows.length === 0) {

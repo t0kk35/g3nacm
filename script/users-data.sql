@@ -25,8 +25,10 @@ VALUES
     ('Data', 'data.alert', 'Base permission for the back-end access to alert data. Needed by end-users as well as as APIs.'),
     ('Data', 'data.subject', 'Base permission for the back-end access to subject data. Needed by end-users as well as as APIs.'),
     ('Data', 'data.attachment', 'Permission needed to read attachments from workflow entities'),
+    ('Data', 'data.rfi_request', 'Permission needed to read RFI Requests'),
     ('Action', 'action.rfi.send', 'Send an RFI via the API endpoint'),
-    ('Reporting', 'reporting.agent.usage.all', 'Agent usage and cost reporting for all users');
+    ('Reporting', 'reporting.agent.usage.all', 'Agent usage and cost reporting for all users'),
+    ('Job', 'job.submit.rfi.inbound_mail', 'Permission to submit the job to read inbound rfi mails');
 
 INSERT INTO user_role_permission_link ("role_id", "permission_id")
 SELECT r.id, p.id

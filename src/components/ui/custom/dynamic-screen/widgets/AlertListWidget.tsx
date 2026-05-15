@@ -19,6 +19,7 @@ import { DynamicScreenError } from '../DynamicScreenError'
 import Link from "next/link"
 import { TanStackTable, tanStackColumnHelper } from "@/components/ui/custom/tanstack-table"
 import { cn } from "@/lib/utils"
+import { useFormatter } from "next-intl"
 
 const HEADER_SIZE = 60;
 const SUMMARY_SIZE = 45;
@@ -255,11 +256,12 @@ function AlertPriorityBadge({ priority }: Props) {
 type AlertUserCommentProps = { alert: Alert }
 
 function AlertUserComment({ alert }: AlertUserCommentProps) {
+  const format = useFormatter();
 
   return (
     <div>
       <p className="text-xs">
-        On: <strong>{alert.entity_state.date_time.toLocaleLowerCase()}</strong>, By: <strong>{alert.entity_state.user_name}</strong>
+        On: <strong>{format.dateTime(new Date(alert.entity_state.date_time), {dateStyle: "short", timeStyle: "medium"})}</strong>, By: <strong>{alert.entity_state.user_name}</strong>
       </p>
       <Separator className="my-2" />
       { alert.entity_state.comment ? (
@@ -282,6 +284,8 @@ function AlertUserComment({ alert }: AlertUserCommentProps) {
 type AlertUserStatusProps = { alert: Alert }
 
 function AlertUserStatus({ alert }: AlertUserStatusProps ) {
+  const format = useFormatter();
+
   return (
     <div>
       <h3 className="text-sm font-semibold mb-2">Entity State</h3>
@@ -292,7 +296,7 @@ function AlertUserStatus({ alert }: AlertUserStatusProps ) {
           From State: <strong>{alert.entity_state.from_state_name}</strong>, To State: <strong>{alert.entity_state.to_state_name}</strong>
         </p>
         <p className="text-xs">
-          On: <strong>{alert.entity_state.date_time}</strong>, By: <strong>{alert.entity_state.user_name}</strong>
+          On: <strong>{format.dateTime(new Date(alert.entity_state.date_time), {dateStyle: "short", timeStyle: "medium"}) }</strong>, By: <strong>{alert.entity_state.user_name}</strong>
         </p>
       </div>
     </div>

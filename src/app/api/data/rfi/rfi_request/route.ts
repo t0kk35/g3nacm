@@ -15,6 +15,7 @@ SELECT
   rr.identifier AS "identifier",
   rr.entity_code AS "entity_code",
   rr.org_unit_code AS "org_unit_code",
+  we.display_url AS "entity_display_url",
   rr.direction AS "direction",
   jsonb_build_object(
     'id', rr.linked_entity_id,
@@ -25,6 +26,7 @@ SELECT
   ) AS "linked_entity",
   rr.parent_rfi_id AS "parent_rfi_id",
   rr.related_rfi_ids AS "related_rfi_ids",
+  rr.create_user_name AS "create_user_name",
   rr.title AS "title",
   rr.body AS "body",
   rr.purpose AS "purpose",
@@ -78,11 +80,15 @@ JOIN workflow_entity_state wes ON rr.entity_code = wes.entity_code and rr.id = w
 JOIN org_unit ou ON ou.code = rr.org_unit_code
 JOIN v_user_org_access_path ouap ON ou.path = ouap.path OR ou.path LIKE CONCAT(ouap.path, '/%')
 JOIN users u ON ouap.user_id = u.id
-WHERE u.name=$1
-AND rr.create_datetime >= $2
-AND wes.assigned_to_user_name = $1
+WHERE 
+u.name = $1 AND
+($2::uuid IS NULL OR (rr.id = $2 AND u.name = $1)) AND 
+($3::timestamp IS NULL OR (u.name = $1 AND rr.create_datetime >= $3 AND wes.assigned_to_user_name = $1))
 `
-
+/**
+ * Function to get RFI's is at present either called with an RFI ID (main rfi detail screen) 
+ * or with a specific date range (from the rfi list widget)
+ */
 export async function GET(request: NextRequest) {
     const useMockData = process.env.USE_MOCK_DATA === "true";
 
@@ -92,19 +98,26 @@ export async function GET(request: NextRequest) {
     const user = session.user;
     if (!user?.name) return ErrorCreators.auth.missingUser(origin);
 
-    // We need a time_range param.
+    // Get Params
     const searchParams = request.nextUrl.searchParams;
-    const timeRange = searchParams.get("time_range");
-    if (!timeRange) return ErrorCreators.param.urlMissing(origin, 'time_range');
-    const currentDate = new Date();
-    const startDate = getStartDate(currentDate, timeRange);
-    if (!startDate) return ErrorCreators.param.invalidTimeRange(origin, 'time_range', timeRange);
+    // If there is an RFI Id we are looking for a specific ID
+    const rfiId = searchParams.get("rfi_id");
+
+    let startDate: Date | undefined;
+    if (!rfiId) {
+      // We need a time_range param.
+      const timeRange = searchParams.get("time_range");
+      if (!timeRange) return ErrorCreators.param.urlMissing(origin, 'time_range');
+      const currentDate = new Date();
+      startDate = getStartDate(currentDate, timeRange);
+      if (!startDate) return ErrorCreators.param.invalidTimeRange(origin, 'time_range', timeRange);
+    }
 
     if (!useMockData) {
         const query = {
             name: origin,
             text: query_text,
-            values: [user.name, startDate]
+            values: [user.name, rfiId, startDate]
         };
         try {
             const response = await db.pool.query(query);

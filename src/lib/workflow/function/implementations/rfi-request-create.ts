@@ -25,6 +25,7 @@ export class FunctionRfiRequestCreate implements IWorkflowFunction {
             org_unit_code: ctx.system.orgUnitCode,
             linked_entity_id: ctx.system.entityId,
             linked_entity_code: ctx.system.entityCode,
+            create_user_name: ctx.system.userName,
             title: title,
             body: body,
             recipient_subject_id: recipientSubjectId,

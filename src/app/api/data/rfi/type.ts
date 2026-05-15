@@ -87,10 +87,12 @@ export type RfiRequest = {
   identifier: string;
   entity_code: string;
   org_unit_code: string;
+  entity_display_url: string;
   direction: RfiDirection;
   linked_entity: LinkedEntity;
   parent_rfi_id?: string;
   related_rfi_ids?: string[];
+  create_user_name: string;
   title: string;
   body?: string;
   purpose?: string;

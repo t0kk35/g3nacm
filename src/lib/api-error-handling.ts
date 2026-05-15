@@ -86,6 +86,12 @@ export enum ErrorCode {
     /** API Errors */
     API_FAILED_CALL = 'API_000001',
 
+    /** Job Submit Errors */
+    JOB_UNKNOWN_TYPE = "JOB_000001",
+    JOB_INVALID_PRIORITY = "JOB_000002",
+    JOB_NO_SECRET = "JOB_000003",
+    JOB_ERROR = "JOB_000004",
+
     /** Schema Not Found */
     SCHEMA_NOT_FOUND = "SCHM_00001",
 
@@ -127,7 +133,7 @@ export const ErrorCreators = {
         /** Error code 'AUTH_00007'. Password secret missing */
         passwordSecretNotFound: (origin: string) => createErrorResponse(ErrorCode.AUT_PASSWORD_SECRET_NOT_FOUND, origin),
     },
-    rule : {
+    rule: {
         cacheError: (origin: string, error: Error) => createErrorResponse(ErrorCode.RULE_CACHE_ERROR, origin, {'error_message': error.message }, error),        
     },
     param: {
@@ -177,12 +183,18 @@ export const ErrorCreators = {
     user: {
         notFound: (origin: string, userId: number) => createErrorResponse(ErrorCode.USER_NOT_FOUND, origin, {'userId': userId}),
     },
-    componentSection : {
+    componentSection: {
         notFound: (origin: string, section_code: string) => createErrorResponse(ErrorCode.COMPONENT_SECTION_NOT_FOUND, origin, {'section_code': section_code}),
         internalError: (origin: string, section_code: string, error: Error) => createErrorResponse(ErrorCode.COMPONENT_SECTION_INTERNAL_ERROR, origin, {'section_code': section_code}, error),
     },
-    api : {
+    api: {
         failedCall: (origin: string, error: Error) => createErrorResponse(ErrorCode.API_FAILED_CALL, origin, {'error_message': error.message }, error)
+    },
+    job: {
+        unknownType: (origin: string, type: string, registeredTypes: string) => createErrorResponse(ErrorCode.JOB_UNKNOWN_TYPE, origin, {'type': type, 'registered_types': registeredTypes}),
+        invalidPriority: (origin: string, priority: number) => createErrorResponse(ErrorCode.JOB_INVALID_PRIORITY, origin, {priority: priority}),
+        workerSecretMissing: (origin: string) => createErrorResponse(ErrorCode.JOB_NO_SECRET, origin),
+        error: (origin: string, jobId:string, error: Error) => createErrorResponse(ErrorCode.JOB_ERROR, origin, {job_id:jobId, error_message: error.message} , error)      
     }
 } as const;
 
@@ -334,6 +346,22 @@ const errorDefinition = new Map<ErrorCode, errorParams>([
     [ErrorCode.API_FAILED_CALL, {
       httpCode: 500,
       text: "Call to API Failed. Error Message: '{error_message}'"
+    }],
+    [ErrorCode.JOB_UNKNOWN_TYPE, {
+      httpCode: 400,
+      text: "Unknown job type: '{type}'. Registered types: '{registered_types}'"
+    }],
+    [ErrorCode.JOB_INVALID_PRIORITY, {
+      httpCode: 400,
+      text: "Invalid priority: '{priority}'. Valid values: 1 (HIGH), 2 (NORMAL), 3 (LOW), 4 (BACKGROUND)"
+    }],
+    [ErrorCode.JOB_NO_SECRET, {
+      httpCode: 500,
+      text: "Worker endpoint secret is not configured"
+    }],
+    [ErrorCode.JOB_NO_SECRET, {
+      httpCode: 500,
+      text: "Worker error for job '{job_id}' message '{error_message}'"
     }],
   ]);
 

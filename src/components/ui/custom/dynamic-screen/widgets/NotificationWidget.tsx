@@ -67,7 +67,7 @@ export function NotificationWidget({
       setMarkingRead(prev => new Set(prev).add(notificationId))
 
       const action: PerformWorkflowAction = {
-        entityCode: 'notification',
+        entityCode: 'system.notification',
         entityId: notificationId,
         orgUnitCode: 'GRP',
         actionCode: 'system.notification.mark_read',

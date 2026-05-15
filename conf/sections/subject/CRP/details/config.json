@@ -36,7 +36,8 @@
         "dataMode": "reference",
         "props": {
             "label": "Acquisition Date",
-            "value": "{{subject.acquisition_date}}"
+            "value": "{{subject.acquisition_date}}",
+            "format": "date"
         }
       }
     ]

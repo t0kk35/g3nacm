@@ -39,7 +39,8 @@
         "props": {
             "label": "Acquisition Date",
             "i18nKey": "fieldAcquisitionDate",
-            "value": "{{subject.acquisition_date}}"
+            "value": "{{subject.acquisition_date}}",
+            "format": "date"
         }
       },
       {
@@ -49,7 +50,8 @@
         "props": {
             "label": "Date Of Birth",
             "i18nKey": "fieldDateOfBirth",
-            "value": "{{subject.type_specific.date_of_birth}}"
+            "value": "{{subject.type_specific.date_of_birth}}",
+            "format": "date"
         }
       },
       {

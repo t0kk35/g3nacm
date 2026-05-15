@@ -150,7 +150,7 @@ export async function getCachedWorkflowConfig(entityCode: string, orgUnitCode: s
             try {
                 const workflows = await db.pool.query(query_text, [entityCode, orgUnitCode]);
                 const out:WorkflowConfig =  workflows.rows[0];
-                if (workflows.rows.length === 0) throw Error(`Workflow for Organisation "${orgUnitCode}" and Entity "${entityCode} could not be found`);
+                if (workflows.rows.length === 0) throw Error(`Workflow for Organisation "${orgUnitCode}" and Entity "${entityCode}" could not be found`);
                 if (workflows.rows.length > 1) throw Error(`Workflow for Organisation "${orgUnitCode}" and Entity "${entityCode} is not unique`);
                 return out
             } catch (error) {

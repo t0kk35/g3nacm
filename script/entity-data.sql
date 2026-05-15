@@ -6,6 +6,6 @@ INSERT INTO workflow_entity
   ('case', 'Case', NULL), 
   ('wlm.ns.alert', 'Name Screening Alert', NULL), 
   ('wlm.tf.alert', 'Transaction Filtering Alert', '/alert'),
-  ('notification', 'User Notification', '/notification'),
+  ('system.notification', 'User Notification', '/notification'),
   ('rfi.inbound', 'Inbound RFI', '/rfi'),
   ('rfi.outbound', 'Outbound RFI', '/rfi');

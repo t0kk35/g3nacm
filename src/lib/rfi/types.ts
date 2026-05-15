@@ -18,6 +18,7 @@ export type CreateOutboundRfiParams = {
     org_unit_code: string;
     linked_entity_id: string;      // UUID of the linked alert/case
     linked_entity_code: string;    // e.g. "aml.rule.alert"
+    create_user_name: string;
     title: string;
     body?: string;
     purpose?: string;

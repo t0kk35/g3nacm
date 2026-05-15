@@ -38,7 +38,7 @@ export async function executeWorkflowAction(client: PoolClient, workflowConfig: 
     }
     else {
       // Validate that the entity's current state matches the allowed source state.
-      if (entityState.to_state_code !== action.from_state_code) WorkflowErrorCreators.action.invalidStateTransition(origin, action.code, action.from_state_code, entityState.from_state_code) 
+      if (entityState.to_state_code !== action.from_state_code) WorkflowErrorCreators.action.invalidStateTransition(origin, action.code, action.from_state_code, entityState.to_state_code) 
     }
   
     // Set system fields for this execution.
@@ -46,16 +46,16 @@ export async function executeWorkflowAction(client: PoolClient, workflowConfig: 
     ctx.system.toStateCode = action.to_state_code;
 
     // First update the entity state and state_log. So they reflect the action transition.
-    copyToEntityStateLog(client, ctx.system.entityId, ctx.system.entityCode);    
+    await copyToEntityStateLog(client, ctx.system.entityId, ctx.system.entityCode);    
     // Get the comment if required for the action.
     if (action.comment_required) {
       WorkflowErrorCreators.action.assertActionHasCommentMapping(origin, action.code, action.comment_mapping);
       const comment = ctx.data[action.comment_mapping];
       WorkflowErrorCreators.action.assertCommentInContext(origin, action.code, comment);
-      updateEntityState(client, ctx.system.entityId, ctx.system.entityCode, ctx.system.actionCode, ctx.system.fromStateCode, ctx.system.userName, comment);
+      await updateEntityState(client, ctx.system.entityId, ctx.system.entityCode, ctx.system.actionCode, ctx.system.fromStateCode, ctx.system.userName, comment);
     }
     else {
-      updateEntityState(client, ctx.system.entityId, ctx.system.entityCode, ctx.system.actionCode, ctx.system.fromStateCode, ctx.system.userName, undefined);
+      await updateEntityState(client, ctx.system.entityId, ctx.system.entityCode, ctx.system.actionCode, ctx.system.fromStateCode, ctx.system.userName, undefined);
     }
 
     // Execute each workflow function in order.
@@ -74,10 +74,10 @@ export async function executeWorkflowAction(client: PoolClient, workflowConfig: 
           inputs[s.mapping] = resolveSetting(s.value, ctx);
         })
       };
-    
+
       // Insert the context variables into inputs.
       func.input_parameters.forEach((ip) => {
-        if (ip.context_mapping) inputs[ip.code] = ctx.data[ip.context_mapping]
+        if (ip.context_mapping) inputs[ip.code] = resolveContextMapping(ip.context_mapping, ctx)
       });
       
       // Execute the function
@@ -164,4 +164,13 @@ export function isAnyActive(fromStateCode: string): Boolean {
 /* Helper function to get an object by path */
 function getByPath(obj: any, path: string) {
   return path.split('.').reduce((o, key) => (o ? o[key] : undefined), obj);
+}
+
+/* Resolves a context_mapping path against the workflow context.
+   Paths starting with 'system.' read from ctx.system; all others traverse ctx.data. */
+function resolveContextMapping(path: string, ctx: WorkflowContext): any {
+  if (path.startsWith('system.')) {
+    return getByPath(ctx.system, path.slice('system.'.length));
+  }
+  return getByPath(ctx.data, path);
 }

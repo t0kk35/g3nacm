@@ -62,6 +62,7 @@ CREATE TABLE rfi_request(
     linked_entity_code TEXT NOT NULL, -- Linked to alert or case
     parent_rfi_id UUID,
     related_rfi_ids UUID[],
+    create_user_name TEXT NOT NULL,
     title TEXT NOT NULL,
     body TEXT, -- Main body of the RFI.
     purpose TEXT,
@@ -128,7 +129,7 @@ CREATE INDEX idx_rfi_i_rfi_id ON rfi_question(rfi_request_id);
 
 --- RFI Reponses
 CREATE TABLE rfi_response (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    repsonse_text UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     rfi_request_id UUID NOT NULL,
     rfi_message_id UUID,
     -- Responder content

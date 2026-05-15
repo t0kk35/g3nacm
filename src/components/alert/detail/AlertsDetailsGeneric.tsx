@@ -16,6 +16,7 @@ import { EntityState } from "@/app/api/data/entity_state/entity-state"
 import { ComponentSectionRenderer } from "@/components/ui/custom/component-section/ComponentSectionRenderer"
 import { ClipboardList } from "lucide-react"
 import { getTranslations } from "next-intl/server"
+import { useFormatter } from "next-intl"
 
 export async function AlertDetailsGeneric({ alert }: { alert: Alert }) {
   
@@ -42,7 +43,7 @@ export async function AlertDetailsGeneric({ alert }: { alert: Alert }) {
         </CardTitle>
         <div className="text-sm">
           <p>
-            <strong>(t('descriptionField')): </strong>{alert.description}
+            <strong>{t('descriptionField')}: </strong>{alert.description}
           </p>
         </div>
         <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
@@ -61,7 +62,7 @@ export async function AlertDetailsGeneric({ alert }: { alert: Alert }) {
       </CardContent>
       <CardFooter>
         <div className="mt-4">
-          <EntityAuditButton audit={alert.entity_state_history} />
+          <EntityAuditButton audit={alert.entity_state_history} t={t} />
         </div>        
       </CardFooter>
     </Card>
@@ -70,9 +71,12 @@ export async function AlertDetailsGeneric({ alert }: { alert: Alert }) {
 
 type EntityAuditProps = {
   audit: EntityState[];
+  t: Awaited<ReturnType<typeof getTranslations<'Alert.GenericDetails'>>>;
 }
 
-function EntityAuditButton ({ audit } : EntityAuditProps) {
+function EntityAuditButton ({ audit, t } : EntityAuditProps) {
+  const format = useFormatter();
+  
   const sortedAudit = audit.sort(
     (a, b) => new Date(b.date_time).getTime() - new Date(a.date_time).getTime(),
   )
@@ -82,26 +86,26 @@ function EntityAuditButton ({ audit } : EntityAuditProps) {
       <HoverCardTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2 bg-transparent">
           <ClipboardList className="h-4 w-4" />
-          Audit
+          {t('auditButton')}
         </Button>
       </HoverCardTrigger>
       <HoverCardContent className="w-96" align="start">
-        <div className="font-medium mb-2">Audit History</div>
+        <div className="font-medium mb-2">{t('auditHooverTitle')}</div>
         <ScrollArea className="h-40">
           <div className="space-y-2">
             {sortedAudit.map((entry, index) => (
               <div key={index} className="border-b pb-2 last:border-0">
-                <p className="text-sm">Action : <strong>{entry.action_name}</strong></p>
+                <p className="text-sm">{t('auditAction')}: <strong>{entry.action_name}</strong></p>
                 <p className="text-xs text-muted-foreground">
-                  From State: <strong>{entry.from_state_name}</strong>, To State: <strong>{entry.to_state_name}</strong>
+                  {(t('auditFromState'))}: <strong>{entry.from_state_name}</strong>, {t('auditToState')}: <strong>{entry.to_state_name}</strong>
                 </p>
                 <p className="text-xs">
-                  On: <strong>{entry.date_time}</strong>, By: <strong>{entry.user_name}</strong>
+                  {t('auditDate')}: <strong>{format.dateTime(new Date(entry.date_time), {dateStyle: "short", timeStyle: "medium"})}</strong>, By: <strong>{entry.user_name}</strong>
                 </p>
               </div>
             ))}
             {sortedAudit.length === 0 && (
-              <div className="text-center py-4 text-muted-foreground">No audit history available</div>
+              <div className="text-center py-4 text-muted-foreground">{t('auditNoneAvailable')}</div>
             )}
           </div>
         </ScrollArea>

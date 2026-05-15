@@ -3,7 +3,9 @@ import { OrgUnit } from "@/app/api/data/org_unit/org_unit";
 import { OrgUnitUserAccess } from "@/app/api/data/org_unit/access/route";
 import { cookies } from "next/headers";
 import { APIError } from "./api-error-handling";
-import { toast } from "sonner"
+import { getCachedUserOrgAccess } from "./cache/user-org-access-cache";
+import { getCachedOrgUnit } from "./cache/org-unit-cache";
+import { error } from "console";
 
 /**
  * Checks if a child path is under a parent path in the hierarchy.
@@ -15,72 +17,24 @@ function isPathUnderHierarchy(parentPath: string, childPath: string): boolean {
     return childPath.startsWith(`${parentPath}/`) || childPath === parentPath;
 }
 
-async function getOrganisations() {
-    const org_units = await authorizedFetch(`${process.env.DATA_URL}/api/data/org_unit`)
-        .then((res) => {
-            if (!res.ok) throw new Error(`Could not get Organisation for filtering`) 
-            else return res.json()
-        })
-        .then((j) => j as OrgUnit[]);
-    return org_units
-}
-
-async function getUserAccess(userName: string) {
-    const org_access = await authorizedFetch(`${process.env.DATA_URL}/api/data/org_unit_access?user_name=${userName}`)
-        .then((res) => {
-            if (!res.ok) throw new Error(`Could not get user access for filtering user: ${userName}`)
-            else return res.json()
-        })
-        .then((j)=> j as OrgUnitUserAccess[])
-    return org_access 
-}
-
 /**
- * Function that performs the org unit filtering on a single data element. The data element
- * must be of type OrgUnitFilter
- * The function will filter the data element according to the access granted to the users.
- * @param data - List of data elements to filter by Org-unit code.
- * @param user - The user for which we need to filter.
- * @returns - The data item if the user has access, else undefined
+ * Checks if an org unit is within the accessible hierarchy of a given user.
+ * Uses the user org access cache + a direct DB lookup for the target org unit's path.
+ * Safe to call from background jobs (no cookie/session dependency).
  */
-export async function orgFilterSingle(data:OrgUnitFilter, user_name: string) {
-    const org_func = getOrganisations()
-    const acc_func = getUserAccess(user_name)
-    const [org_units, org_access] = await Promise.all([org_func, acc_func])
-    
-    // Create a map that contains the org-unit codes and paths this user has access to
-    const org_path_map = new Map(org_units.map((ou) => [ou.code, ou.path]));
-    const accessiblePaths = org_access ? org_access.map((oa) => oa.path) : []
+export async function isOrgUnitAccessibleToUser(userName: string, orgUnitCode: string): Promise<boolean> {
 
-    const itemPath = org_path_map.get(data.org_unit_code); // Find path for the org unit
-    if (!itemPath) return false
-    return accessiblePaths.some((accesspath) => isPathUnderHierarchy(accesspath, itemPath)) ? data : undefined;
-}
-
-/**
- * Function that performs the org unit filtering on a list of data elements. The data elements
- * must be of type OrgUnitFilter[], items that are of a different type will be filtered out.
- * The function will filter the data element according to the access granted to the users.
- * @param data - List of data elements to filter by Org-unit code.
- * @param user - The user for which we need to filter.
- * @returns - A list of data elements that are filtered to only have items the user has access to.
- */
-export async function orgFilterArray<T extends OrgUnitFilter>(data: T[], user_name: string): Promise<T[]> {
-    const org_func = getOrganisations()
-    const acc_func = getUserAccess(user_name)
-    const [org_units, org_access] = await Promise.all([org_func, acc_func])
-    
-    // Create a map that contains the org-unit codes and paths this user has access to
-    const org_path_map = new Map(org_units.map((ou) => [ou.code, ou.path]));
-    const accessiblePaths = org_access ? org_access.map((oa) => oa.path) : []
-
-    return data.filter((item) => {
-        const itemPath = org_path_map.get(item.org_unit_code); // Find path for the org unit
-        if (!itemPath) return false
-    
-        // Check if itemPath is under any accessible path
-        return accessiblePaths.some((accesspath) => isPathUnderHierarchy(accesspath, itemPath));
-    })
+    let org;
+    let userAccess;
+    try {
+        org = await getCachedOrgUnit(orgUnitCode)
+        userAccess = await getCachedUserOrgAccess(userName);
+    } catch (error) {
+        console.log('Error Fetching Org and UserAccess ' + (error as Error).message)
+        return false;
+    }
+    if (org.deleted) return false;
+    return userAccess.org_units.some(ou => isPathUnderHierarchy(ou.path, org.path));
 }
 
 export async function authorizedFetch(url: string) {

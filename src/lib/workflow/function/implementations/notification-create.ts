@@ -26,12 +26,12 @@ INSERT INTO notification (
     $4,
     $5,
     $6
-) RETURNING (id, code)
+) RETURNING (id)
 `
 
 const query_update_text = `
 UPDATE notification
-SET identifer = $2
+SET identifier = $2
 WHERE id = $1 
 `
 
@@ -48,7 +48,7 @@ export class FunctionNotificationCreate implements IWorkflowFunction {
         const notificationEntityCode =  getInput(this.code, inputs, 'function.notification.create.notification_entity_code', isString);
 
         const query_insert = {
-            name: this.code,
+            name: `${this.code}.insert`,
             text: query_insert_text,
             values:[senderUser, receiverUser, ctx.system.entityId, ctx.system.entityCode, title, body]
         };
@@ -59,13 +59,13 @@ export class FunctionNotificationCreate implements IWorkflowFunction {
         const identifier = generateIdentifier('NTF', notification.id, new Date())
         // Update the identifier
         const query_update = {
-            name: this.code,
+            name: `${this.code}.update`,
             text: query_update_text,
             values:[notification.id, identifier]
         };
         await client.query(query_update);
         // Create the workflow_entity_state entry.
-        await createEntity(client, notification.id, notificationEntityCode, identifier, ctx.system.orgUnitCode, ctx.system.userName);
+        await createEntity(client, notification.id, notificationEntityCode, identifier, "GRP", ctx.system.userName);
         
         // Return a reference to the newly created notification.
         return {

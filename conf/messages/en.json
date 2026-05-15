@@ -26,7 +26,12 @@
     "validationNumberStep": "Value must be in steps of {step}.",
     "languageEnglish": "English",
     "languageFrench": "French",
-    "languageSpanish": "Spanish"
+    "languageSpanish": "Spanish",
+    "dateTimeLast1Hour": "Last 1 Hour",
+    "dateTimeLast24Hours": "Last 24 Hours",
+    "dateTimeLast7Days": "Last 7 days",
+    "dateTimeLast30Days": "Last 30 days",
+    "dateTimeLast90Days": "Last 90 days"
   },
   "Admin" : {
     "Agent": {
@@ -389,12 +394,45 @@
   "Alert": {
     "GenericDetails": {
       "descriptionField": "Description",
-      "orgUnitField": "Org-Unit"
+      "orgUnitField": "Org-Unit",
+      "auditButton": "Audit",
+      "auditHooverTitle" : "Audit History",
+      "auditAction": "Action",
+      "auditFromState": "From State",
+      "auditToState": "To State",
+      "auditDate": "On",
+      "auditNoneAvailable": "No audit history available"
     }
   },
   "Subject": {
     "GenericDetails" : {
       "BadgeRisk": "Risk"
+    }
+  },
+  "RfiRequest": {
+    "Details": {
+      "Request": {
+        "title": "RFI Request",
+        "datesSectionCreateDate": "Create Date",
+        "dateSectionDueDate": "Due Date",
+        "dateSectionReminderDate": "Reminder Date",
+        "dateSectionReminderNotSet": "Not Set",
+        "linkedToDescription": "Linked to",
+        "linkedToId": "ID",
+        "reponsesTitle": "Responses"     
+      },
+      "Responses" : {
+        "reponseTitle": "Response Detail",
+        "responseUnknownRespondent": "Unknown Respondent",
+        "responseComplete": "Complete",
+        "responseInComplete": "Incomplete",
+        "responseSatisfactory": "Satisfactory",
+        "responseUnSatisfactory" : "Unsatisfactory",
+        "responseNoContent": "No response content provided.",
+        "reponseQualityNotes": "Quality Notes",
+        "responseDateReceived": "Received",
+        "responseSelectToView": "Select a response to view details"
+      }
     }
   },
   "DynamicScreen": {
@@ -413,7 +451,7 @@
       "Grid": {
         "loading": "Loading ...",
         "unlockButton": "Edit Mode",
-        "lockButton": "Lock",
+        "lockButton": "Locked",
         "addWidgetButton": "Add Widget",
         "addFirstWidgetButton": "Add Your First Widget",
         "noWidgets": "No widgets configured"
@@ -439,6 +477,19 @@
       }
     },
     "Widgets": {
+      "RfiAssignment" : {
+        "headerShowOnlyActive" : "Only Active",
+        "scrollNoRfis": "No RFI Requests",
+        "hooverId": "ID",
+        "statusState": "State",
+        "hooverHeaderTo": "To",
+        "hooverCardCreateDate": "Create Date",
+        "hooverCardDueDate": "Due Date",
+        "hooverCardReminderDate": "Reminder Date",
+        "hooverCardReminderNotSet": "Not set",
+        "hooverCardLinkedToDescription": "Linked to",
+        "hooverCardLinkedToId": "ID"
+      }
     }
   },
   "ComponentSection": {

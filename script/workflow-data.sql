@@ -86,6 +86,7 @@ VALUES
   ('function.notification.create.receiver_user_name', 'function.notification.create', 'User name of the user receiving the notification', 'string', 'Input'),
   ('function.notification.create.title', 'function.notification.create', 'A title for the notification', 'object', 'Input'),
   ('function.notification.create.body', 'function.notification.create', 'The content of the notification', 'string', 'Input'),
+  ('function.notification.create.notification_entity_code', 'function.notification.create', 'The workflow entity code for the notification', 'string', 'Input'),
   -- Output parameters
   ('function.notification.create.notification_id', 'function.notification.create', 'Unique ID of the notification', 'string', 'Output');
 

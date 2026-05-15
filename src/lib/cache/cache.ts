@@ -165,3 +165,9 @@ export const permissionCache = new InMemoryCache(100, 2000, 5);
 
 // RFI Channel cache. Max size = 5, clean-up every 500 calls with a bach size of 5.
 export const rfiChannelCache = new InMemoryCache(5, 500, 2);
+
+// Org unit cache. Max size = 10, clean-up every 1000 calls and batchsize of 2.
+export const orgUnitCache = new InMemoryCache(10, 1000, 2);
+
+// User Org unit access. Max size = 50, clean-up every 500 calls and batchsize of 20.
+export const userOrgAccessCache = new InMemoryCache(50, 500, 20);
