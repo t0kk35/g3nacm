@@ -2,13 +2,13 @@
 
 import { auth } from "@/auth";
 import * as db from "@/db"
-import { authorizedFetch } from "@/lib/org-filtering";
+import { queryAgentConfig } from "@/lib/data/queries/agent/config";
 import { NextRequest, NextResponse } from 'next/server';
 import { ErrorCreators } from '@/lib/api-error-handling';
 import { requirePermissions } from '@/lib/permissions/check';
 import { AuditData } from "@/lib/audit/types";
 import { createAuditEntry } from "@/lib/audit/audit-log";
-import { AgentConfigAdmin } from "@/app/api/data/agent/types";
+import { AgentConfigAdmin } from "@/lib/data/queries/agent/types";
 
 type Props = { params: Promise<{ configCode: string }> }
 
@@ -59,14 +59,6 @@ export async function PUT(request: NextRequest, { params }: Props) {
         if (!param.field) return ErrorCreators.param.bodyMissing(origin, param.name);
     }
 
-    // Get before state for audit
-    let beforeData:AgentConfigAdmin;
-    try {
-        beforeData = await getBeforeData(configCode)
-    } catch(error) {
-        return ErrorCreators.agent.notFound(origin, configCode)
-    }    
-
     // Set up a connection and transactions
     let client;
     let transactionStarted = false;
@@ -75,6 +67,11 @@ export async function PUT(request: NextRequest, { params }: Props) {
         client = await db.pool.connect();
         await client.query('BEGIN');
         transactionStarted = true;
+
+        // Get before state for audit
+        const before = await queryAgentConfig({code: configCode}, {userName: user.name, client: client})
+        if (before.length < 1) return ErrorCreators.agent.notFound(origin, configCode)
+        const beforeData = before[0]
 
         // Delete all the tool links.
         await client.query(query_delete_agent_tool_link, [configCode]);
@@ -158,14 +155,6 @@ export async function DELETE(_request: NextRequest, { params }: Props) {
     const configCode = (await params).configCode;
     if (!configCode) return ErrorCreators.param.urlMissing(origin, 'configCode');
 
-    // Get before state for audit
-    let beforeData:AgentConfigAdmin;
-    try {
-        beforeData = await getBeforeData(configCode)
-    } catch(error) {
-        return ErrorCreators.agent.notFound(origin, configCode)
-    }
-
     // Set up a connection and transactions
     let client;
     let transactionStarted = false;
@@ -174,6 +163,11 @@ export async function DELETE(_request: NextRequest, { params }: Props) {
         client = await db.pool.connect();
         await client.query('BEGIN');
         transactionStarted = true;
+
+        // Get before state for audit
+        const before = await queryAgentConfig({code: configCode}, {userName: user.name, client: client})
+        if (before.length < 1) return ErrorCreators.agent.notFound(origin, configCode)
+        const beforeData = before[0]
 
         // Delete all the tool links.
         await client.query(query_delete_agent_tool_link, [configCode]);
@@ -210,12 +204,4 @@ export async function DELETE(_request: NextRequest, { params }: Props) {
     } finally {
         if (client) client.release();
     }
-}
-
-async function getBeforeData(configCode: string) {
-    const before = await authorizedFetch(`${process.env.DATA_URL}/api/data/agent/config?code=${configCode}`)
-        .then(res => { if (!res.ok) throw new Error('Error fetching agent config'); else return res.json() })
-        .then(j => j as AgentConfigAdmin[])
-    if (before.length < 1) throw new Error ('Got empty agent config')
-    return before[0];    
 }

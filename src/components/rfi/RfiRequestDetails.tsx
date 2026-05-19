@@ -8,8 +8,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { MessageSquare } from "lucide-react";
 import { RfiRequestDetailsClient } from "./RfiRequestDetailsClient"
 import { formatDateToInterval } from '@/lib/date-time/formatting'
-import { RfiRequest } from "@/app/api/data/rfi/type"
-import { RfiResponse } from "@/app/api/data/rfi/type"
+import { RfiRequest } from "@/lib/data/queries/rfi/type"
+import { RfiResponse } from "@/lib/data/queries/rfi/type"
 import Link from 'next/link'
 import { getTranslations, getFormatter } from "next-intl/server"
 

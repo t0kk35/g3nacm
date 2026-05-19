@@ -9,7 +9,7 @@ import { EditDeleteCardFooter } from "../EditDeleteCardFooter"
 import { EditDeleteTableCell } from "../EditDeleteTableCell"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { UserRole } from "@/app/api/data/user/user"
+import { UserRole } from "@/lib/data/queries/user/user"
 import { toast } from "sonner"
 import { ApiError } from "next/dist/server/api-utils"
 

@@ -2,9 +2,9 @@
 
 import { auth } from "@/auth";
 import * as db from "@/db"
-import { authorizedFetch } from "@/lib/org-filtering";
+import { queryAgentModelConfig } from "@/lib/data/queries/agent/model_config";
 import { NextRequest, NextResponse } from 'next/server';
-import { AgentModelConfig } from "@/lib/cache/agent-model-config-cache";
+import { AgentModelConfigAdmin } from "@/lib/data/queries/agent/types";
 import { ErrorCreators } from '@/lib/api-error-handling';
 import { requirePermissions } from '@/lib/permissions/check';
 import { AuditData } from "@/lib/audit/types";
@@ -46,7 +46,7 @@ export async function PUT(request: NextRequest, { params }: Props) {
     if (!configCode) return ErrorCreators.param.urlMissing(origin, 'configCode');
 
     // Get config to update and validate
-    const config: AgentModelConfig = await request.json();    
+    const config: AgentModelConfigAdmin = await request.json();    
 
     const req_params = [
         { name: 'config.name', field: config.name }, 
@@ -55,14 +55,6 @@ export async function PUT(request: NextRequest, { params }: Props) {
     ]
     for (var param of req_params) {
         if (!param.field) return ErrorCreators.param.bodyMissing(origin, param.name);
-    }
-
-    // Get before state for audit
-    let beforeData:AgentModelConfig;
-    try {
-        beforeData = await getBeforeData(configCode)
-    } catch(error) {
-        return ErrorCreators.agent.notFound(origin, configCode)
     }
 
     // Set up a connection and transactions
@@ -74,6 +66,11 @@ export async function PUT(request: NextRequest, { params }: Props) {
         await client.query('BEGIN');
         transactionStarted = true;
         
+        // Get before state for audit
+        const before = await queryAgentModelConfig({code: configCode}, {userName: user.name, client: client})
+        if (before.length < 1) return ErrorCreators.agent.notFound(origin, configCode)
+        const beforeData = before[0]
+
         await client.query(query_agent_model_update, [
             config.code,
             config.name,
@@ -144,14 +141,6 @@ export async function DELETE(_request: NextRequest, { params }: Props) {
     const configCode = (await params).configCode;
     if (!configCode) return ErrorCreators.param.urlMissing(origin, 'configCode');
 
-    // Get before state for audit
-    let beforeData:AgentModelConfig;
-    try {
-        beforeData = await getBeforeData(configCode)
-    } catch(error) {
-        return ErrorCreators.agent.notFound(origin, configCode)
-    }
-
     // Set up a connection and transactions
     let client;
     let transactionStarted = false;
@@ -160,6 +149,11 @@ export async function DELETE(_request: NextRequest, { params }: Props) {
         client = await db.pool.connect();
         await client.query('BEGIN');
         transactionStarted = true;
+
+        // Get before state for audit
+        const before = await queryAgentModelConfig({code: configCode}, {userName: user.name, client: client})
+        if (before.length < 1) return ErrorCreators.agent.notFound(origin, configCode)
+        const beforeData = before[0]
 
         await client.query(query_agent_model_delete, [configCode]);
 
@@ -193,12 +187,4 @@ export async function DELETE(_request: NextRequest, { params }: Props) {
     } finally {
         if (client) client.release();
     }
-}
-
-async function getBeforeData(configCode: string) {
-    const before = await authorizedFetch(`${process.env.DATA_URL}/api/data/agent/model_config?code=${configCode}`)
-        .then(res => { if (!res.ok) throw new Error('Error fetching model config'); else return res.json() })
-        .then(j => j as AgentModelConfig[])
-    if (before.length < 1) throw new Error ('Got empty model config')
-    return before[0];    
 }

@@ -1,7 +1,7 @@
 'use server'
 
 import { authorizedGetJSON } from "@/lib/org-filtering"
-import { UserTeam } from "@/app/api/data/user/user"
+import { UserTeam } from "@/lib/data/queries/user/user"
 import { EvalInputSchema } from "@/lib/eval-engine/types"
 import { OrgUnit } from "@/app/api/data/org_unit/org_unit"
 import { TeamAssignmentRulesClient } from "./TeamAssignmentRulesClient"
@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export async function TeamAssignmentRules() {
 
-  const teams = authorizedGetJSON<UserTeam[]>(`${process.env.DATA_URL}/api/data/user/team`);
+  const teams = authorizedGetJSON<UserTeam[]>(`${process.env.DATA_URL}/api/data/team/list`);
   const schemas = authorizedGetJSON<EvalInputSchema[]>(`${process.env.DATA_URL}/api/data/eval/schema`);
   const orgUnits = authorizedGetJSON<OrgUnit[]>(`${process.env.DATA_URL}/api/data/org_unit/org_unit`);
   

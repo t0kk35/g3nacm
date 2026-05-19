@@ -2,10 +2,9 @@
 
 import { auth } from "@/auth";
 import * as db from "@/db";
-import { authorizedGetJSON } from "@/lib/org-filtering";
+import { queryTeamList } from "@/lib/data/queries/team/list";
 import { NextRequest, NextResponse } from 'next/server';
 import { UserTeamRequest } from '../user-team';
-import { UserTeam } from "@/app/api/data/user/user";
 import { ErrorCreators } from '@/lib/api-error-handling';
 import { requirePermissions } from '@/lib/permissions/check';
 import { AuditData } from "@/lib/audit/types";
@@ -51,16 +50,6 @@ export async function PUT(request: NextRequest, { params }: Props) {
         if (!param.field) return ErrorCreators.param.bodyMissing(origin, param.name);
     }
 
-    // Get audit before data
-    let beforeData;
-    try {
-        const before = await authorizedGetJSON<UserTeam[]>(`${process.env.DATA_URL}/api/data/user/team?team_id=${teamId}`)
-        if (before.length < 1) return ErrorCreators.db.entityNotFound(origin, "Team", teamId)
-        beforeData = before[0]
-    } catch (error) {
-        return ErrorCreators.api.failedCall(origin, error as Error)
-    }
-
     // Set up a connection and transactions
     let client;
     let transactionStarted = false;
@@ -68,6 +57,12 @@ export async function PUT(request: NextRequest, { params }: Props) {
         client = await db.pool.connect();
         await client.query('BEGIN');
         transactionStarted = true;
+
+        // Get before state for audit
+        const before = await queryTeamList({team_id: teamId}, {userName: user.name, client: client});
+        if (before.length < 1) return ErrorCreators.db.entityNotFound(origin, "Team", teamId);
+        const beforeData = before[0];
+
         // Update the team record
         await client.query(query_team_update, [teamId, team.name, team.description]);
 
@@ -114,16 +109,6 @@ export async function DELETE(_request: NextRequest, { params }: Props) {
     const teamId = (await params).teamId;
     if (!teamId) return ErrorCreators.param.urlMissing(origin, 'teamId');
 
-    // Get audit before data
-    let beforeData;
-    try {
-        const before = await authorizedGetJSON<UserTeam[]>(`${process.env.DATA_URL}/api/data/user/team?team_id=${teamId}`)
-        if (before.length < 1) return ErrorCreators.db.entityNotFound(origin, "Team", teamId)
-        beforeData = before[0]
-    } catch (error) {
-        return ErrorCreators.api.failedCall(origin, error as Error)
-    }
-
     // Set up a connection and transactions
     let client;
     let transactionStarted = false;
@@ -132,6 +117,12 @@ export async function DELETE(_request: NextRequest, { params }: Props) {
         client = await db.pool.connect();
         await client.query('BEGIN');
         transactionStarted = true;
+
+        // Get before state for audit
+        const before = await queryTeamList({team_id: teamId}, {userName: user.name, client: client});
+        if (before.length < 1) return ErrorCreators.db.entityNotFound(origin, "Team", teamId);
+        const beforeData = before[0];
+
         await client.query(query_team_delete, [teamId]);
 
         const auditData: AuditData = {

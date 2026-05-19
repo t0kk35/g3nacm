@@ -7,7 +7,7 @@ import { Badge } from "../ui/badge";
 import { Separator } from "../ui/separator";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { useTranslations } from "next-intl";
-import { RfiResponse } from "@/app/api/data/rfi/type"
+import { RfiResponse } from "@/lib/data/queries/rfi/type"
 import {
   ArrowDownLeft,
   ArrowUpRight,

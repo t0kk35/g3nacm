@@ -1,6 +1,6 @@
 'use server'
 
-import { authorizedFetch, authorizedGetJSON } from "@/lib/org-filtering"
+import { authorizedGetJSON } from "@/lib/org-filtering"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { OrgUnitNode } from "@/app/api/data/org_unit/org_unit"

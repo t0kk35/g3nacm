@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth";
 import { authorizedGetJSON } from "@/lib/org-filtering";
-import { Alert } from "@/app/api/data/alert/alert";
+import { Alert } from "@/lib/data/queries/alert/alert";
 import { Suspense } from "react";
 import { EntityLockProvider } from "@/contexts/entity-lock-context";
 import { EntityLockIndicator, EntityLockIndicatorSkeleton } from "@/components/ui/custom/entity-lock-indicator";
@@ -27,7 +27,7 @@ export default async function AlertDetails({ params }: Props) {
   const alert = await authorizedGetJSON<Alert>(`${process.env.DATA_URL}/api/data/alert/detail?alert_id=${alertId}`);
   
   // Get the agent code for the chat window 
-  const agentCode = await authorizedGetJSON<any>(`${process.env.DATA_URL}/api/data/agent/workflow?workflow_state_code=${alert.entity_state.to_state_code}`)
+  const agentCode = await authorizedGetJSON<string>(`${process.env.DATA_URL}/api/data/agent/workflow?workflow_state_code=${alert.entity_state.to_state_code}`)
 
   // Setup context for the agent
   const agentContext: TemplateContext = {
@@ -50,7 +50,7 @@ export default async function AlertDetails({ params }: Props) {
             entityId={alert.id}
             orgUnitCode={alert.org_unit_code}
           />
-          <ChatWindow agent={agentCode.agent_code} 
+          <ChatWindow agent={agentCode} 
             context={agentContext} 
             orgUnitCode={alert.org_unit_code}
             entityCode={alert.entity_state.entity_code}

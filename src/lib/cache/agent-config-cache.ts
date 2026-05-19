@@ -1,58 +1,31 @@
-import * as db from "@/db"
 import { agentConfigCache } from "./cache";
 import { StreamingAgentConfig, TextAgentConfig, ObjectAgentConfig } from "../ai-tools";
 import { removeNullsAndEmptyObjects } from "../json";
+import { queryAgentConfig, queryAgentConfigPermission } from "../data/queries/agent/config";
+import { hasPermissions } from '@/lib/permissions/core';
+import { AgentConfigAdmin } from "../data/queries/agent/types";
 
-const config_query_text = `
-SELECT 
-  a.code,
-  a.agent_type AS "type",
-  a.model_code,   
-  a.name,
-  a.description,
-  a.system_prompt,
-  a.max_steps,
-  a.output_schema,
-  ARRAY_REMOVE(ARRAY_AGG(DISTINCT at.code), NULL) AS "tools"
-FROM agent a 
-LEFT JOIN agent_tool_link atl ON atl.agent_code = a.code
-LEFT JOIN agent_tool at ON atl.tool_code = at.code
-WHERE a.code = $1
-GROUP BY a.code, a.agent_type, a.name, a.description, a.system_prompt, a.max_steps, a.output_schema
-`
-
-type AgentDBConfig = {
-    code: string;
-    type: string;
-    model_code: string;
-    name: string;
-    description: string;
-    system_prompt: string;
-    max_steps: number;
-    output_schema: Record<string, any>;
-    tools: string[];
-}
-
-export async function getCachedAgentConfig(configCode: string) {
+export async function getCachedAgentConfig(configCode: string, userName: string) {
     const key = `agentConfig:${configCode}`;
+    const ok = await hasPermissions(userName,queryAgentConfigPermission)
+    if (!ok) throw new Error(`Agent Config Cache Error. User '${userName}' does not have permission to '${queryAgentConfigPermission.toString}'`)
 
     return agentConfigCache.get(
         key,
         async () => {
-            const res = await db.pool.query(config_query_text, [configCode]);
-            const configs:AgentDBConfig[] = res.rows;
-            if (configs.length < 1) throw new Error(`Agent Config Cache Error. Could not find the config with code "${configCode}"`)
-            switch (configs[0].type) {
-                case 'streaming': return createStreamingConfig(configs[0]);
-                case 'text': return createTextConfig(configs[0]);
-                default: throw new Error(`Agent Config Cache Error. Unsupported agent type: ${(configs as any).type}`);
+            const result = await queryAgentConfig({code: configCode}, {userName: userName});
+            if (result.length < 1) throw new Error(`Agent Config Cache Error. Could not find the config with code "${configCode}"`)
+            switch (result[0].agent_type) {
+                case 'streaming': return createStreamingConfig(result[0]);
+                case 'text': return createTextConfig(result[0]);
+                default: throw new Error(`Agent Config Cache Error. Unsupported agent type: ${result[0].agent_type}`);
             }
         },
         600_000
     )
 }
 
-function createStreamingConfig(config: AgentDBConfig): StreamingAgentConfig {
+function createStreamingConfig(config: AgentConfigAdmin): StreamingAgentConfig {
     
     const options: Record<string, any> = {};
     
@@ -69,13 +42,13 @@ function createStreamingConfig(config: AgentDBConfig): StreamingAgentConfig {
         name: config.name,
         agentType: 'streaming',
         description: config.description,
-        modelConfigCode: config.model_code,
-        tools: config.tools,
+        modelConfigCode: config.model_config_code,
+        tools: config.tools || [],
         ... clearOptions
     }
 }
 
-function createTextConfig(config: AgentDBConfig): TextAgentConfig {
+function createTextConfig(config: AgentConfigAdmin): TextAgentConfig {
     
     const options: Record<string, any> = {};
     
@@ -92,8 +65,8 @@ function createTextConfig(config: AgentDBConfig): TextAgentConfig {
         name: config.name,
         agentType: 'text',
         description: config.description,
-        modelConfigCode: config.model_code,
-        tools: config.tools,
+        modelConfigCode: config.model_config_code,
+        tools: config.tools || [],
         ... clearOptions
     }
 

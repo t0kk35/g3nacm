@@ -1,9 +1,9 @@
 import { WorkflowFieldRendererProps } from "./workflow-action-form";
-import { User } from "@/app/api/data/user/user";
+import { User } from "@/lib/data/queries/user/user";
 import { DynamicSelectField } from "./dynamic-select-field";
 
 async function getUsers(): Promise<User[]> {
-    const users = fetch("/api/data/user/user")
+    const users = fetch("/api/data/user/list")
         .then(res => { 
             if (!res.ok) throw new Error("Could not get User list")
             else return res.json();

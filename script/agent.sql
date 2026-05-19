@@ -71,7 +71,7 @@ CREATE INDEX idx_apmc_agent_model ON agent_provider_model_cost(model);
 CREATE TABLE agent_user_preference(
   user_id INTEGER PRIMARY KEY NOT NULL,
   communication_style TEXT NOT NULL,
-  explantion_depth TEXT NOT NULL,
+  explanation_depth TEXT NOT NULL,
   risk_perspective TEXT NOT NULL,
   output_format TEXT NOT NULL,
   use_visual TEXT NOT NULL,

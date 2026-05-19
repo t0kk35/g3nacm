@@ -2,15 +2,13 @@
 
 import { auth } from "@/auth";
 import * as db from "@/db"
-import { authorizedGetJSON } from "@/lib/org-filtering";
+import { queryUserListAdmin } from "@/lib/data/queries/user/list_admin";
 import { NextRequest, NextResponse } from 'next/server';
 import { UserRequest } from '../types';
 import { ErrorCreators } from '@/lib/api-error-handling';
 import { requirePermissions } from '@/lib/permissions/check';
-import { UserAdmin } from "@/app/api/data/user/user";
 import { AuditData } from "@/lib/audit/types";
 import { createAuditEntry } from "@/lib/audit/audit-log";
-import { parse } from "path";
 
 type Props = {params: Promise<{ userId: string }>}
 
@@ -71,16 +69,6 @@ export async function PUT(request: NextRequest, { params }: Props) {
         if (!param.field) return ErrorCreators.param.bodyMissing(origin, param.name);
     }
 
-    // Get before state for audit
-    let beforeData:UserAdmin;
-    try {
-        const before = await authorizedGetJSON<UserAdmin[]>(`${process.env.DATA_URL}/api/data/user/user_admin?user_id=${userId}`)
-        if (before.length < 1) return ErrorCreators.user.notFound(origin, parseInt(userId))
-        beforeData = before[0]
-    } catch(error) {
-        return ErrorCreators.api.failedCall(origin, error as Error)
-    }
-
     // Set up a connection and transactions
     let client; 
     let transactionStarted = false;
@@ -88,36 +76,37 @@ export async function PUT(request: NextRequest, { params }: Props) {
         client = await db.pool.connect();
         await client.query('BEGIN');
         transactionStarted = true;
+
+        // Get before state for audit
+        const before = await queryUserListAdmin({user_id: parseInt(userId)}, {userName: user.name, client: client});
+        if (before.length < 1) return ErrorCreators.user.notFound(origin, parseInt(userId));
+        const beforeData = before[0];
+
         // First delete existing role and team links
-        await Promise.all([
-            client.query(query_role_link_delete, [userId]), 
-            client.query(query_team_link_delete, [userId]),
-            client.query(query_org_link_delete, [userId])
-        ]);
-        
+        await client.query(query_role_link_delete, [userId]);
+        await client.query(query_team_link_delete, [userId]);
+        await client.query(query_org_link_delete, [userId]);
+
         // Then recreate them
-        const insert_queries = [];
         if (userRequest.role_ids.length > 0) {
-            // Link the permissions in the user_role_permission_link table.
             const role_link_query = `
                 INSERT INTO user_role_link(user_id, role_id)
                 VALUES ${userRequest.role_ids.map((_, i) => `($1, $${i+2})`).join(',')}
             `
             const params = [userId, ...userRequest.role_ids];
-            insert_queries.push(client.query(role_link_query, params));
+            await client.query(role_link_query, params);
         }
         if (userRequest.team_infos.length > 0) {
-            // Link the permissions in the user_role_permission_link table.
             const team_link_query = `
                 INSERT INTO user_team_link(user_id, team_id, rank)
                 VALUES ${userRequest.team_infos.map((_, i) => `($1, $${i+2}, $${i+2+userRequest.team_infos.length})`).join(',')}
             `
             const params = [
-                userId, 
+                userId,
                 ...userRequest.team_infos.map((ti) => ti.team_id),
                 ...userRequest.team_infos.map((ti) => ti.team_rank)
             ];
-            insert_queries.push(client.query(team_link_query, params));
+            await client.query(team_link_query, params);
         }
         if (userRequest.org_unit_ids.length > 0) {
             const org_access_query = `
@@ -125,10 +114,8 @@ export async function PUT(request: NextRequest, { params }: Props) {
                 VALUES ${userRequest.org_unit_ids.map((_, i) => `($1, $${i+2})`).join(',')}
             `
             const params = [userId, ...userRequest.org_unit_ids]
-            insert_queries.push(client.query(org_access_query, params));
+            await client.query(org_access_query, params);
         }
-
-        if (insert_queries.length > 0) await Promise.all(insert_queries)
         
         // Update user data. Though it might not have changed.
         await client.query(query_update_user, [
@@ -192,16 +179,6 @@ export async function DELETE(_request: NextRequest, { params }: Props) {
     const userId = (await params).userId;
     if (!userId) return ErrorCreators.param.urlMissing(origin, 'userId');
 
-     // Get before state for audit
-    let beforeData:UserAdmin;
-    try {
-        const before = await authorizedGetJSON<UserAdmin[]>(`${process.env.DATA_URL}/api/data/user/user_admin?user_id=${userId}`)
-        if (before.length < 1) return ErrorCreators.user.notFound(origin, parseInt(userId))
-        beforeData = before[0]
-    } catch(error) {
-        return ErrorCreators.api.failedCall(origin, error as Error)
-    }
-
     // Set up a connection and transactions
     let client;
     let transactionStarted = false;
@@ -209,12 +186,16 @@ export async function DELETE(_request: NextRequest, { params }: Props) {
         client = await db.pool.connect();
         await client.query('BEGIN');
         transactionStarted = true;
+
+        // Get before state for audit
+        const before = await queryUserListAdmin({user_id: parseInt(userId)}, {userName: user.name, client: client});
+        if (before.length < 1) return ErrorCreators.user.notFound(origin, parseInt(userId));
+        const beforeData = before[0];
+
         // First delete existing role and team links
-        await Promise.all([
-            client.query(query_role_link_delete, [userId]),
-            client.query(query_team_link_delete, [userId]),
-            client.query(query_org_link_delete, [userId])
-        ])
+        await client.query(query_role_link_delete, [userId]);
+        await client.query(query_team_link_delete, [userId]);
+        await client.query(query_org_link_delete, [userId]);
         // Then logically delete the user
         await client.query(query_delete_user, [userId]);
 

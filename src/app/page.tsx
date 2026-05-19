@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth"
 import { authorizedGetJSON } from "@/lib/org-filtering"
-import { DynamicScreenConfig } from "@/app/api/data/dynamic_screen/types"
+import { DynamicScreenConfig } from "@/lib/data/queries/dynamic_screen/types"
 import { DynamicScreenContainer } from "@/components/ui/custom/dynamic-screen/DynamicScreenContainer"
 
 export default async function Home() {

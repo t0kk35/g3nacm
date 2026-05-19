@@ -5,7 +5,7 @@ import * as db from "@/db"
 import { NextRequest, NextResponse } from 'next/server';
 import { ErrorCreators } from '@/lib/api-error-handling';
 import { requirePermissions } from '@/lib/permissions/check';
-import { AgentConfigAdmin } from "@/app/api/data/agent/types";
+import { AgentConfigAdmin } from "@/lib/data/queries/agent/types";
 import { AuditData } from "@/lib/audit/types";
 import { createAuditEntry } from "@/lib/audit/audit-log";
 

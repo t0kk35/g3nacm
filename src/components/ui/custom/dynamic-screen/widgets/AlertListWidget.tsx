@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { ComponentSection } from "@/app/api/data/entity/types"
 import { ComponentSectionRenderer } from "@/components/ui/custom/component-section/ComponentSectionRenderer"
-import { Alert } from '@/app/api/data/alert/alert'
+import { Alert } from '@/lib/data/queries/alert/alert'
 import { EntityPriority } from "@/app/api/data/entity_state/entity-state"
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

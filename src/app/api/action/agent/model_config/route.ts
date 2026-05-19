@@ -5,7 +5,7 @@ import * as db from "@/db"
 import { NextRequest, NextResponse } from 'next/server';
 import { ErrorCreators } from '@/lib/api-error-handling';
 import { requirePermissions } from '@/lib/permissions/check';
-import { AgentModelConfig } from "@/lib/cache/agent-model-config-cache";
+import { AgentModelConfigAdmin } from "@/lib/data/queries/agent/types";
 import { AuditData } from "@/lib/audit/types";
 import { createAuditEntry } from "@/lib/audit/audit-log";
 
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     if (permissionCheck) return permissionCheck;
     
     // Get config to create and validate
-    const config: AgentModelConfig = await request.json();    
+    const config: AgentModelConfigAdmin = await request.json();    
 
     const req_params = [
         { name: 'config.code', field: config.code },

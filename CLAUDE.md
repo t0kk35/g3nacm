@@ -132,6 +132,13 @@ SQL schema files are located in the `script/` directory and should be run in dep
 - Standalone worker process (`npm run worker`) for local dev; serverless deployments receive jobs via HTTP push to `POST /api/action/job/process`
 - See `src/lib/jobs/README.md` for full documentation, including how to add new job types
 
+**Data Query Registry** (`src/lib/data/`)
+- Register a query once with `defineQuery()` — it automatically becomes a `GET /api/data/<path>` endpoint AND a directly-callable typed function
+- Eliminates boilerplate (auth, permission check, Zod validation, error mapping) that was repeated across every `/api/data` route
+- Callable from job handlers and workflow functions without HTTP — pass a `PoolClient` to participate in an existing transaction
+- Reusable Zod param helpers in `params.ts` (e.g. `zTimeRange` for `7d`/`3w`/`2m` strings)
+- See `src/lib/data/README.md` for full documentation, including how to register a new query
+
 ### Design Principles ###
 - All interaction between the UI and database goes through the API routes, either /api/data or /api/action
 - Run as much logic as possible in UI server components with 'use server' marker
@@ -175,6 +182,48 @@ REDIS_HOST=localhost              # BullMQ only
 REDIS_PORT=6379
 ```
 Worker reads from `.env.worker`; Next.js app reads from `.env.local`.
+
+## Data Query Registry Architecture
+
+### Overview
+The data query registry eliminates the repeated boilerplate in `/api/data` routes (auth check, permission check, param extraction/validation, try/catch error mapping) and solves a second problem: job handlers and workflow functions that need the same business data no longer have to duplicate SQL or call the HTTP API internally. Register a query once and it is available both as an HTTP endpoint and as a typed function you can import anywhere.
+
+### Core Components
+- **`src/lib/data/registry.ts`** — `defineQuery<TParams, TResult>(def)`: registers the definition in the global map and returns a directly-callable typed function; `QueryContext` type (`userName`, `orgUnitCode?`, `client?`)
+- **`src/lib/data/errors.ts`** — `DataNotFoundError`, `DataNotUniqueError`, `DataQueryError` — thrown by `execute`, caught and mapped to HTTP responses by the catch-all route
+- **`src/lib/data/params.ts`** — reusable Zod schema helpers (e.g. `zTimeRange` converts `'7d'`/`'3w'`/`'2m'` to a `Date` inside the schema)
+- **`src/lib/data/index.ts`** — bootstrap file; add one import per query file here so definitions self-register on startup
+- **`src/lib/data/queries/`** — one file per query (or per domain group)
+- **`src/app/api/data/[...path]/route.ts`** — catch-all HTTP dispatcher: auth → permission → Zod parse → `execute` → error mapping; specific `route.ts` files take Next.js precedence and are unaffected
+
+### Adding a New Query
+1. Create `src/lib/data/queries/<name>.ts` and call `defineQuery({ path, permissions?, params, execute })`
+2. Add one import line to `src/lib/data/index.ts`
+
+The query is now available as `GET /api/data/<path>` with no additional route file needed.
+
+### Calling a Query Directly (from a job or workflow function)
+```typescript
+import { queryAlertDetail } from '@/lib/data/queries/alert.detail';
+
+// From a job handler
+const alert = await queryAlertDetail({ alert_id: ctx.payload.alert_id }, { userName: ctx.userName });
+
+// From a workflow function — participates in the existing DB transaction
+const alert = await queryAlertDetail({ alert_id: inputs.alert_id }, { userName: ctx.system.userName, client });
+```
+
+### Zod Param Schemas and Coercion
+All HTTP query params arrive as strings. Use `z.coerce.number()`, `z.coerce.boolean()`, and `.transform()` for non-string fields so the same schema works for both HTTP calls and direct typed calls:
+- `z.coerce.number().int().max(200)` — numeric params with bounds
+- `zTimeRange` from `params.ts` — validates format and transforms to `Date`
+- `z.string().transform(s => s?.split(','))` — comma-separated arrays
+
+### Routes That Stay as Specific `route.ts` Files
+These cannot be served by the registry's `NextResponse.json(result)` pattern:
+- `attachment/detail` — returns a binary response with custom headers
+- `workflow/`, `eval/rule`, `eval/schema` — delegate to cache layer, not DB
+- Routes with non-standard response shapes or complex streaming
 
 ## AI Chat Auditing Architecture
 

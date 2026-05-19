@@ -4,7 +4,7 @@ import { getChannelByCode } from '@/lib/cache/rfi-channel-cache';
 import { resolveChannel } from '@/lib/rfi/rfi-resolve';
 import { readUnseenRfiReplies, markEmailsProcessed, extractIdentifierFromAddress } from '@/lib/rfi/inbound/imap-reader';
 import { RfiInboundEmailCredentials, RfiInboundEmailConfig } from '@/lib/rfi/inbound/types';
-import { RfiChannelType } from '@/app/api/data/rfi/type';
+import { RfiChannelType } from '@/lib/data/queries/rfi/type';
 import { getCachedWorkflowConfig } from "@/lib/cache/workflow-cache";
 import { createWorkflowContext, executeWorkflowAction } from '@/lib/workflow/workflow-engine';
 import * as db from '@/db';

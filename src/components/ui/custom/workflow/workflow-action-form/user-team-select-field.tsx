@@ -1,9 +1,9 @@
 import { WorkflowFieldRendererProps } from "./workflow-action-form";
-import { UserTeam } from "@/app/api/data/user/user";
+import { UserTeam } from "@/lib/data/queries/user/user";
 import { DynamicSelectField } from "./dynamic-select-field";
 
 async function getUserTeams(): Promise<UserTeam[]> {
-    const users = fetch("/api/data/user/user_team")
+    const users = fetch("/api/data/team/list")
         .then(res => { 
             if (!res.ok) throw new Error("Could not team list")
             else return res.json();

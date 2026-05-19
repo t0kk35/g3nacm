@@ -4,8 +4,8 @@ import { authorizedGetJSON } from "@/lib/org-filtering"
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { RoleFormClient } from "./RoleFormClient"
-import { UserRole } from "@/app/api/data/user/user"
-import { UserPermission } from "@/app/api/data/user/user"
+import { UserRole } from "@/lib/data/queries/user/user"
+import { UserPermission } from "@/lib/data/queries/user/user"
 
 type Props = {
   roleId?: number;
@@ -13,7 +13,7 @@ type Props = {
 
 export async function RoleForm({ roleId } : Props) {
 
-  const role = roleId ? await authorizedGetJSON<UserRole[]>(`${process.env.DATA_URL}/api/data/user/role?role_id=${roleId}`)
+  const role = roleId ? await authorizedGetJSON<UserRole[]>(`${process.env.DATA_URL}/api/data/role/list?role_id=${roleId}`)
     .then(ur => { 
       if (ur.length === 0) throw new Error(`Roless with id ${roleId} not found`)
       else return ur[0]

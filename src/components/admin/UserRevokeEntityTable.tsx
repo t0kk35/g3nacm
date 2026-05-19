@@ -20,7 +20,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Loader2, ChevronLeft, ChevronRight, Trash2 } from "lucide-react"
 import { toast } from "sonner"
-import { User } from "@/app/api/data/user/user"
+import { User } from "@/lib/data/queries/user/user"
 import { useTranslations } from "next-intl"
 
 type UserRevokeEntityTableProps = {
@@ -69,7 +69,7 @@ export function UserRevokeEntityTable({
       try {
         setLoading(true)
         const queryString = userIds.map(id => `user_ids=${id}`).join('&')
-        const response = await fetch(`/api/data/user/user?${queryString}`)
+        const response = await fetch(`/api/data/user/list?${queryString}`)
         if (!response.ok) throw new Error("Failed to fetch users")
         const userData: User[] = await response.json()
         setUsers(userData)

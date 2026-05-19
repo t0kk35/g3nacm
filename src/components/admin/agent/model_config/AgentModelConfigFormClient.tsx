@@ -8,14 +8,14 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "sonner"
 import { ArrowLeft } from "lucide-react"
-import { AgentModelConfig } from "@/lib/cache/agent-model-config-cache"
+import { AgentModelConfigAdmin } from "@/lib/data/queries/agent/types"
 import { modelProviders, modelProviderModels } from "@/lib/ai-tools/types"
 import { useValidationForm, formValidateNumber, FormFieldSelect, FormFieldInput, FormFieldCheckBox, FormFieldTextArea } from "@/components/ui/custom/form-field"
 import { SaveSubmitFormButton } from "../../SaveSubmitFormButton"
 import { useTranslations } from "next-intl"
 
 type AgentModelConfigFormProps = {
-  config?: AgentModelConfig;
+  config?: AgentModelConfigAdmin;
 }
 
 export function AgentModelConfigFormClient({ config }: AgentModelConfigFormProps) {
@@ -209,7 +209,7 @@ export function AgentModelConfigFormClient({ config }: AgentModelConfigFormProps
       }
 
       // Build the request payload
-      const configData = {
+      const configData:AgentModelConfigAdmin = {
         code: form.values.code,
         name: form.values.name,
         provider: form.values.provider,
@@ -219,7 +219,8 @@ export function AgentModelConfigFormClient({ config }: AgentModelConfigFormProps
         ...(form.values.topP && { top_p: parseFloat(form.values.topP) }),
         api_key: form.values.apiKey,
         headers,
-        provider_options: providerOptions
+        provider_options: providerOptions,
+        agent_codes:[]
       }
 
       // Create or update config

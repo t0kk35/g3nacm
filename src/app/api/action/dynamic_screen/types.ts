@@ -1,4 +1,4 @@
-import { ResponsiveLayouts } from "../../data/dynamic_screen/types";
+import { ResponsiveLayouts } from "../../../../lib/data/queries/dynamic_screen/types";
 
 export type DynamicScreenLayoutUpdate = {
     name: string

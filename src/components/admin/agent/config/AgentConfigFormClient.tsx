@@ -13,8 +13,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "sonner"
 import { ArrowLeft, Search, Check } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { AgentConfigAdmin, AgentToolAdmin } from "@/app/api/data/agent/types"
-import { AgentModelConfig } from "@/lib/cache/agent-model-config-cache"
+import { AgentConfigAdmin, AgentToolAdmin } from "@/lib/data/queries/agent/types"
+import { AgentModelConfigAdmin } from "@/lib/data/queries/agent/types"
 import { useValidationForm, FormFieldSelect, FormFieldInput, FormFieldTemplateTextArea } from "@/components/ui/custom/form-field"
 import { formValidateTemplateText, formValidateNumber } from "@/components/ui/custom/form-field"
 import { SaveSubmitFormButton } from "../../SaveSubmitFormButton"
@@ -30,7 +30,7 @@ type FormAgentTool = {
 type AgentConfigFormProps = {
   config?: AgentConfigAdmin;
   iTools: AgentToolAdmin[];
-  iModelConfig: AgentModelConfig[]
+  iModelConfig: AgentModelConfigAdmin[]
 }
 
 export function AgentConfigFormClient({ config, iTools, iModelConfig }: AgentConfigFormProps) {

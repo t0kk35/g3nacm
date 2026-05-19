@@ -1,6 +1,6 @@
 import * as db from "@/db"
 import { rfiChannelCache } from "./cache";
-import { RfiChannel } from "@/app/api/data/rfi/type";
+import { RfiChannel } from "@/lib/data/queries/rfi/type";
 
 const channel_query_text = `
 SELECT 

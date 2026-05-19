@@ -1,4 +1,4 @@
-import { RfiChannel } from "@/app/api/data/rfi/type";
+import { RfiChannel } from "@/lib/data/queries/rfi/type";
 
 /**
  * Runtime fields available for variable resolution in channel configuration and credentials.

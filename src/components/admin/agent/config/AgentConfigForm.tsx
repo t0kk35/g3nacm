@@ -3,9 +3,9 @@
 import { authorizedGetJSON } from "@/lib/org-filtering"
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { AgentConfigAdmin } from "@/app/api/data/agent/types"
-import { AgentToolAdmin } from "@/app/api/data/agent/types"
-import { AgentModelConfig } from "@/lib/cache/agent-model-config-cache"
+import { AgentConfigAdmin } from "@/lib/data/queries/agent/types"
+import { AgentToolAdmin } from "@/lib/data/queries/agent/types"
+import { AgentModelConfigAdmin } from "@/lib/data/queries/agent/types"
 import { AgentConfigFormClient } from "./AgentConfigFormClient"
 
 type Props = {
@@ -21,7 +21,7 @@ export async function AgentConfigForm({ configCode } : Props) {
     }) : undefined
 
   const agentTools = authorizedGetJSON<AgentToolAdmin[]>(`${process.env.DATA_URL}/api/data/agent/tool`)
-  const agentModelConfig = authorizedGetJSON<AgentModelConfig[]>(`${process.env.DATA_URL}/api/data/agent/model_config`)
+  const agentModelConfig = authorizedGetJSON<AgentModelConfigAdmin[]>(`${process.env.DATA_URL}/api/data/agent/model_config`)
 
   const data = await Promise.all([agentTools, agentModelConfig]);
 

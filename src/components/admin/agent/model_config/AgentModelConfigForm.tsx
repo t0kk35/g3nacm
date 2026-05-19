@@ -3,7 +3,7 @@
 import { authorizedGetJSON } from "@/lib/org-filtering"
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { AgentModelConfigAdmin } from "@/app/api/data/agent/types"
+import { AgentModelConfigAdmin } from "@/lib/data/queries/agent/types"
 import { AgentModelConfigFormClient } from "./AgentModelConfigFormClient"
 
 type Props = {

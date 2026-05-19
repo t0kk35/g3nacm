@@ -10,7 +10,7 @@ import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/h
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Alert } from "@/app/api/data/alert/alert"
+import { Alert } from "@/lib/data/queries/alert/alert"
 import { Separator } from "@/components/ui/separator"
 import { EntityState } from "@/app/api/data/entity_state/entity-state"
 import { ComponentSectionRenderer } from "@/components/ui/custom/component-section/ComponentSectionRenderer"

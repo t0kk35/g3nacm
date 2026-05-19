@@ -1,5 +1,5 @@
 import { PoolClient } from "pg";
-import { RfiChannel, RfiChannelType } from "@/app/api/data/rfi/type";
+import { RfiChannel, RfiChannelType } from "@/lib/data/queries/rfi/type";
 import { RfiContactDetails, RfiDeliveryResult, RfiSendContext } from "./types";
 
 /**

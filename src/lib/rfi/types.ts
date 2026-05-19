@@ -1,4 +1,4 @@
-import { RfiQuestionType } from "@/app/api/data/rfi/type";
+import { RfiQuestionType } from "@/lib/data/queries/rfi/type";
 
 export type RfiStatus = 'Draft' | 'PendingApproval' | 'Approved' | 'Sent' | 'Failed' | 'Cancelled';
 

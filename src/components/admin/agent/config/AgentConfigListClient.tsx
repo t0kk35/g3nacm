@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { toast } from "sonner"
 import { ApiError } from "next/dist/server/api-utils"
-import { AgentConfigAdmin } from "@/app/api/data/agent/types"
+import { AgentConfigAdmin } from "@/lib/data/queries/agent/types"
 import { useTranslations } from 'next-intl'
 
 type Props = { agentConfigs : AgentConfigAdmin[]}

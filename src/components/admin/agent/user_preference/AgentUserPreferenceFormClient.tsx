@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useValidationForm, FormFieldRadioGroup, FormFieldSelect, FormFieldCheckBox } from "@/components/ui/custom/form-field"
-import { AgentUserPreference } from "@/app/api/data/agent/types"
+import { AgentUserPreference } from "@/lib/data/queries/agent/types"
 import { SaveSubmitFormButton } from "../../SaveSubmitFormButton"
 import { Separator } from "@/components/ui/separator"
 import { useTranslations } from "next-intl"
@@ -27,7 +27,7 @@ export function AgentUserPerferenceFormClient({ userName, preference }: AgentMod
   const form = useValidationForm(
     {  
       communication_style: preference?.communication_style || "",
-      explanation_depth: preference?.explantion_depth || "",
+      explanation_depth: preference?.explanation_depth || "",
       risk_perspective: preference?.risk_perspective || "",
       output_format: preference?.output_format || "",
       use_visual: preference?.use_visual || "",
@@ -56,7 +56,7 @@ export function AgentUserPerferenceFormClient({ userName, preference }: AgentMod
       const pref:AgentUserPreference = {
         user_name: userName,
         communication_style: form.values.communication_style as 'concise' | 'balanced' | 'detailed',
-        explantion_depth: form.values.explanation_depth as 'minimal' | 'standard' | 'comprehensive',
+        explanation_depth: form.values.explanation_depth as 'minimal' | 'standard' | 'comprehensive',
         risk_perspective: form.values.risk_perspective as 'balanced' | 'conservative' | 'risk_tolerant',
         output_format: form.values.output_format as 'narrative' | 'bullet_points' | 'structured',
         use_visual: form.values.use_visual as 'balanced' | 'minimal' | 'maximal',

@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ConditionBuilder } from "./ConditionBuilder"
-import { UserTeam } from "@/app/api/data/user/user"
+import { UserTeam } from "@/lib/data/queries/user/user"
 import type { EvalRule, EvalInputSchema, EvalAtomicCondition, EvalRuleCondition } from "@/lib/eval-engine/types"
 import { Save, X, AlertCircle } from "lucide-react"
 import { validateRule } from "@/lib/eval-engine/validation"

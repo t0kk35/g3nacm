@@ -1,4 +1,4 @@
-import { AgentUserPreference } from "@/app/api/data/agent/types"
+import { AgentUserPreference } from "@/lib/data/queries/agent/types"
 
 // Preference to prompt fragment mappings
 const AGENT_USER_PREFERENCE_MAPPINGS = {
@@ -46,7 +46,7 @@ export function generateUserPreferences(preference: AgentUserPreference) {
     const header = '# User preferences. \nThe end-user has provided following preferences\n\n'
     const up = [
         AGENT_USER_PREFERENCE_MAPPINGS.communication_style[preference.communication_style],
-        AGENT_USER_PREFERENCE_MAPPINGS.explanation_depth[preference.explantion_depth],
+        AGENT_USER_PREFERENCE_MAPPINGS.explanation_depth[preference.explanation_depth],
         AGENT_USER_PREFERENCE_MAPPINGS.risk_perspective[preference.risk_perspective],
         AGENT_USER_PREFERENCE_MAPPINGS.output_format[preference.output_format],
         AGENT_USER_PREFERENCE_MAPPINGS.use_visual[preference.use_visual],

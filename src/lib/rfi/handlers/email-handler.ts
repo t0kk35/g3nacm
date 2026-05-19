@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 import { PoolClient } from "pg";
-import { RfiChannel, RfiChannelType } from "@/app/api/data/rfi/type";
+import { RfiChannel, RfiChannelType } from "@/lib/data/queries/rfi/type";
 import { IRfiChannelHandler } from "../channel-handler-registry";
 import { RfiContactDetails, RfiDeliveryResult, RfiEmailContactDetails, RfiSendContext } from "../types";
 

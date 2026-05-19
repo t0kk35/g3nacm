@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { User, Users, RefreshCw, Loader2 } from 'lucide-react'
-import { UserAssignment } from '@/app/api/data/user/user'
+import { UserAssignment } from '@/lib/data/queries/user/user'
 import { useGetNextAlert } from '@/hooks/use-get-next-alert'
 import { DynamicScreenError } from '../DynamicScreenError'
 

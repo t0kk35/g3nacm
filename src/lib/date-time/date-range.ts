@@ -1,5 +1,17 @@
 import { calculateDailyPeriods, calculateMonthlyPeriods, calculateWeeklyPeriods, Period } from '@/lib/date-time/period-calculator';
 
+const timeIntervals: { [key: string]: string } = {
+    '1h': '1 hour',
+    '24h': '24 hours',
+    '7d': '7 days',
+    '30d': '30 days',
+    '90d': '90 days'
+}
+
+export function getSQLInterval(timeRange: string) {
+    return timeIntervals[timeRange] || '24 hours'
+}
+
 export function getStartDate(referenceDate: Date, timePeriod: string) {
     const period = timePeriod.slice(-1).toLocaleLowerCase();
     let periods:Period[]

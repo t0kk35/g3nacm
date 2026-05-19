@@ -2,11 +2,11 @@
 
 import { auth } from "@/auth";
 import * as db from "@/db"
-import { authorizedFetch } from "@/lib/org-filtering";
+import { queryAgentUserPreference } from "@/lib/data/queries/agent/user_preference";
 import { NextRequest, NextResponse } from 'next/server';
 import { ErrorCreators } from '@/lib/api-error-handling';
 import { requirePermissions } from '@/lib/permissions/check';
-import { AgentUserPreference } from "@/app/api/data/agent/types";
+import { AgentUserPreference } from "@/lib/data/queries/agent/types";
 import { AuditData } from "@/lib/audit/types";
 import { createAuditEntry } from "@/lib/audit/audit-log";
 
@@ -17,7 +17,7 @@ INSERT INTO agent_user_preference
 (
   user_id,
   communication_style,
-  explantion_depth,
+  explanation_depth,
   risk_perspective,
   output_format,
   use_visual,
@@ -41,7 +41,7 @@ UPDATE agent_user_preference SET
 WHERE user_id = (SELECT id from users WHERE name = $1)
 `
 
-// Creation of an agent model config
+// Creation of an user preference
 export async function POST(request: NextRequest) {
 
     // User Auth and Permission checking
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
         await client.query(query_insert_agent_preference, [
             preference.user_name,
             preference.communication_style,
-            preference.explantion_depth,
+            preference.explanation_depth,
             preference.risk_perspective,
             preference.output_format,
             preference.use_visual,
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
             after_data: {
                 user_name: preference.user_name,
                 communication_style: preference.communication_style,
-                explantion_depth: preference.explantion_depth,
+                explantion_depth: preference.explanation_depth,
                 risk_perspective: preference.risk_perspective,
                 output_format: preference.output_format,
                 use_visual: preference.use_visual,
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
     }
 }
 
-// Update of an agent model config
+// Update of a user preference
 export async function PUT(request: NextRequest) {
 
     // User Auth and Permission checking
@@ -116,7 +116,7 @@ export async function PUT(request: NextRequest) {
     if (!session) return ErrorCreators.auth.missingSession(origin);
     const user = session.user;
     if (!user?.name) return ErrorCreators.auth.missingUser(origin);
-    const permissionCheck = await requirePermissions(user.name, origin, ['admin.agent.model.config']);
+    const permissionCheck = await requirePermissions(user.name, origin, ['user.agent.preference']);
     if (permissionCheck) return permissionCheck;
 
     // Get role to create and validate
@@ -134,18 +134,16 @@ export async function PUT(request: NextRequest) {
         client = await db.pool.connect();
         await client.query('BEGIN');
         transactionStarted = true;
-        
+
         // First get current state for the audit.
-        const before = await authorizedFetch(`${process.env.DATA_URL}/api/data/agent/user_preference`)
-            .then(res => { if (!res.ok) throw new Error('Error fetching agent user preference'); else return res.json() })
-            .then(j => j as AgentUserPreference)
-        if (!before) throw new Error ('Got empty agent user preference') 
+        const before = await queryAgentUserPreference({}, {userName: user.name, client: client})
+        if (!before) throw new Error ('Got empty agent user preference as Before state') 
 
         // Update current data
         await client.query(query_update_agent_preference, [
             user.name,
             preference.communication_style,
-            preference.explantion_depth,
+            preference.explanation_depth,
             preference.risk_perspective,
             preference.output_format,
             preference.use_visual,
@@ -163,7 +161,7 @@ export async function PUT(request: NextRequest) {
             before_data: {
                 user_name: before.user_name,
                 communication_style: before.communication_style,
-                explantion_depth: before.explantion_depth,
+                explantion_depth: before.explanation_depth,
                 risk_perspective: before.risk_perspective,
                 output_format: before.output_format,
                 use_visual: before.use_visual,
@@ -173,7 +171,7 @@ export async function PUT(request: NextRequest) {
             after_data: {
                 user_name: preference.user_name,
                 communication_style: preference.communication_style,
-                explantion_depth: preference.explantion_depth,
+                explantion_depth: preference.explanation_depth,
                 risk_perspective: preference.risk_perspective,
                 output_format: preference.output_format,
                 use_visual: preference.use_visual,
@@ -199,7 +197,7 @@ function checkRequest(preference: AgentUserPreference) {
     const req_params = [
         { name: 'preference.user_name', field: preference.user_name },
         { name: 'preference.communication_style', field: preference.communication_style }, 
-        { name: 'preference.explantion_depth', field: preference.explantion_depth },
+        { name: 'preference.explantion_depth', field: preference.explanation_depth },
         { name: 'preference.risk_perspective', field: preference.risk_perspective},
         { name: 'preference.output_format', field: preference.output_format },
         { name: 'preference.use_visual', field: preference.use_visual},

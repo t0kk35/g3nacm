@@ -1,10 +1,10 @@
 'use server'
 
-import { authorizedFetch, authorizedGetJSON } from "@/lib/org-filtering"
+import { authorizedGetJSON } from "@/lib/org-filtering"
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TeamFormClient } from "./TeamFormClient";
-import { UserTeam } from "@/app/api/data/user/user";
+import { UserTeam } from "@/lib/data/queries/user/user";
 
 type Props = {
     teamId?: number;
@@ -12,7 +12,7 @@ type Props = {
 
 export async function TeamForm({ teamId } : Props) {
 
-  const team = teamId ? await authorizedGetJSON<UserTeam[]>(`${process.env.DATA_URL}/api/data/user/team?team_id=${teamId}`)
+  const team = teamId ? await authorizedGetJSON<UserTeam[]>(`${process.env.DATA_URL}/api/data/team/list?team_id=${teamId}`)
     .then(ut => { 
       if (ut.length === 0) throw new Error(`Team with id ${teamId} not found`)
       else return ut[0]

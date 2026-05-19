@@ -30,6 +30,7 @@ export interface AgentExecutionOptions {
 }
 
 export async function executeAgent(
+  userName: string,
   config: AgentConfig,
   options: AgentExecutionOptions
 ): Promise<AgentResult> {
@@ -41,7 +42,7 @@ export async function executeAgent(
     : undefined;
 
   // Create model instance
-  const modelInstance = getCachedAgentModelConfig(config.modelConfigCode)
+  const modelInstance = getCachedAgentModelConfig(config.modelConfigCode, userName)
   
   // Execute based on agent type
   switch (config.agentType) {

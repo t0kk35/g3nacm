@@ -7,7 +7,7 @@ import { PermissionGuard } from "@/components/ui/custom/permission-guard-server"
 import { NoPermission } from "@/components/ui/custom/no-permission";
 import { RfiRequestDetails } from "@/components/rfi/RfiRequestDetails";
 import { SubjectDetailsGenericSkeleton } from "@/components/subject/SubjectDetailsGeneric";
-import { RfiRequest, RfiResponse } from "@/app/api/data/rfi/type";
+import { RfiRequest, RfiResponse } from "@/lib/data/queries/rfi/type";
 
 type Props = {params: Promise<{ rfiId : string }>}
 

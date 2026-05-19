@@ -1,24 +1,11 @@
 import * as db from "@/db"
+import { queryAgentModelConfig, queryAgentModelConfigPermission } from "../data/queries/agent/model_config";
 import { createOpenAI } from '@ai-sdk/openai';
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { agentModelConfigCache } from "./cache";
 import { removeNullsAndEmptyObjects } from "../json";
-
-const model_config_query_text = `
-SELECT 
-  code,
-  name,
-  provider,
-  model,
-  temperature,
-  max_tokens,
-  top_p,
-  api_key,
-  headers,
-  provider_options
-FROM agent_model
-WHERE code = $1
-`
+import { hasPermissions } from '@/lib/permissions/core';
+import { AgentModelConfigAdmin } from "../data/queries/agent/types";
 
 export type ModelInstance = {
   model: any;
@@ -27,39 +14,27 @@ export type ModelInstance = {
   generateObjectOptions: Record<string, any>;
 }
 
-export type AgentModelConfig = {
-    code: string;
-    name: string;
-    provider: string;
-    model: string;
-    temperature?: number;
-    max_tokens?:number;
-    top_p?: number;
-    api_key?: string;
-    headers: Record<string, any>,
-    provider_options: Record<string, any>
-}
-
-export async function getCachedAgentModelConfig(configCode: string) {
+export async function getCachedAgentModelConfig(configCode: string, userName: string) {
     const key = `agentModelConfig:${configCode}`;
-
+    const ok = await hasPermissions(userName,queryAgentModelConfigPermission)
+    if (!ok) throw new Error(`Agent Config Cache Error. User '${userName}' does not have permission to '${queryAgentModelConfigPermission.toString}'`)
+    
     return agentModelConfigCache.get(
         key,
         async () => {
-            const res = await db.pool.query(model_config_query_text, [configCode]);
-            const configs:AgentModelConfig[] = res.rows;
-            if (configs.length < 1) throw new Error(`Agent Model Config Cache Error. Could not find the config with code "${configCode}"`)
-            switch (configs[0].provider) {
-                case 'openai': return createOpenAIInstance(configs[0]);
-                case 'anthropic': return createAnthropicInstance(configs[0]);
-                default : throw new Error(`Agent Model Config Cache Error. Unsupported model provider: ${(configs as any).provider}`);                
+            const result = await queryAgentModelConfig({code: configCode}, {userName: userName});
+            if (result.length < 1) throw new Error(`Agent Model Config Cache Error. Could not find the config with code "${configCode}"`)
+            switch (result[0].provider) {
+                case 'openai': return createOpenAIInstance(result[0]);
+                case 'anthropic': return createAnthropicInstance(result[0]);
+                default : throw new Error(`Agent Model Config Cache Error. Unsupported model provider: ${(result[0] as any).provider}`);                
             }
         },
         600_000
     )
 }
 
-function createOpenAIInstance(config: AgentModelConfig): ModelInstance {
+function createOpenAIInstance(config: AgentModelConfigAdmin): ModelInstance {
   const openai = config.api_key ? createOpenAI({ apiKey: config.api_key }): createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
   const model = openai(config.model);
   const baseOptions: Record<string, any> = {};
@@ -86,7 +61,7 @@ function createOpenAIInstance(config: AgentModelConfig): ModelInstance {
   };
 }
 
-function createAnthropicInstance(config: AgentModelConfig): ModelInstance {
+function createAnthropicInstance(config: AgentModelConfigAdmin): ModelInstance {
   const anthropic = config.api_key ? createAnthropic({ apiKey: config.api_key }): createAnthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
   const model = anthropic(config.model);
   const baseOptions: Record<string, any> = {};

@@ -1,4 +1,4 @@
-import { User } from "@/app/api/data/user/user";
+import { User } from "@/lib/data/queries/user/user";
 
 export type UserRequest = {
     name: string;

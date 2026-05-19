@@ -1,6 +1,6 @@
 'use server'
 
-import { Alert } from "@/app/api/data/alert/alert"
+import { Alert } from "@/lib/data/queries/alert/alert"
 import { authorizedFetch } from "@/lib/org-filtering"
 import { TFAlertDetailsMainClient } from "./TFAlertDetailsMainClient"
 import { TFTransaction } from "@/app/api/data/transaction/transaction"

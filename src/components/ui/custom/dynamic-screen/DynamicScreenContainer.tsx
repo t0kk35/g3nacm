@@ -2,7 +2,7 @@
 
 import { DynamicScreenGrid } from '@/components/ui/custom/dynamic-screen'
 import { toast } from 'sonner'
-import { DynamicScreenConfig } from '@/app/api/data/dynamic_screen/types'
+import { DynamicScreenConfig } from '@/lib/data/queries/dynamic_screen/types'
 import { createDynamicScreenWidget } from '@/components/ui/custom/dynamic-screen'
 import { DynamicScreenLayoutUpdate } from '@/app/api/action/dynamic_screen/types'
 import { DynamicScreenWidgetDelete, DynamicScreenWidgetCreate } from '@/app/api/action/dynamic_screen/types'

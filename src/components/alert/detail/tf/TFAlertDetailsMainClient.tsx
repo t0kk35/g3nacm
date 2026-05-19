@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
-import { Alert, TFDetection } from "@/app/api/data/alert/alert"
+import { Alert, TFDetection } from "@/lib/data/queries/alert/alert"
 import { TFTransaction, TFParticipant, TFFinancialTransaction } from "@/app/api/data/transaction/transaction"
 import { ScoreBar } from "@/components/ui/custom/score-bar"
 

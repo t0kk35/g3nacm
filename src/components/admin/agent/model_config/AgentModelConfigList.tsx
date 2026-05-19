@@ -2,7 +2,7 @@
 
 import { authorizedGetJSON } from "@/lib/org-filtering"
 import { AgentModelConfigListClient } from "./AgentModelConfigListClient";
-import { AgentModelConfigAdmin } from "@/app/api/data/agent/types";
+import { AgentModelConfigAdmin } from "@/lib/data/queries/agent/types";
 
 export async function AgentModelConfigList() {
 

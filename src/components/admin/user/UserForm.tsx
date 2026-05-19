@@ -3,8 +3,8 @@
 import { authorizedGetJSON } from "@/lib/org-filtering";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { UserAdmin, UserTeam } from "@/app/api/data/user/user";
-import { UserRole } from "@/app/api/data/user/user";
+import { UserAdmin, UserTeam } from "@/lib/data/queries/user/user";
+import { UserRole } from "@/lib/data/queries/user/user";
 import { UserFormClient } from "./UserFormCient";
 import { OrgUnitNode } from "@/app/api/data/org_unit/org_unit";
 
@@ -14,14 +14,14 @@ type Props = {
 
 export async function UserForm({ userId } : Props) {
   
-  const user = userId ? await authorizedGetJSON<UserAdmin[]>(`${process.env.DATA_URL}/api/data/user/user_admin?user_id=${userId}`)
+  const user = userId ? await authorizedGetJSON<UserAdmin[]>(`${process.env.DATA_URL}/api/data/user/list_admin?user_id=${userId}`)
     .then(u => { 
       if (u.length === 0) throw new Error(`User with id ${userId} not found`);
       else return u[0];
     }) : undefined
   
-  const roles = authorizedGetJSON<UserRole[]>(`${process.env.DATA_URL}/api/data/user/role`)
-  const teams = authorizedGetJSON<UserTeam[]>(`${process.env.DATA_URL}/api/data/user/team`)
+  const roles = authorizedGetJSON<UserRole[]>(`${process.env.DATA_URL}/api/data/role/list`)
+  const teams = authorizedGetJSON<UserTeam[]>(`${process.env.DATA_URL}/api/data/team/list`)
   const orgHierarchy = authorizedGetJSON<OrgUnitNode[]>(`${process.env.DATA_URL}/api/data/org_unit/hierarchy`)
 
   const data = await Promise.all([roles, teams, orgHierarchy]);

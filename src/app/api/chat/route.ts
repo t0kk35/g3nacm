@@ -46,7 +46,7 @@ export async function POST(req: Request) {
   if (!user?.name) return ErrorCreators.auth.missingUser(origin);
 
   // Get agent configuration
-  const agentConfig = await getCachedAgentConfig(agent);
+  const agentConfig = await getCachedAgentConfig(agent, user.name);
   if (!agentConfig) return ErrorCreators.agent.notFound(origin, agent)
 
   // Validate that this is a streaming agent
@@ -88,7 +88,7 @@ export async function POST(req: Request) {
   const tools = toolRegistry.getTools(streamingAgentConfig.tools);
 
   // Create model instance based on streaming agent configuration
-  const { model, streamTextOptions } = await getCachedAgentModelConfig(streamingAgentConfig.modelConfigCode);
+  const { model, streamTextOptions } = await getCachedAgentModelConfig(streamingAgentConfig.modelConfigCode, user.name);
 
   // Build three-level system prompt structure
   const templateContext: TemplateContext = mergeContexts(getDefaultContext(), context as TemplateContext);

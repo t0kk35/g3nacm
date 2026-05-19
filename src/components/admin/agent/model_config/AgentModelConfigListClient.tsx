@@ -11,8 +11,7 @@ import { DeleteDialog } from "../../DeleteDiaglog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { AgentModelConfig } from "@/lib/cache/agent-model-config-cache";
-import { AgentModelConfigAdmin } from "@/app/api/data/agent/types"
+import { AgentModelConfigAdmin } from "@/lib/data/queries/agent/types"
 import { toast } from "sonner"
 import { ApiError } from "next/dist/server/api-utils"
 import { useTranslations } from "next-intl"
@@ -23,7 +22,7 @@ export function AgentModelConfigListClient({ agentConfigs }: Props) {
 
   const t = useTranslations('Admin.Agent.ModelConfig')
 
-  const [modelConfigToDelete, setModelConfigToDelete] = useState<AgentModelConfig | null>(null)
+  const [modelConfigToDelete, setModelConfigToDelete] = useState<AgentModelConfigAdmin | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid")
   const [deletedModelConfigCodes, setDeletedModelConfigCodes] = useState<string[]>([])

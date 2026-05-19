@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { AIToolDefinition, ToolResult } from '../types';
 import { authorizedFetch } from '@/lib/org-filtering';
-import { User } from '@/app/api/data/user/user';
+import { User } from '@/lib/data/queries/user/user';
 
 const schema = z.object({
   criteria: z.string().describe('Search criteria')
@@ -18,7 +18,7 @@ export const searchUser: AIToolDefinition = {
 
     try {
       // Construct the API URL with parameters
-      const url = new URL(`${process.env.DATA_URL}/api/data/user/user`);
+      const url = new URL(`${process.env.DATA_URL}/api/data/user/list`);
       url.searchParams.append('search', criteria);
       
       // Make the API call to fetch subject history

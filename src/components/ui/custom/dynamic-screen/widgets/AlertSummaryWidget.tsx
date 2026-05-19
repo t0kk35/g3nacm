@@ -52,7 +52,7 @@ export function AlertSummaryWidget({
       setLoading(true)
       setError(null)
 
-      const response = await fetch(`/api/data/alert/summary?timeRange=${timeRange}`)
+      const response = await fetch(`/api/data/alert/summary?time_range=${timeRange}`)
       
       if (!response.ok) {
         throw new Error(`Failed to fetch alert summary: ${response.status}`)

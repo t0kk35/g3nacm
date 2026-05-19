@@ -8,7 +8,7 @@ import { SearchNoMatch } from "../SearchNoMatch"
 import { EditDeleteCardFooter } from "../EditDeleteCardFooter"
 import { EditDeleteTableCell } from "../EditDeleteTableCell"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { UserAdmin } from "@/app/api/data/user/user"
+import { UserAdmin } from "@/lib/data/queries/user/user"
 import { toast } from "sonner"
 import { ApiError } from "next/dist/server/api-utils"
 import { useTranslations } from 'next-intl'

@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ConditionBuilder } from "./ConditionBuilder"
 import { EvalRule, EvalInputSchema } from "@/lib/eval-engine/types"
-import { UserTeam } from "@/app/api/data/user/user"
+import { UserTeam } from "@/lib/data/queries/user/user"
 import { Save, X, AlertCircle } from "lucide-react"
 import { validateRule } from "@/lib/eval-engine/validation"
 
