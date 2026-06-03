@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner";
-import { OrgUnit, OrgUnitNode } from "@/app/api/data/org_unit/org_unit"
+import { OrgUnit, OrgUnitNode } from "@/lib/data/queries/org_unit/org_unit"
 import { useValidationForm, FormFieldInput } from "@/components/ui/custom/form-field"
 import { OrgUnitRequest } from "@/app/api/action/org_unit/org-unit";
 import { useTranslations } from "next-intl";

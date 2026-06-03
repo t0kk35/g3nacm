@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, CheckCircle, Bot, ChevronRight, ChevronDown, AlertCircle } from 'lucide-react';
-import { WorkflowAction } from '@/app/api/data/workflow/types';
+import { WorkflowAction } from '@/lib/data/queries/workflow/types';
 import { WorkflowActionForm } from '../workflow/workflow-action-form/workflow-action-form';
 import { PerformWorkflowAction } from '@/app/api/action/workflow/workflow';
 import { cn } from '@/lib/utils';

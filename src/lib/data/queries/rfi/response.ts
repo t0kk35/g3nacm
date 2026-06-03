@@ -11,6 +11,7 @@ const paramsSchema = z.object({
 const query_text = `
 SELECT 
   rrs.id AS "id",
+  rrs.entity_code AS "entity_code",
   rfi_request_id,
   repsonse_text,
   response_data,

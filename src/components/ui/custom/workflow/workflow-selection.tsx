@@ -10,7 +10,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { WorkflowActionForm } from "./workflow-action-form/workflow-action-form"
-import { WorkflowAction, WorkflowConfig } from "@/app/api/data/workflow/types"
+import { WorkflowAction, WorkflowConfig } from "@/lib/data/queries/workflow/types"
 import { PerformWorkflowAction } from "@/app/api/action/workflow/workflow"
 
 

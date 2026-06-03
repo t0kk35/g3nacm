@@ -40,7 +40,7 @@ export class FunctionNotificationCreate implements IWorkflowFunction {
     code = 'function.notification.create';
 
     async run(inputs: { [key:string]: any }, ctx: WorkflowContext, client: PoolClient): Promise<{ [key: string]: any }> {
-        
+
         const senderUser = ctx.system.userName;
         const receiverUser = getInput(this.code, inputs, 'function.notification.create.receiver_user_name', isString);
         const title = getInput(this.code, inputs, 'function.notification.create.title', isString);

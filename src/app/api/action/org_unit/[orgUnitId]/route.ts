@@ -3,13 +3,12 @@
 import { auth } from "@/auth";
 import * as db from "@/db"
 import { NextRequest, NextResponse } from 'next/server';
-import { authorizedGetJSON } from "@/lib/org-filtering";
 import { OrgUnitRequest } from '../org-unit';
 import { ErrorCreators } from '@/lib/api-error-handling';
 import { requirePermissions } from '@/lib/permissions/check';
-import { OrgUnit } from "@/app/api/data/org_unit/org_unit";
 import { AuditData } from "@/lib/audit/types";
 import { createAuditEntry } from "@/lib/audit/audit-log";
+import { queryOrgUnitList } from "@/lib/data/queries/org_unit/list";
 
 type Props = {params: Promise<{ orgUnitId: string }>}
 
@@ -55,16 +54,6 @@ export async function PUT(request: NextRequest, { params }: Props) {
         if (!param.field) return ErrorCreators.param.bodyMissing(origin, param.name);
     }
 
-    // Get audit before data
-    let beforeData;
-    try {
-        const before = await authorizedGetJSON<OrgUnit[]>(`${process.env.DATA_URL}/api/data/org_unit/org_unit?org_unit_id=${orgUnitId}`)
-        if (before.length < 1) return ErrorCreators.db.entityNotFound(origin, "OrgUnit", orgUnitId)
-        beforeData = before[0]
-    } catch (error) {
-        return ErrorCreators.api.failedCall(origin, error as Error)
-    }
-
     // Set up a connection and transactions
     let client;
     let transactionStarted=false;
@@ -73,6 +62,12 @@ export async function PUT(request: NextRequest, { params }: Props) {
         client = await db.pool.connect();    
         await client.query('BEGIN');
         transactionStarted = true;
+
+        // Get before state for audit
+        const before = await queryOrgUnitList({org_unit_id: parseInt(orgUnitId)}, {userName: user.name, client: client});
+        if (before.length < 1) return ErrorCreators.db.entityNotFound(origin, "OrgUnit", orgUnitId);
+        const beforeData = before[0];
+
         // Really the only thing that can change is the name
         await client.query(query_update, [orgUnitId, org.name]);
         const auditData: AuditData = {
@@ -123,16 +118,6 @@ export async function DELETE(_request: NextRequest, { params }: Props) {
     const orgUnitId = (await params).orgUnitId;
     if (!orgUnitId) return ErrorCreators.param.urlMissing(origin, 'orgUnitId');
 
-    // Get audit before data
-    let beforeData;
-    try {
-        const before = await authorizedGetJSON<OrgUnit[]>(`${process.env.DATA_URL}/api/data/org_unit/org_unit?org_unit_id=${orgUnitId}`)
-        if (before.length < 1) return ErrorCreators.db.entityNotFound(origin, "OrgUnit", orgUnitId)
-        beforeData = before[0]
-    } catch (error) {
-        return ErrorCreators.api.failedCall(origin, error as Error)
-    }
-
     // Set up a connection and transactions
     let client;
     let transactionStarted=false;
@@ -140,6 +125,12 @@ export async function DELETE(_request: NextRequest, { params }: Props) {
         client = await db.pool.connect();    
         await client.query('BEGIN');
         transactionStarted = true;
+
+        // Get before state for audit
+        const before = await queryOrgUnitList({org_unit_id: parseInt(orgUnitId)}, {userName: user.name, client: client});
+        if (before.length < 1) return ErrorCreators.db.entityNotFound(origin, "OrgUnit", orgUnitId);
+        const beforeData = before[0];
+
         // Run Validations
         const parent = await client.query(query_parent_validation, [orgUnitId]);
         const { child_count } = parent.rows[0];

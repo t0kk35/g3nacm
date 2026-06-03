@@ -62,3 +62,12 @@ export type RfiEmailContactDetails = {
 
 // Union — extend with new shapes as more channel handlers are added
 export type RfiContactDetails = RfiEmailContactDetails;
+
+export type CreateOutboundRfiResponseParams = {
+    entity_code: string;
+    rfi_request_id: string;
+    response_data: Record<string, any>;
+    body_text?: string;
+    from_name?: string;
+    respondent_contact: Record<string, any>;
+}

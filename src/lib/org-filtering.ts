@@ -1,11 +1,7 @@
-import { OrgUnitFilter } from "@/app/api/data/org_unit/org_unit";
-import { OrgUnit } from "@/app/api/data/org_unit/org_unit";
-import { OrgUnitUserAccess } from "@/app/api/data/org_unit/access/route";
 import { cookies } from "next/headers";
 import { APIError } from "./api-error-handling";
 import { getCachedUserOrgAccess } from "./cache/user-org-access-cache";
 import { getCachedOrgUnit } from "./cache/org-unit-cache";
-import { error } from "console";
 
 /**
  * Checks if a child path is under a parent path in the hierarchy.
@@ -27,7 +23,7 @@ export async function isOrgUnitAccessibleToUser(userName: string, orgUnitCode: s
     let org;
     let userAccess;
     try {
-        org = await getCachedOrgUnit(orgUnitCode)
+        org = await getCachedOrgUnit(orgUnitCode, userName);
         userAccess = await getCachedUserOrgAccess(userName);
     } catch (error) {
         console.log('Error Fetching Org and UserAccess ' + (error as Error).message)

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Plus, RefreshCw, Search } from "lucide-react"
 import { OrgUnitForm } from "./OrgUnitForm"
 import { OrgUnitEditTree } from "./OrgUnitEditTree";
-import { OrgUnitNode } from "@/app/api/data/org_unit/org_unit"
+import { OrgUnitNode } from "@/lib/data/queries/org_unit/org_unit"
 import { filterOrgUnitHierarchy, removeDeletedFromOrgUnitHierarchy } from "./OrgUnitFilter";
 import { useTranslations } from "next-intl";
 

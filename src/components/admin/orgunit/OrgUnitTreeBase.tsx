@@ -2,7 +2,7 @@ import { useState, useEffect, ReactNode } from "react"
 import { ChevronRight, ChevronDown } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { OrgUnitNode } from "@/app/api/data/org_unit/org_unit"
+import { OrgUnitNode } from "@/lib/data/queries/org_unit/org_unit"
 
 type OrgUnitTreeBaseProps = {
   units: OrgUnitNode[]

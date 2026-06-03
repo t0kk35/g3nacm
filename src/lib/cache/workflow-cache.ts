@@ -1,6 +1,6 @@
 import * as db from "@/db"
 import { workflowConfigCache } from "./cache";
-import { WorkflowConfig } from "@/app/api/data/workflow/types";
+import { WorkflowConfig } from "@/lib/data/queries/workflow/types";
 
 const query_text = `
 SELECT 

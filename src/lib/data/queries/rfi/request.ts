@@ -6,7 +6,8 @@ import { zTimeRangeToDate } from '../../params';
 import { RfiRequest } from '@/lib/data/queries/rfi/type';
 
 const paramsSchema = z.object({
-    rfi_id:     z.string().uuid().optional(),
+    rfi_id: z.string().uuid().optional(),
+    rfi_identifier: z.string().optional(),
     time_range: zTimeRangeToDate.optional(),
 }).refine(
     d => d.rfi_id || d.time_range,
@@ -86,21 +87,22 @@ JOIN v_user_org_access_path ouap ON ou.path = ouap.path OR ou.path LIKE CONCAT(o
 JOIN users u ON ouap.user_id = u.id
 WHERE 
 u.name = $1 AND
-($2::uuid IS NULL OR (rr.id = $2 AND u.name = $1)) AND 
-($3::timestamp IS NULL OR (u.name = $1 AND rr.create_datetime >= $3 AND wes.assigned_to_user_name = $1))
+($2::uuid IS NULL OR rr.id = $2) AND
+($3::text IS NULL OR rr.identifier = $3) AND 
+($4::timestamp IS NULL OR (u.name = $1 AND rr.create_datetime >= $4 AND wes.assigned_to_user_name = $1))
 `
 
 export const queryRfiRequest = defineQuery({
     path: 'rfi/rfi_request',
     permissions: [],
     params: paramsSchema,
-    execute: async ({ rfi_id, time_range }: z.infer<typeof paramsSchema>, ctx: QueryContext): Promise<RfiRequest[]> => {
+    execute: async ({ rfi_id, rfi_identifier, time_range }: z.infer<typeof paramsSchema>, ctx: QueryContext): Promise<RfiRequest[]> => {
         const conn = ctx.client ?? db.pool;
         try {
             const result = await conn.query({
                 name: 'rfi_request',
                 text: query_text,
-                values: [ctx.userName, rfi_id ?? null, time_range ?? null],
+                values: [ctx.userName, rfi_id ?? null, rfi_identifier ?? null, time_range ?? null],
             });
             return result.rows as RfiRequest[];
         } catch (err) {

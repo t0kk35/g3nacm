@@ -5,7 +5,7 @@ import * as db from '@/db'
 import { NextRequest, NextResponse } from 'next/server';
 import { createWorkflowContext, executeWorkflowAction } from '@/lib/workflow/workflow-engine';
 import { getCachedWorkflowConfig } from "@/lib/cache/workflow-cache";
-import { WorkflowConfig } from '../../data/workflow/types';
+import { WorkflowConfig } from '@/lib/data/queries/workflow/types';
 import { PerformWorkflowAction } from './workflow';
 import { PoolClient } from 'pg';
 import { ErrorCreators } from '@/lib/api-error-handling';

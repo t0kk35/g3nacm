@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { OrgUnitSelectTree } from "../orgunit/OrgUnitSelectTree"
-import { OrgUnitNode } from "@/app/api/data/org_unit/org_unit"
+import { OrgUnitNode } from "@/lib/data/queries/org_unit/org_unit"
 import { useTranslations } from "next-intl"
 
 type Props = {

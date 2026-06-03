@@ -8,4 +8,5 @@ INSERT INTO workflow_entity
   ('wlm.tf.alert', 'Transaction Filtering Alert', '/alert'),
   ('system.notification', 'User Notification', '/notification'),
   ('rfi.inbound', 'Inbound RFI', '/rfi'),
-  ('rfi.outbound', 'Outbound RFI', '/rfi');
+  ('rfi.outbound', 'Outbound RFI', '/rfi'),
+  ('rfi.response.inbound', 'Inbound RFI reponse', null);

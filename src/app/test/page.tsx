@@ -13,7 +13,11 @@ export default async function Test() {
     `${process.env.DATA_URL}/api/action/job/submit`,
     JSON.stringify({
       "jobType": "rfi.process-inbound-mail",
-      "payload": { "channel_code": "mail-in", "workflow_action_code": "system.rfi.outbound.process_reply" }
+      "payload": { 
+        "channel_code": "mail-in", 
+        "rfi_request_workflow_action_code": "system.rfi.outbound.process_reply",
+        "rfi_response_entity_code": "rfi.response.inbound"   
+      }
     })
   )
 

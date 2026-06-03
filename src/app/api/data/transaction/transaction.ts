@@ -1,4 +1,4 @@
-import { OrgUnitFilter } from "../org_unit/org_unit";
+import { OrgUnitFilter } from "../../../../lib/data/queries/org_unit/org_unit";
 
 export enum entity_data_type  {
     STRING = 'string',

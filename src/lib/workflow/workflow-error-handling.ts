@@ -1,5 +1,5 @@
 import { BaseError } from "../base-error";
-import { WorkflowAction } from "@/app/api/data/workflow/types";
+import { WorkflowAction } from "@/lib/data/queries/workflow/types";
 import { IWorkflowFunction } from "./function/function";
 
 export class WorkflowError extends BaseError {
@@ -20,6 +20,7 @@ export enum ErrorCode {
     WFL_CONTEXT_UNKNOWN_REPLACEMENT_SOURCE = "WRKC_00002",
     WFL_CONTEXT_CAN_NOT_FIND_ENV_SETTING = "WRKC_00003",
     WFL_CONTEXT_CAN_NOT_FIND_CONTEXT_SETTING = "WRKC_00004",
+    WFL_CONTEXT_NO_ENTITY_ID_ON_NONE_START_ACTION = "WRKC_00005",
     WFL_FUNC_CLAIM_LEASE_USER_DOES_NOT_HAVE_LEASE = "WRLF_00001",
 }
 
@@ -35,6 +36,7 @@ const errorDefinition = new Map<ErrorCode, string>([
     [ErrorCode.WFL_CONTEXT_UNKNOWN_REPLACEMENT_SOURCE, 'Unknown Replacement source "{source}" for setting "{setting_path}", can not replace in context'],
     [ErrorCode.WFL_CONTEXT_CAN_NOT_FIND_ENV_SETTING, 'Missing env variable: "{setting_path}". Can not resolve setting'],
     [ErrorCode.WFL_CONTEXT_CAN_NOT_FIND_CONTEXT_SETTING, 'Missing context variable: "{setting_path}". Can not resolve setting'],
+    [ErrorCode.WFL_CONTEXT_NO_ENTITY_ID_ON_NONE_START_ACTION, 'The Entity is missing in the context, this is only allowed for start actions. Currenct action "{actionCode}"'],
     [ErrorCode.WFL_FUNC_CLAIM_LEASE_USER_DOES_NOT_HAVE_LEASE, 'User "{user_name}" does not hold the lease to entity-id "{entity_id}" and entity-code "{entity_code}"']
 ]);
 
@@ -54,6 +56,7 @@ export const WorkflowErrorCreators: {
         unknowSettingSource: (origin: string, source: string, setting_path: string) => never;
         canNotFindEnvSetting: (origin: string, settingPath: string) => never;
         canNotFindContextSetting: (origin: string, settingPath: string) => never;
+        noEntityIdNoneStartAction: (origin : string, actionCode: string) => never;
     }
     function: {
         userDoesNotHaveLease: (origin: string, userName: string, entity_id: string, entity_code: string) => never;
@@ -81,6 +84,7 @@ export const WorkflowErrorCreators: {
         unknowSettingSource: (origin: string, source: string, settingPath: string): never => workflowErrorCreator(ErrorCode.WFL_CONTEXT_UNKNOWN_REPLACEMENT_SOURCE, origin, {'source': source, 'setting_path': settingPath }),
         canNotFindEnvSetting: (origin: string, settingPath: string): never => workflowErrorCreator(ErrorCode.WFL_CONTEXT_CAN_NOT_FIND_ENV_SETTING, origin, {'setting_path': settingPath}),
         canNotFindContextSetting: (origin, settingPath): never => workflowErrorCreator(ErrorCode.WFL_CONTEXT_CAN_NOT_FIND_CONTEXT_SETTING, origin, {'setting_path': settingPath}),
+        noEntityIdNoneStartAction: (origin, actionCode): never => workflowErrorCreator(ErrorCode.WFL_CONTEXT_NO_ENTITY_ID_ON_NONE_START_ACTION, origin, {'actionCode': actionCode})
     },
     function: {
         userDoesNotHaveLease: (origin: string, userName: string, entity_id: string, entity_code: string): never => workflowErrorCreator(ErrorCode.WFL_FUNC_CLAIM_LEASE_USER_DOES_NOT_HAVE_LEASE, origin, {'user_name': userName, 'entity_id': entity_id, 'entity_code': entity_code})

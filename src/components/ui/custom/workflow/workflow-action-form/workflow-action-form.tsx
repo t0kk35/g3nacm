@@ -1,5 +1,5 @@
 import { JSX } from "react"
-import { WorkflowFormField } from "@/app/api/data/workflow/types"
+import { WorkflowFormField } from "@/lib/data/queries/workflow/types"
 import { TextField } from "./text-field"
 import { TextAreaField } from "./text-area-field"
 import { SelectField } from "./select-field"

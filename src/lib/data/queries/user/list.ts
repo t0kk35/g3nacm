@@ -2,7 +2,6 @@ import { z } from 'zod';
 import * as db from '@/db';
 import { defineQuery, QueryContext } from '@/lib/data/registry';
 import { DataQueryError } from '@/lib/data/errors';
-import { zStringToBoolean } from '../../params';
 import { User } from './user';
 
 const paramsSchema = z.object({

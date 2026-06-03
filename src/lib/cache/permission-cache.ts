@@ -1,3 +1,6 @@
+/**
+ * This is one cache that can not call a @lib/data/ query. That creates a reference error during compile.
+ */
 import * as db from "@/db"
 import { permissionCache } from "./cache";
 

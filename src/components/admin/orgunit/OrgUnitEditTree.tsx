@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { OrgUnitNode } from "@/app/api/data/org_unit/org_unit"
+import { OrgUnitNode } from "@/lib/data/queries/org_unit/org_unit"
 import { toast } from "sonner"
 import { ApiError } from "next/dist/server/api-utils"
 import { useTranslations } from "next-intl"

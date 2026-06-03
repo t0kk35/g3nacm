@@ -1,4 +1,4 @@
-import { OrgUnitNode } from "@/app/api/data/org_unit/org_unit"
+import { OrgUnitNode } from "@/lib/data/queries/org_unit/org_unit"
 import { nodeServerAppPaths } from "next/dist/build/webpack/plugins/pages-manifest-plugin"
 
 // This function filters the org unit tree based on a search query

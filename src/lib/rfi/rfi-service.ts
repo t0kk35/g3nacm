@@ -2,6 +2,7 @@ import { PoolClient } from "pg";
 import { getChannelByCode } from "@/lib/cache/rfi-channel-cache";
 import { getRfiChannelHandler } from "./channel-handler-registry";
 import { CreateOutboundRfiParams, CreateRfiResult, DispatchRfiResult, RfiContactDetails, RfiSendContext } from "./types";
+import { CreateOutboundRfiResponseParams } from "./types";
 import { resolveChannel } from "./rfi-resolve";
 import { generateIdentifier } from "../helpers";
 
@@ -88,6 +89,20 @@ SET status = 'Failed'::rfi_status
 WHERE id = $1::uuid
 `;
 
+const query_insert_response = `
+INSERT INTO rfi_response (
+    entity_code,
+    rfi_request_id,
+    repsonse_text,
+    response_data,
+    respondent_name,
+    respondent_contact_details,
+    is_complete
+) 
+VALUES ($1, $2::uuid, $3, $4::jsonb, $5, $6::jsonb, false)
+RETURNING id AS "id"
+`;
+
 /**
  * Persists an outbound RFI record with status 'Draft'.
  * Must be called within an active DB transaction.
@@ -95,10 +110,7 @@ WHERE id = $1::uuid
  * This is step 1 of the two-step create → dispatch flow. The record is saved
  * but not yet sent, allowing for approval or async dispatch later.
  */
-export async function createOutboundRfi(
-    params: CreateOutboundRfiParams,
-    client: PoolClient
-): Promise<CreateRfiResult> {
+export async function createOutboundRfi(params: CreateOutboundRfiParams, client: PoolClient): Promise<CreateRfiResult> {
 
     // 1. Load + validate channel
     const channel = await getChannelByCode(params.channel_code);
@@ -226,4 +238,25 @@ export async function dispatchOutboundRfi(rfiId: string, client: PoolClient): Pr
     }
 
     return { delivery_result: deliveryResult };
+}
+
+
+/**
+ * Persists an outbound RFI Repsonse 
+ * Must be called within an active DB transaction.
+ */
+export async function createOutboundRfiResponse(params : CreateOutboundRfiResponseParams, client: PoolClient): Promise<string> { 
+
+    const responseResult = await client.query(query_insert_response, [
+        params.entity_code,
+        params.rfi_request_id,
+        params.body_text || null,
+        JSON.stringify(params.response_data),
+        params.from_name || null,
+        JSON.stringify(params.respondent_contact),
+    ]);
+
+    const reponseId: string = responseResult.rows[0].id;
+    return reponseId;
+
 }

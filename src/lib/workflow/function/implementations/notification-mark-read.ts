@@ -1,7 +1,6 @@
 import { PoolClient } from "pg";
 import { WorkflowContext } from "../../types";
 import { IWorkflowFunction } from "../function";
-import { updateEntityState, copyToEntityStateLog } from "../../workflow-data";
 
 const query_text = `
 UPDATE notification
@@ -25,9 +24,6 @@ export class FunctionNotificationMarkRead implements IWorkflowFunction {
             values:[ctx.system.userName, ctx.system.entityId]
         };
         await client.query(query);
-        // Do the standard entity_state stuff.
-        await copyToEntityStateLog(client, ctx.system.entityId, ctx.system.entityCode);
-        await updateEntityState(client, ctx.system.entityId, ctx.system.entityCode, ctx.system.actionCode, ctx.system.fromStateCode, ctx.system.userName, undefined);
         // No need to return anything
         return {}
     }

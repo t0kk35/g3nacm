@@ -21,3 +21,8 @@ import './queries/user/permission';
 import './queries/role/list';
 import './queries/team/list';
 import './queries/team/assignment';
+import './queries/org_unit/list';
+import './queries/org_unit/hierarchy';
+import './queries/org_unit/access';
+import './queries/org_unit/user_access';
+import './queries/workflow/config';

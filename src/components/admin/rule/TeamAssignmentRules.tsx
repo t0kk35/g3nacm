@@ -3,7 +3,7 @@
 import { authorizedGetJSON } from "@/lib/org-filtering"
 import { UserTeam } from "@/lib/data/queries/user/user"
 import { EvalInputSchema } from "@/lib/eval-engine/types"
-import { OrgUnit } from "@/app/api/data/org_unit/org_unit"
+import { OrgUnit } from "@/lib/data/queries/org_unit/org_unit"
 import { TeamAssignmentRulesClient } from "./TeamAssignmentRulesClient"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,7 +12,7 @@ export async function TeamAssignmentRules() {
 
   const teams = authorizedGetJSON<UserTeam[]>(`${process.env.DATA_URL}/api/data/team/list`);
   const schemas = authorizedGetJSON<EvalInputSchema[]>(`${process.env.DATA_URL}/api/data/eval/schema`);
-  const orgUnits = authorizedGetJSON<OrgUnit[]>(`${process.env.DATA_URL}/api/data/org_unit/org_unit`);
+  const orgUnits = authorizedGetJSON<OrgUnit[]>(`${process.env.DATA_URL}/api/data/org_unit/list`);
   
   const data = await Promise.all([teams, schemas, orgUnits]);
 

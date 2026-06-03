@@ -150,4 +150,20 @@ VALUES
   --- Input
   ('function.rfi_request.send.rfi_id', 'function.rfi_request.send', 'RFI ID', 'string', 'Input'),
   --- Output TBD
-  
+
+-- RFI Response workfow functions
+INSERT INTO workflow_function 
+  ("code", "name") 
+VALUES 
+  ('function.rfi_request.send', 'Send an RFI request');
+
+INSERT INTO workflow_function_parameter
+  ("code", "function_code", "name", "parameter_type", "direction") 
+VALUES 
+  ('function.rfi_response.create.body_text', 'function.rfi_response.create', 'Body of the RFI Response', 'string', 'Input'),
+  ('function.rfi_response.create.from_name', 'function.rfi_response.create', 'Name of the subject that provided the response', 'string', 'Input'), 
+  ('function.rfi_response.create.id', 'function.rfi_response.create', 'Id of the created response', 'string', 'Output'),
+  ('function.rfi_response.create.respondent_contact', 'function.rfi_response.create', 'The respondent subject contact details as object', 'object', 'Input'), 
+  ('function.rfi_response.create.response_data', 'function.rfi_response.create', 'The main response data as an object', 'object', 'Input'), 
+  ('function.rfi_response.create.rfi_request_id', 'function.rfi_response.create', 'The ID of the original RFI request.', 'string', 'Input'), 
+  ('function.rfi_response.create.rfi_response_entity_code', 'function.rfi_response.create', 'Entity Code of the Response', 'string', 'Input');

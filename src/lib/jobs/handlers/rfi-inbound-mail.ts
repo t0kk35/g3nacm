@@ -8,19 +8,9 @@ import { RfiChannelType } from '@/lib/data/queries/rfi/type';
 import { getCachedWorkflowConfig } from "@/lib/cache/workflow-cache";
 import { createWorkflowContext, executeWorkflowAction } from '@/lib/workflow/workflow-engine';
 import * as db from '@/db';
+import { queryRfiRequest } from '@/lib/data/queries/rfi/request';
 
-const query_lookup_rfi = `
-SELECT 
-    id,
-    org_unit_code,
-    entity_code,
-    create_user_name
-FROM rfi_request
-WHERE identifier = $1 AND status = 'Sent'::rfi_status
-LIMIT 1
-`;
-
-const query_insert_response = `
+/* const query_insert_response = `
 INSERT INTO rfi_response (
     rfi_request_id,
     repsonse_text,
@@ -29,12 +19,21 @@ INSERT INTO rfi_response (
     respondent_contact_details,
     is_complete
 ) VALUES ($1::uuid, $2, $3::jsonb, $4, $5::jsonb, false)
-`;
+`; */
 
 JobRegistry.register('rfi.process-inbound-mail', async (ctx: JobContext): Promise<JobResult> => {
-    const { channel_code, workflow_action_code } = ctx.payload as { channel_code: string, workflow_action_code: string };
+    const { 
+        channel_code, 
+        rfi_request_workflow_action_code, 
+        rfi_response_entity_code 
+    } = ctx.payload as { 
+        channel_code: string, 
+        rfi_request_workflow_action_code: string,
+        rfi_response_entity_code: string 
+    };
 
     if (!channel_code) return { success: false, errorMessage: 'payload.channel_code is required' };
+    if (!rfi_response_entity_code) return { success: false, errorMessage: 'payload.rfi_response_workflow_action_code is required' };
 
     const channel = await getChannelByCode(channel_code);
 
@@ -75,17 +74,16 @@ JobRegistry.register('rfi.process-inbound-mail', async (ctx: JobContext): Promis
                 continue;
             }
 
-            const lookup = await client.query(query_lookup_rfi, [identifier]);
+            const lookup = await queryRfiRequest({rfi_identifier: identifier}, {userName: ctx.userName, client: client});
 
-            if (lookup.rows.length === 0) {
+            if (lookup.length === 0) {
                 skipped++;
                 continue;
             }
 
-            const rfiRequestId: string = lookup.rows[0].id;
-            const rfiOrgUnitCode: string = lookup.rows[0].org_unit_code;
-            const rfiEntityCode: string = lookup.rows[0].entity_code;
-            const rfiCreateUserName: string = lookup.rows[0].create_user_name;
+            const rfiRequestId: string = lookup[0].id;
+            const rfiOrgUnitCode: string = lookup[0].org_unit_code;
+            const rfiEntityCode: string = lookup[0].entity_code;
 
             const responseData = {
                 message_id: email.messageId,
@@ -101,37 +99,54 @@ JobRegistry.register('rfi.process-inbound-mail', async (ctx: JobContext): Promis
                 subject_name: email.from_name,
             };
 
-            await client.query(query_insert_response, [
-                rfiRequestId,
-                email.body_text || null,
-                JSON.stringify(responseData),
-                email.from_name || null,
-                JSON.stringify(respondentContact),
-            ]);
+            // Execute the workflow action to create the response
+            const responseWorkflowConfig = await getCachedWorkflowConfig(rfi_response_entity_code, rfiOrgUnitCode)
+            const reponseStartAction = responseWorkflowConfig.actions.find(a => a.start_action);
+            if (!reponseStartAction) return { success: false, errorMessage: `Could not find start action for the rfi response. Loaded entity code ${rfi_response_entity_code} for org code ${rfiOrgUnitCode}` };
+
+            const responseSystemFields = {
+                userName: ctx.userName,
+                orgUnitCode: rfiOrgUnitCode,
+                actionCode: reponseStartAction.code,
+                entityCode: rfi_response_entity_code,
+                entityId: "Unknown",
+                fromStateCode: '',
+                toStateCode: '',
+                entityData: lookup[0]     // Feed original RFI as entity data
+            };
+            const actionData = {
+                responseData: responseData,
+                respondentContact: respondentContact,
+                emailBodyText: email.body_text,
+                fromName: email.from_name
+            }
+            const responsetWfCtx = createWorkflowContext(actionData, responseSystemFields);
+            await executeWorkflowAction(client, responseWorkflowConfig, responsetWfCtx);
+
+//            await client.query(query_insert_response, [
+//                rfiRequestId,
+//                email.body_text || null,
+//                JSON.stringify(responseData),
+//                email.from_name || null,
+//                JSON.stringify(respondentContact),
+//            ]);
 
             // Now trigger the workflow action on the orignal RFI (if provided)
-            if (workflow_action_code) {
-                const workflowConfig = await getCachedWorkflowConfig(rfiEntityCode, rfiOrgUnitCode)
-                const systemFields = {
+            if (rfi_request_workflow_action_code) {
+                const requstWorkflowConfig = await getCachedWorkflowConfig(rfiEntityCode, rfiOrgUnitCode)
+                const requestSystemFields = {
                     userName: ctx.userName,
                     orgUnitCode: rfiOrgUnitCode,
-                    actionCode: workflow_action_code,
+                    actionCode: rfi_request_workflow_action_code,
                     entityCode: rfiEntityCode,
                     entityId: rfiRequestId,
                     fromStateCode: '',
                     toStateCode: '',
-                    entityData: { 
-                        rfi_request: {
-                            id: rfiRequestId,
-                            entity_code: rfiEntityCode,
-                            org_unit_code: rfiOrgUnitCode,
-                            create_user_id: rfiCreateUserName
-                        }
-                    }
+                    entityData: lookup[0]
                 };
                 const actionData = {}
-                const wfCtx = createWorkflowContext(actionData, systemFields);
-                await executeWorkflowAction(client, workflowConfig, wfCtx);
+                const requestWfCtx = createWorkflowContext(actionData, requestSystemFields);
+                await executeWorkflowAction(client, requstWorkflowConfig, requestWfCtx);
             }
 
             processedUids.push(email.uid);

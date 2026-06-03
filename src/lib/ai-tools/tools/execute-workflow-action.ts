@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { AIToolDefinition, ToolResult } from '../types';
 import { authorizedFetch } from '@/lib/org-filtering';
-import { WorkflowConfig } from '@/app/api/data/workflow/types';
+import { WorkflowConfig } from '@/lib/data/queries/workflow/types';
 
 const schema = z.object({
   orgUnitCode: z.string().describe('Organization unit code'),

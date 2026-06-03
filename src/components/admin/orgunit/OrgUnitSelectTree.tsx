@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { OrgUnitTreeBase } from "./OrgUnitTreeBase"
-import { OrgUnitNode } from "@/app/api/data/org_unit/org_unit"
+import { OrgUnitNode } from "@/lib/data/queries/org_unit/org_unit"
 import { filterOrgUnitHierarchy } from "./OrgUnitFilter"
 import { useTranslations } from "next-intl"
 

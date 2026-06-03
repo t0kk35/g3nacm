@@ -146,6 +146,7 @@ export type RfiQuestion = {
 
 export interface RfiResponse {
   id: string;
+  entity_code: string;
   rfi_request_id: string;
   rfi_message_id?: string;
   repsonse_text?: string;

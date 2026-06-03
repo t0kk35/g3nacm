@@ -11,6 +11,7 @@ import { FunctionNotificationCreate } from "./implementations/notification-creat
 import { FunctionNotificationMarkRead } from "./implementations/notification-mark-read";
 import { FunctionRfiRequestCreate } from "./implementations/rfi-request-create";
 import { FunctionRfiRequestSend } from "./implementations/rfi-request-send";
+import { FunctionRfiResponseCreate } from "./implementations/rfi-response-create";
 
 export interface IWorkflowFunction {
     code: string;
@@ -36,3 +37,4 @@ workflowFunctionRegistry['function.notification.create'] = new FunctionNotificat
 workflowFunctionRegistry['function.notification.mark_read'] = new FunctionNotificationMarkRead();
 workflowFunctionRegistry['function.rfi_request.create'] = new FunctionRfiRequestCreate();
 workflowFunctionRegistry['function.rfi_request.send'] = new FunctionRfiRequestSend();
+workflowFunctionRegistry['function.rfi_response.create'] = new FunctionRfiResponseCreate();

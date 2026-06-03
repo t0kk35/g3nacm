@@ -1,6 +1,6 @@
 import { PoolClient } from "pg";
 import { SystemFields, WorkflowContext } from "./types";
-import { WorkflowConfig } from "@/app/api/data/workflow/types";
+import { WorkflowConfig } from "@/lib/data/queries/workflow/types";
 import { workflowFunctionRegistry } from "./function/function";
 import { getEntityState } from "./workflow-data";
 import { hasPermissions } from "../permissions/core";
@@ -27,35 +27,38 @@ export async function executeWorkflowAction(client: PoolClient, workflowConfig: 
     const hasPermission = await hasPermissions(ctx.system.userName, [action.permission]);
     if (action.permission && !hasPermission) WorkflowErrorCreators.action.noActionPermission(origin, ctx.system.userName, action.code) 
 
-    // Locate the entity in the workflow_entity_state table. See if we find it and it is in the correct starting state.
-    const entityState = await getEntityState(client, ctx.system.entityId, ctx.system.entityCode)
-    
-    // if state ends with 'any_active' the action can be applied to all active states.
-    if (isAnyActive(action.from_state_code)) {
-      // Look-up the state 
-      const fsc = workflowConfig.states.find(s => s.code === entityState.from_state_code)
-      if (!fsc || (!fsc.is_active)) WorkflowErrorCreators.action.invalidAnyStateTransition(origin, action.code, entityState.from_state_code) 
-    }
-    else {
-      // Validate that the entity's current state matches the allowed source state.
-      if (entityState.to_state_code !== action.from_state_code) WorkflowErrorCreators.action.invalidStateTransition(origin, action.code, action.from_state_code, entityState.to_state_code) 
-    }
-  
-    // Set system fields for this execution.
-    ctx.system.fromStateCode = entityState.to_state_code;
-    ctx.system.toStateCode = action.to_state_code;
+    // The start action is a bit specific. It's the first action to create an entry. No need to check current state or do audit in workflow_state_log
+    if (!action.start_action) {
+      // Locate the entity in the workflow_entity_state table. See if we find it and it is in the correct starting state.
+      // Only needed if we already have an entity; so not for the start action
+      const entityState = await getEntityState(client, ctx.system.entityId, ctx.system.entityCode)
+      
+      // if state ends with 'any_active' the action can be applied to all active states.
+      if (isAnyActive(action.from_state_code)) {
+        // Look-up the state 
+        const fsc = workflowConfig.states.find(s => s.code === entityState.from_state_code)
+        if (!fsc || (!fsc.is_active)) WorkflowErrorCreators.action.invalidAnyStateTransition(origin, action.code, entityState.from_state_code) 
+      } else {
+        // Validate that the entity's current state matches the allowed source state.
+        if (entityState.to_state_code !== action.from_state_code) WorkflowErrorCreators.action.invalidStateTransition(origin, action.code, action.from_state_code, entityState.to_state_code) 
+      }
 
-    // First update the entity state and state_log. So they reflect the action transition.
-    await copyToEntityStateLog(client, ctx.system.entityId, ctx.system.entityCode);    
-    // Get the comment if required for the action.
-    if (action.comment_required) {
-      WorkflowErrorCreators.action.assertActionHasCommentMapping(origin, action.code, action.comment_mapping);
-      const comment = ctx.data[action.comment_mapping];
-      WorkflowErrorCreators.action.assertCommentInContext(origin, action.code, comment);
-      await updateEntityState(client, ctx.system.entityId, ctx.system.entityCode, ctx.system.actionCode, ctx.system.fromStateCode, ctx.system.userName, comment);
-    }
-    else {
-      await updateEntityState(client, ctx.system.entityId, ctx.system.entityCode, ctx.system.actionCode, ctx.system.fromStateCode, ctx.system.userName, undefined);
+      // Set system fields for this execution.
+      ctx.system.fromStateCode = entityState.to_state_code;
+      ctx.system.toStateCode = action.to_state_code;
+
+      // First update the entity state and state_log. So they reflect the action transition.
+      await copyToEntityStateLog(client, ctx.system.entityId, ctx.system.entityCode);    
+      // Get the comment if required for the action.
+      if (action.comment_required) {
+        WorkflowErrorCreators.action.assertActionHasCommentMapping(origin, action.code, action.comment_mapping);
+        const comment = ctx.data[action.comment_mapping];
+        WorkflowErrorCreators.action.assertCommentInContext(origin, action.code, comment);
+        await updateEntityState(client, ctx.system.entityId, ctx.system.entityCode, ctx.system.actionCode, ctx.system.fromStateCode, ctx.system.userName, comment);
+      }
+      else {
+        await updateEntityState(client, ctx.system.entityId, ctx.system.entityCode, ctx.system.actionCode, ctx.system.fromStateCode, ctx.system.userName, undefined);
+      }
     }
 
     // Execute each workflow function in order.

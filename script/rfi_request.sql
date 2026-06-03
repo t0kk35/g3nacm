@@ -129,7 +129,8 @@ CREATE INDEX idx_rfi_i_rfi_id ON rfi_question(rfi_request_id);
 
 --- RFI Reponses
 CREATE TABLE rfi_response (
-    repsonse_text UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    entity_code TEXT NOT NULL,
     rfi_request_id UUID NOT NULL,
     rfi_message_id UUID,
     -- Responder content
@@ -154,6 +155,7 @@ CREATE TABLE rfi_response (
     create_datetime TIMESTAMPTZ DEFAULT now(),
     update_datetime TIMESTAMPTZ DEFAULT now(),
     CONSTRAINT rfi_id FOREIGN KEY (rfi_request_id) REFERENCES rfi_request(id),
+    CONSTRAINT fk_entity_code FOREIGN KEY (entity_code) REFERENCES workflow_entity(code),
     CONSTRAINT rfi_r_contact_method FOREIGN KEY (respondent_entity_id) REFERENCES subject_base(id)
 );
 

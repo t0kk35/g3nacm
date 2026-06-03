@@ -1,4 +1,4 @@
-import { OrgUnitFilter } from "../../../../app/api/data/org_unit/org_unit";
+import { OrgUnitFilter } from "../org_unit/org_unit";
 import { EntityState, EntityStateHistory } from "../../../../app/api/data/entity_state/entity-state";
 
 export enum AlertItemType {
