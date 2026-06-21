@@ -12,32 +12,29 @@ import { ErrorCreators } from '@/lib/api-error-handling';
 
 const origin = 'api/action/workflow'
 
-async function parseRequestBody(req: NextRequest): Promise<{ actions: PerformWorkflowAction[], files: Map<string, File> }> {
+async function parseRequestBody(req: NextRequest): Promise<{ actions: PerformWorkflowAction[], files: File[] }> {
     const contentType = req.headers.get('content-type') || '';
 
     if (contentType.includes('application/json')) {
-        // Handle JSON requests (backward compatibility)
         const actions = await req.json();
-        return { actions, files: new Map() };
+        return { actions, files: [] };
     } else if (contentType.includes('multipart/form-data')) {
-        // Handle FormData requests with files
         const formData = await req.formData();
         const actionsData = formData.get('actions') as string;
-        
+
         if (!actionsData) {
             throw new Error('Missing actions data in FormData');
         }
-        
+
         const actions = JSON.parse(actionsData);
-        const files = new Map<string, File>();
-        
-        // Extract files from FormData
+        const files: File[] = [];
+
         for (const [key, value] of formData.entries()) {
             if (key !== 'actions' && value instanceof File) {
-                files.set(key, value);
+                files.push(value);
             }
         }
-        
+
         return { actions, files };
     } else {
         throw new Error('Unsupported content type');
@@ -99,7 +96,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'Workflow Action Performed', redirectUrls });
 }
 
-async function executeActions(client: PoolClient, userName: string, workflowConfig: WorkflowConfig, actions: PerformWorkflowAction[], files: Map<string, File>): Promise<string[]> {
+async function executeActions(client: PoolClient, userName: string, workflowConfig: WorkflowConfig, actions: PerformWorkflowAction[], files: File[]): Promise<string[]> {
 
     const redirectUrls: string[] = [];
 
@@ -115,15 +112,20 @@ async function executeActions(client: PoolClient, userName: string, workflowConf
             entityData: a.entityData || {}
         };
 
-        // Merge files into the data context using their field names
         const actionData = { ...(a.data || {}) };
-        for (const [fieldName, file] of files.entries()) {
-            actionData[fieldName] = file;
+
+        // Build the structured files array from the raw files and per-action metadata
+        if (files.length > 0) {
+            const descriptions: string[] = actionData.fileDescriptions || [];
+            const orgUnit: string = actionData.fileOrgUnit || workflowConfig.org_unit_code;
+            actionData.files = files.map((file, i) => ({
+                file,
+                description: descriptions[i] ?? '',
+                orgUnitCode: orgUnit,
+            }));
         }
 
-        // Create a workflow context to store data needed by the functions
         const ctx = createWorkflowContext(actionData, systemFields);
-        // Execute the action and collect redirect URL
         const redirectUrl = await executeWorkflowAction(client, workflowConfig, ctx);
         if (redirectUrl) {
             redirectUrls.push(redirectUrl);

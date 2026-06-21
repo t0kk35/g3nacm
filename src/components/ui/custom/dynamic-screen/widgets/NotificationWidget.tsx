@@ -1,6 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useWidgetData } from './helpers/useWidgetData'
 import { CardHeader, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
@@ -13,6 +15,8 @@ import { DynamicScreenError } from '../DynamicScreenError'
 import { TimeRangeSelector } from './helpers/TimeRangeSelector'
 import { formatDateToInterval } from '@/lib/date-time/formatting'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
+import { useFormatter } from "next-intl"
 
 const HEADER_SIZE = 60;
 const FOOTER_SIZE = 40;
@@ -32,33 +36,20 @@ export function NotificationWidget({
   width,
   height
 }: NotificationWidgetProps) {
-  const [notifications, setNotifications] = useState<Notification[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [lastRefresh, setLastRefresh] = useState<Date>(new Date())
+
+  const t = useTranslations('DynamicScreen.Widgets.Notification')
+  const tc = useTranslations('Common')
+  const format = useFormatter();
+  const router = useRouter();
+
   const [markingRead, setMarkingRead] = useState<Set<string>>(new Set())
   const [selectedTimeRange, setSelectedTimeRange] = useState(timeRange)  
 
-  const fetchNotifications = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-
-      const response = await fetch(`/api/data/notification/list?time_range=${selectedTimeRange}`)
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch notifications: ${response.status}`)
-      }
-
-      const data = await response.json()
-      setNotifications(data)
-      setLastRefresh(new Date())
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load notifications')
-    } finally {
-      setLoading(false)
-    }
-  }
+  const { data: notifications, loading, error, lastRefresh, refresh: fetchNotifications } = useWidgetData<Notification[]>(
+    `/api/data/notification/list?time_range=${selectedTimeRange}`,
+    refreshInterval,
+    () => router.push('/'),
+  )
 
   const markAsRead = async (notificationId: string) => {
     if (markingRead.has(notificationId)) return
@@ -87,14 +78,9 @@ export function NotificationWidget({
         throw new Error('Failed to mark notification as read')
       }
 
-      // Update local state to reflect the change
-      setNotifications(prev =>
-        prev.map(n =>
-          n.id === notificationId
-            ? { ...n, read_date_time: new Date().toISOString() }
-            : n
-        )
-      )
+      // Refetch notifications. To show the updated state.
+      fetchNotifications()
+
     } catch (err) {
       console.error('Error marking notification as read:', err)
     } finally {
@@ -106,22 +92,15 @@ export function NotificationWidget({
     }
   }
 
-  useEffect(() => { 
-    fetchNotifications()
-    const interval = setInterval(fetchNotifications, refreshInterval)
-    return () => clearInterval(interval)
-  }, [selectedTimeRange, refreshInterval])
-
-
   const options = [
-    { key: '1h', value: 'Last Hour' },
-    { key: '24h', value: 'Last 24 Hours' },
-    { key: '7d', value: 'Last 7 Days' },
-    { key: '30d', value: 'Last 30 Days' },
-    { key: '90d', value: 'Last 90 Days' }
+    { key: '1h', value: tc('dateTimeLast1Hour') },
+    { key: '24h', value: tc('dateTimeLast24Hours') },
+    { key: '7d', value: tc('dateTimeLast7Days') },
+    { key: '30d', value: tc('dateTimeLast30Days') },
+    { key: '90d', value: tc('dateTimeLast90Days') }
   ] as const;
 
-  const unreadCount = notifications.filter(n => !n.read_date_time).length
+  const unreadCount = notifications ? notifications.filter(n => !n.read_date_time).length : 0
   const scrollSize = height - HEADER_SIZE - FOOTER_SIZE
 
   if (error) return <DynamicScreenError title={title} error={error} onClick={fetchNotifications} />
@@ -149,7 +128,7 @@ export function NotificationWidget({
       </CardHeader>
       <Separator />
       <CardContent className="pt-4 pb-2 flex flex-col">
-        { loading && !notifications.length ? (
+        {  !notifications ? (
           <div className="h-48 flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
@@ -158,7 +137,7 @@ export function NotificationWidget({
             { notifications.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <Bell className="h-12 w-12 mx-auto mb-2 opacity-20" />
-                <p className="text-sm">No notifications</p>
+                <p className="text-sm">{t('scrollNoNotifications')}</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -191,7 +170,7 @@ export function NotificationWidget({
                               )}
                             </div>
                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                              <span>From: {notification.sender_user_name}</span>
+                              <span>{t('scrollFrom')}: {notification.sender_user_name}</span>
                               <span>•</span>
                               <span>{formatDateToInterval(notification.create_date_time)}</span>
                             </div>
@@ -213,7 +192,7 @@ export function NotificationWidget({
         )}
         {/* Last Updated */}
         <div className="text-xs text-muted-foreground text-center mt-2 pt-2 border-t">
-          Last updated: {lastRefresh.toLocaleTimeString()}
+          {tc('lastUpdated')}: {format?.dateTime(lastRefresh, {timeStyle: "medium"})}
         </div>
       </CardContent>
     </div>
@@ -222,6 +201,9 @@ export function NotificationWidget({
 
 function NotificationDetailContent({ notification }: { notification: Notification }) {
 
+  const t = useTranslations('DynamicScreen.Widgets.Notification')
+  const format = useFormatter();
+
   const linked_entity_link = notification.linked_entity.id ? notification.linked_entity.display_url + '/' + notification.linked_entity.id : undefined
 
   return (
@@ -229,7 +211,7 @@ function NotificationDetailContent({ notification }: { notification: Notificatio
       <div>
         <h4 className="font-semibold text-sm mb-1">{notification.title}</h4>
         <p className="text-xs text-muted-foreground">
-          From: {notification.sender_user_name} • {new Date(notification.create_date_time).toLocaleString()}
+          {t('detailFrom')}: {notification.sender_user_name} • {format?.dateTime(new Date(notification.create_date_time), {timeStyle: "medium"})}
         </p>
       </div>
       <Separator />
@@ -238,9 +220,9 @@ function NotificationDetailContent({ notification }: { notification: Notificatio
         <>
           <Separator />
           <div className="text-xs text-muted-foreground">
-            <p><strong>Linked to: </strong>{notification.linked_entity.description}</p>
+            <p><strong>{t('detailLinkedTo')}: </strong>{notification.linked_entity.description}</p>
             <p>
-              <strong>ID: </strong>
+              <strong>{t('detailId')}: </strong>
               <Link href={linked_entity_link} className='hover:underline'>
                 {notification.linked_entity.identifier}
               </Link>

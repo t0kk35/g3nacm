@@ -27,7 +27,7 @@ export default async function AlertDetails({ params }: Props) {
   const alert = await authorizedGetJSON<Alert>(`${process.env.DATA_URL}/api/data/alert/detail?alert_id=${alertId}`);
   
   // Get the agent code for the chat window 
-  const agentCode = await authorizedGetJSON<string>(`${process.env.DATA_URL}/api/data/agent/workflow?workflow_state_code=${alert.entity_state.to_state_code}`)
+  const agentCode = await authorizedGetJSON<string|undefined>(`${process.env.DATA_URL}/api/data/agent/workflow?workflow_state_code=${alert.entity_state.to_state_code}`)
 
   // Setup context for the agent
   const agentContext: TemplateContext = {
@@ -49,21 +49,24 @@ export default async function AlertDetails({ params }: Props) {
             entityCode={alert.entity_state.entity_code}
             entityId={alert.id}
             orgUnitCode={alert.org_unit_code}
+            readOnly={false}
           />
-          <ChatWindow agent={agentCode} 
-            context={agentContext} 
-            orgUnitCode={alert.org_unit_code}
-            entityCode={alert.entity_state.entity_code}
-            entityId={alert.id}
-          />
-          <WorkflowSelector
+          { agentCode && (
+            <ChatWindow agent={agentCode} 
+              context={agentContext} 
+              orgUnitCode={alert.org_unit_code}
+              entityCode={alert.entity_state.entity_code}
+              entityId={alert.id}
+            />
+          )}
+      { /*    <WorkflowSelector
             entityCode={alert.entity_state.entity_code}
             entityId={alert.id}
             entityIdentifier={alert.alert_identifier}
             orgUnitCode={alert.org_unit_code}
             entityData={alert}
             stateCode={alert.entity_state.to_state_code}
-          />
+          /> */ }
         </div>
       </EntityLockProvider>
     </PermissionGuard>

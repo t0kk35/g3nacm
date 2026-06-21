@@ -29,7 +29,7 @@ export const fetchAttachmentDetailTool: AIToolDefinition = {
       }
 
       // Get as text, we need to content and unescaped.
-      const fileContent = response.text();
+      const fileContent = await response.text();
 
       // Return the tool result with the complete subject data
       return {

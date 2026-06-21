@@ -11,6 +11,13 @@ export type RfiInboundEmailConfig = {
     processed_folder?: string;
 };
 
+export type RfiEmailAttachment = {
+    filename: string;
+    content: Buffer;
+    contentType: string;
+    size: number;
+};
+
 export type InboundRfiEmail = {
     uid: number;
     messageId: string | undefined;
@@ -20,4 +27,5 @@ export type InboundRfiEmail = {
     subject: string;
     date: Date | undefined;
     body_text: string;
+    attachments: RfiEmailAttachment[];
 };

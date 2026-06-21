@@ -2,11 +2,11 @@ import { z } from 'zod';
 import * as db from '@/db';
 import { defineQuery, QueryContext } from '@/lib/data/registry';
 import { DataQueryError } from '@/lib/data/errors';
-import { zStringToBoolean, zStringToInteger } from '../../params';
+import { zStringToBoolean } from '../../params';
 import { OrgUnit } from '@/lib/data/queries/org_unit/org_unit';
 
 const paramsSchema = z.object({
-    org_unit_id: zStringToInteger.optional(),
+    org_unit_id: z.coerce.number().optional(),
     org_unit_code: z.string().optional(),
     include_deleted: zStringToBoolean.optional() 
 })

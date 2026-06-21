@@ -21,15 +21,11 @@ interface EntityAttachmentsProps {
   entityId: string
   entityCode: string
   orgUnitCode:string
+  readOnly:boolean
   className?: string
 }
 
-export function EntityAttachments({
-  entityId,
-  entityCode,
-  orgUnitCode,
-  className,
-}: EntityAttachmentsProps) {
+export function EntityAttachments({ entityId, entityCode, orgUnitCode, readOnly, className }: EntityAttachmentsProps) {
   const router = useRouter()
   const [attachments, setAttachments] = useState<EntityAttachment[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -97,7 +93,6 @@ export function EntityAttachments({
   }
 
   const onUpload = async (file: File, description: string) => {
-    // Send as FormData
     const formData = new FormData();
     const action: PerformWorkflowAction = {
       entityCode: entityCode,
@@ -106,15 +101,12 @@ export function EntityAttachments({
       orgUnitCode: orgUnitCode,
       actionCode: 'eur.aml.rule.alert.attach_file',
       data: {
-        'file.1.description': description,
-        'file.1.org_unit': orgUnitCode,
+        fileDescriptions: [description],
+        fileOrgUnit: orgUnitCode,
       },
-      files: {
-        'file.1': file
-      }
     }
     formData.append('actions', JSON.stringify([action]))
-    formData.append('file.1', file)
+    formData.append('file', file)
     const requestBody = formData
 
     const res = await fetch(`/api/action/workflow`, {
@@ -261,7 +253,6 @@ export function EntityAttachments({
       }
       
       if (previewContent) {
-        console.log('file content ' + previewContent )
         return (
           <div className="w-full max-h-96 overflow-auto p-4 prose prose-sm dark:prose-invert max-w-none">
             <Markdown content={previewContent} />
@@ -298,7 +289,7 @@ export function EntityAttachments({
       ) : (
         <>
           <Card className={cn("w-full", className)}>
-            <CardContent className="p-2">
+            <CardContent>
               {/* Collapsed State */}
               {!isExpanded && (
                 <div className="flex items-center justify-between">
@@ -309,10 +300,12 @@ export function EntityAttachments({
                     <Paperclip className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm font-medium">Attachments ({attachments.length})</span>
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="h-8">
-                    <Upload className="h-4 w-4 mr-1" />
-                    Upload
-                  </Button>
+                  {!readOnly && (  
+                    <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="h-8">
+                      <Upload className="h-4 w-4 mr-1" />
+                      Upload
+                    </Button>
+                  )}
                 </div>
               )}
 
@@ -327,33 +320,37 @@ export function EntityAttachments({
                       <Paperclip className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm font-medium">Attachments ({attachments.length})</span>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
-                      <Upload className="h-4 w-4 mr-2" />
-                      Upload File
-                    </Button>
+                    {!readOnly && (
+                      <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload File
+                      </Button>
+                    )}
                   </div>
 
                   {/* Drag and Drop Zone */}
-                  <div
-                    className={cn(
-                      "border-2 border-dashed rounded-lg p-6 text-center transition-colors",
-                      isDragOver
-                        ? "border-primary bg-primary/5"
-                        : "border-muted-foreground/25 hover:border-muted-foreground/50",
-                    )}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                  >
-                    <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">
-                      Drag and drop files here, or{" "}
-                      <button onClick={() => fileInputRef.current?.click()} className="text-primary hover:underline">
-                        browse
-                      </button>
-                    </p>
-                  </div>
-
+                  {!readOnly && (
+                    <div
+                      className={cn(
+                        "border-2 border-dashed rounded-lg p-6 text-center transition-colors",
+                        isDragOver
+                          ? "border-primary bg-primary/5"
+                          : "border-muted-foreground/25 hover:border-muted-foreground/50",
+                      )}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                    >
+                      <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">
+                        Drag and drop files here, or{" "}
+                        <button onClick={() => fileInputRef.current?.click()} className="text-primary hover:underline">
+                          browse
+                        </button>
+                      </p>
+                    </div>
+                  )}
+                  
                   {/* File List */}
                   { attachments.length > 0 && (
                     <div  className={cn("space-y-2", attachments.length > 5 && "max-h-80 overflow-y-auto pr-2")}>

@@ -9,12 +9,12 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { useTranslations } from "next-intl";
 import { RfiResponse } from "@/lib/data/queries/rfi/type"
 import {
+  Paperclip,
   ArrowDownLeft,
   ArrowUpRight,
   Calendar,
   CheckCircle2,
   Clock,
-  ExternalLink,
   Mail,
   MessageSquare,
   Send,
@@ -22,6 +22,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { formatDateToInterval } from '@/lib/date-time/formatting'
+import { EntityAttachments } from "../ui/custom/entity-attachment";
 
 type Props = {
   rfiResponses: RfiResponse[]
@@ -62,6 +63,9 @@ export function RfiRequestDetailsClient({ rfiResponses }: Props) {
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
+                    {response.attachment_count > 0 && (
+                      <Paperclip className="h-3 w-3 text-chart-1" />
+                    )}
                     {response.is_complete ? (
                       <CheckCircle2 className="h-3 w-3 text-green-500" />
                     ) : (
@@ -88,8 +92,8 @@ export function RfiRequestDetailsClient({ rfiResponses }: Props) {
       </ScrollArea>
       <div className="flex-1">
         <Card>
-          <CardHeader className="pb-2 pt-3 px-4">
-            <CardTitle className="text-xs font-medium text-muted-foreground">
+          <CardHeader className="px-4">
+            <CardTitle className="text-sm font-bold text-muted-foreground">
               {t('reponseTitle')}
             </CardTitle>
           </CardHeader>
@@ -134,6 +138,18 @@ export function RfiRequestDetailsClient({ rfiResponses }: Props) {
                     </p>
                   </div>
                 )}
+                {selectedResponse.attachment_count > 0 && (
+                  <>
+                    <Separator />
+                    <EntityAttachments
+                      entityId={selectedResponse.id}
+                      entityCode={selectedResponse.entity_code}
+                      orgUnitCode={selectedResponse.org_unit_code}
+                      readOnly={true}
+                    />
+                  </>
+                )}
+                <Separator />
                 <div className="text-xs text-muted-foreground">
                   {t('responseDateReceived')}: {formatDateToInterval(selectedResponse.create_datetime)}
                 </div>

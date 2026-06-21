@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import * as db from '@/db';
 import { defineQuery, QueryContext } from '@/lib/data/registry';
-import { DataNotFoundError, DataQueryError } from '@/lib/data/errors';
+import { DataQueryError } from '@/lib/data/errors';
 
 const paramsSchema = z.object({
     workflow_state_code: z.string()
@@ -17,7 +17,7 @@ export const queryAgentWorkflow = defineQuery({
     path: 'agent/workflow',
     permissions: [],
     params: paramsSchema,
-    execute: async ({ workflow_state_code }: z.infer<typeof paramsSchema>, ctx: QueryContext): Promise<String> => {
+    execute: async ({ workflow_state_code }: z.infer<typeof paramsSchema>, ctx: QueryContext): Promise<String|undefined> => {
         const conn = ctx.client ?? db.pool;
         try {
             const result = await conn.query({
@@ -25,8 +25,8 @@ export const queryAgentWorkflow = defineQuery({
                 text: query_text,
                 values: [workflow_state_code],
             });
-            if (result.rows.length === 0) throw new DataNotFoundError('agent_workflow', workflow_state_code);
-            return result.rows[0].agent_code;
+            if (result.rows.length === 0) return undefined;
+            else return result.rows[0].agent_code;
         } catch (err) {
             throw new DataQueryError('Get Agent Workflow', err as Error);
         }

@@ -34,14 +34,3 @@ export const zStringToBoolean = z.string()
     .transform((val) => {
         return val.toLocaleLowerCase() === 'true' || val.toLocaleLowerCase() === 'y' ? true : false 
     });
-
-// 
-export const zStringToInteger = z.string()
-    .transform((val, ctx) => {
-        try {
-            return parseInt(val)
-        } catch(err) {
-            ctx.addIssue({code: z.ZodIssueCode.custom, message: `Could not parse integer: ${val}`});
-            return z.NEVER
-        }
-    });

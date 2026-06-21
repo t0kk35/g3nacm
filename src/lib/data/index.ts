@@ -1,7 +1,8 @@
 import './queries/alert/detail';
 import './queries/alert/list';
 import './queries/alert/summary';
-import './queries/subject.detail';
+import './queries/subject/detail';
+import './queries/subject/history';
 import './queries/rfi/request';
 import './queries/rfi/response';
 import './queries/rfi/channel';
@@ -26,3 +27,7 @@ import './queries/org_unit/hierarchy';
 import './queries/org_unit/access';
 import './queries/org_unit/user_access';
 import './queries/workflow/config';
+import './queries/eval/rule';
+import './queries/eval/schema'
+import './queries/calendar/list'
+import './queries/attachment/list'

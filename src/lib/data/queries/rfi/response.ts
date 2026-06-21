@@ -12,6 +12,7 @@ const query_text = `
 SELECT 
   rrs.id AS "id",
   rrs.entity_code AS "entity_code",
+  rrq.org_unit_code AS "org_unit_code",
   rfi_request_id,
   repsonse_text,
   response_data,
@@ -29,7 +30,8 @@ SELECT
   ai_summary,
   ai_structured_extraction,
   rrs.create_datetime AS "create_datetime",
-  rrs.update_datetime AS "update_datetime"
+  rrs.update_datetime AS "update_datetime",
+  (select count(*) from workflow_document_attachment wda where wda.entity_id = rrs.id and wda.entity_code = rrs.entity_code) AS "attachment_count"
 FROM rfi_response rrs
 JOIN rfi_request rrq ON rrs.rfi_request_id = rrq.id
 JOIN org_unit ou ON ou.code = rrq.org_unit_code

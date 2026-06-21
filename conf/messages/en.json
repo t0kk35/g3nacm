@@ -19,6 +19,7 @@
     "unknown": "Unknown",
     "revoke": "Revoke",
     "questionMark": "?",
+    "lastUpdated": "Last updated",
     "validationNumberRequired": "This field is required.",
     "validationNumberInvalid": "Please enter a valid number.",
     "validationNumberMin": "Value must be at least {min}.",
@@ -27,11 +28,20 @@
     "languageEnglish": "English",
     "languageFrench": "French",
     "languageSpanish": "Spanish",
-    "dateTimeLast1Hour": "Last 1 Hour",
-    "dateTimeLast24Hours": "Last 24 Hours",
+    "dateTimeLast1Hour": "Last 1 hour",
+    "dateTimeLast24Hours": "Last 24 hours",
     "dateTimeLast7Days": "Last 7 days",
     "dateTimeLast30Days": "Last 30 days",
-    "dateTimeLast90Days": "Last 90 days"
+    "dateTimeLast90Days": "Last 90 days",
+    "dateTimeLast6Weeks": "Last 6 weeks",
+    "dateTimeLast12Weeks": "Last 12 weeks",
+    "dateTimeLast6Months": "Last 6 months",
+    "dateTimeToday": "Today",
+    "dateTimePast30d": "Past 30 days",
+    "dateTimePast7d": "Past 7 days",
+    "dateTimeNext7d": "Next 7 days",
+    "dateTimeNext14d": "Next 14 days",
+    "dateTimeNext30d": "Next 30 days"
   },
   "Admin" : {
     "Agent": {
@@ -52,7 +62,7 @@
         "fieldAgentType": "Agent Type",
         "fieldModelConfig": "Model Configuration",
         "fieldSystemPrompt": "System Prompt",
-        "fieldSystemPromptPlaceholder": "Enter system prompt for the agent. Use {{variableName}} for replacement variables.",
+        "fieldSystemPromptPlaceholder": "Enter system prompt for the agent. Use '{{variableName}}' for replacement variables.",
         "fieldSystemPromptDescription": "Instructions for the agent. Type '{{' to access replacement variables.",
         "fieldMaxSteps": "Max Steps",
 
@@ -489,6 +499,37 @@
         "hooverCardReminderNotSet": "Not set",
         "hooverCardLinkedToDescription": "Linked to",
         "hooverCardLinkedToId": "ID"
+      },
+      "AlertUsageChart" : {
+        "SummaryTokenCost": "Total Token Cost"
+      },
+      "AlertHandledChart": {
+        "SummaryAlertCount": "Total Alert Count"
+      },
+      "TeamAssignmentChart": {
+        "SummaryAlertCount": "Total Alert Count"
+      },
+      "Notification": {
+        "scrollNoNotifications": "No notifications",
+        "scrollFrom": "From",
+        "detailFrom": "From",
+        "detailId": "ID",
+        "detailLinkedTo": "Linked to"
+      },
+      "AlertAssignment" : {
+        "totalAssignment": "Total Alerts",
+        "directAssignment": "Direct Assignments",
+        "teamAssignment": "Team Assignments",
+        "toolTipGetNextAlert": "Get Next Alert",
+        "prioHigh": "High",
+        "prioMedium": "Med",
+        "prioLow": "Low"
+      },
+      "Calendar": {
+        "noEvents": "No events in this period",
+        "noDateLabel": "No date set",
+        "allDay": "All day",
+        "more": "more"
       }
     }
   },

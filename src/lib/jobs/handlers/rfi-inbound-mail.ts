@@ -10,17 +10,6 @@ import { createWorkflowContext, executeWorkflowAction } from '@/lib/workflow/wor
 import * as db from '@/db';
 import { queryRfiRequest } from '@/lib/data/queries/rfi/request';
 
-/* const query_insert_response = `
-INSERT INTO rfi_response (
-    rfi_request_id,
-    repsonse_text,
-    response_data,
-    respondent_name,
-    respondent_contact_details,
-    is_complete
-) VALUES ($1::uuid, $2, $3::jsonb, $4, $5::jsonb, false)
-`; */
-
 JobRegistry.register('rfi.process-inbound-mail', async (ctx: JobContext): Promise<JobResult> => {
     const { 
         channel_code, 
@@ -114,22 +103,20 @@ JobRegistry.register('rfi.process-inbound-mail', async (ctx: JobContext): Promis
                 toStateCode: '',
                 entityData: lookup[0]     // Feed original RFI as entity data
             };
-            const actionData = {
+            const actionData: { [key: string]: any } = {
                 responseData: responseData,
                 respondentContact: respondentContact,
                 emailBodyText: email.body_text,
-                fromName: email.from_name
-            }
+                fromName: email.from_name,
+                files: email.attachments.map(att => ({
+                    file: new File([new Uint8Array(att.content)], att.filename, { type: att.contentType }),
+                    description: `Email attachment: ${att.filename}`,
+                    orgUnitCode: rfiOrgUnitCode,
+                })),
+            };
+
             const responsetWfCtx = createWorkflowContext(actionData, responseSystemFields);
             await executeWorkflowAction(client, responseWorkflowConfig, responsetWfCtx);
-
-//            await client.query(query_insert_response, [
-//                rfiRequestId,
-//                email.body_text || null,
-//                JSON.stringify(responseData),
-//                email.from_name || null,
-//                JSON.stringify(respondentContact),
-//            ]);
 
             // Now trigger the workflow action on the orignal RFI (if provided)
             if (rfi_request_workflow_action_code) {

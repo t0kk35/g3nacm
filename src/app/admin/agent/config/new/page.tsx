@@ -3,8 +3,7 @@
 import { auth } from "@/auth"
 import { Suspense } from "react"
 import { getTranslations } from 'next-intl/server'
-import { AgentConfigForm } from "@/components/admin/agent/config/AgentConfigForm"
-import { RoleFormSkeleton } from "@/components/admin/role/RoleForm"
+import { AgentConfigForm, AgentConfigSkeleton } from "@/components/admin/agent/config/AgentConfigForm"
 import { PermissionGuard } from "@/components/ui/custom/permission-guard-server"
 import { NoPermission } from "@/components/ui/custom/no-permission"
 
@@ -22,7 +21,7 @@ export default async function AgentConfigNew() {
           <h1 className="text-xl font-bold tracking-tight">{t('pageTitle')}</h1>
           <p className="text-muted-foreground">{t('formDescription')}</p>
         </div>
-        <Suspense fallback={<RoleFormSkeleton />}>
+        <Suspense fallback={<AgentConfigSkeleton />}>
           <AgentConfigForm />
         </Suspense>
       </div>

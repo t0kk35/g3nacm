@@ -25,7 +25,7 @@ export class FunctionEvalEngine implements IWorkflowFunction {
         };
         
         // Get the eval rules for the group
-        const evalRules = await getCachedEvalEngineRuleConfig(evalGroup);
+        const evalRules = await getCachedEvalEngineRuleConfig(evalGroup, ctx.system.userName);
         
         // Get the entity data from system context
         const data = {

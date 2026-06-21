@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useWidgetData } from './helpers/useWidgetData'
 import { CardHeader, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -10,6 +12,8 @@ import { User, Users, RefreshCw, Loader2 } from 'lucide-react'
 import { UserAssignment } from '@/lib/data/queries/user/user'
 import { useGetNextAlert } from '@/hooks/use-get-next-alert'
 import { DynamicScreenError } from '../DynamicScreenError'
+import { useTranslations } from 'next-intl'
+import { useFormatter } from "next-intl"
 
 interface AlertAssignmentWidgetProps {
   title?: string
@@ -18,33 +22,18 @@ interface AlertAssignmentWidgetProps {
 
 export function AlertAssignmentWidget({ title = 'Assigned Alerts', refreshInterval = 60000 }: AlertAssignmentWidgetProps) {
 
-  const [assignment, setAssignment] = useState<UserAssignment | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const t = useTranslations('DynamicScreen.Widgets.AlertAssignment')
+  const tc = useTranslations('Common')
+  const format = useFormatter();
+  const router = useRouter();
+
   const { getNextAlert, isLoading: isGettingNext } = useGetNextAlert();
 
-  const fetchAssignment = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const response = await fetch(`/api/data/user/assignment`)
-      if (!response.ok) throw new Error(`Failed to fetch alert assignment: ${response.status}`)
-      const data = await response.json();
-      setAssignment(data);
-      setLastRefresh(new Date());      
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load alert assignment');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    fetchAssignment();
-    const interval = setInterval(fetchAssignment, refreshInterval);
-    return () => clearInterval(interval);
-  }, [refreshInterval])
+  const { data: assignment, loading, error, lastRefresh, refresh: fetchAssignment } = useWidgetData<UserAssignment>(
+    `/api/data/user/assignment`,
+    refreshInterval,
+    () => router.push('/'),
+  );
 
   if (error) return <DynamicScreenError title={title} error={error} onClick={fetchAssignment} />
 
@@ -77,7 +66,7 @@ export function AlertAssignmentWidget({ title = 'Assigned Alerts', refreshInterv
             {/* Total Summary */}
             <div className="text-center p-3 bg-muted/50 rounded-lg">
               <div className="text-2xl font-bold text-foreground">{assignment.alerts.total}</div>
-              <div className="text-sm text-muted-foreground">Total Alerts</div>
+              <div className="text-sm text-muted-foreground">{t('totalAssignment')}</div>
             </div>
 
             {/* User Assignments */}
@@ -85,7 +74,7 @@ export function AlertAssignmentWidget({ title = 'Assigned Alerts', refreshInterv
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <User className="h-4 w-4" />
-                  Direct Assignments
+                  {t('directAssignment')}
                 </div>
                 <span className="font-medium">{assignment.alerts.user.total}</span>
               </div>
@@ -94,17 +83,17 @@ export function AlertAssignmentWidget({ title = 'Assigned Alerts', refreshInterv
                   <div className="flex flex-wrap gap-1">
                     {assignment.alerts.user.high_priority > 0 && (
                       <Badge variant="secondary" className="bg-priority-high text-muted">
-                        High: {assignment.alerts.user.high_priority}
+                        {t('prioHigh')}: {assignment.alerts.user.high_priority}
                       </Badge>
                     )}
                     {assignment.alerts.user.medium_priority > 0 && (
                       <Badge variant="secondary" className="bg-priority-medium text-muted">
-                        Med: {assignment.alerts.user.medium_priority}
+                        {t('prioMedium')}: {assignment.alerts.user.medium_priority}
                       </Badge>
                     )}
                     {assignment.alerts.user.low_priority > 0 && (
                       <Badge variant="secondary" className="bg-priority-low text-muted">
-                        Low: {assignment.alerts.user.low_priority}
+                        {t('prioLow')}: {assignment.alerts.user.low_priority}
                       </Badge>
                     )}
                   </div>
@@ -117,7 +106,7 @@ export function AlertAssignmentWidget({ title = 'Assigned Alerts', refreshInterv
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <Users className="h-4 w-4" />
-                  Team Assignments
+                  {t('teamAssignment')}
                 </div>
                 {assignment.alerts.team.total > 0 ? (
                   <Tooltip>
@@ -136,7 +125,7 @@ export function AlertAssignmentWidget({ title = 'Assigned Alerts', refreshInterv
                       </button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Get Next Alert</p>
+                      <p>{t('toolTipGetNextAlert')}</p>
                     </TooltipContent>
                   </Tooltip>
 
@@ -149,17 +138,17 @@ export function AlertAssignmentWidget({ title = 'Assigned Alerts', refreshInterv
                   <div className="flex flex-wrap gap-1">
                     {assignment.alerts.team.high_priority > 0 && (
                       <Badge variant="secondary" className="bg-priority-high text-muted">
-                        High: {assignment.alerts.team.high_priority}
+                        {t('prioHigh')}: {assignment.alerts.team.high_priority}
                       </Badge>
                     )}
                     {assignment.alerts.team.medium_priority > 0 && (
                       <Badge variant="secondary" className="bg-priority-medium text-muted">
-                        Med: {assignment.alerts.team.medium_priority}
+                        {t('prioMedium')}: {assignment.alerts.team.medium_priority}
                       </Badge>
                     )}
                     {assignment.alerts.team.low_priority > 0 && (
                       <Badge variant="secondary" className="bg-priority-low text-muted">
-                        Low: {assignment.alerts.team.low_priority}
+                        {t('prioLow')}: {assignment.alerts.team.low_priority}
                       </Badge>
                     )}
                   </div>
@@ -172,7 +161,7 @@ export function AlertAssignmentWidget({ title = 'Assigned Alerts', refreshInterv
         {/* Last Updated */}
         <Separator className="mt-4" />
         <div className="mt-6 text-xs text-muted-foreground text-center">
-          Last updated: {lastRefresh.toLocaleTimeString()}
+          {tc('lastUpdated')}: {format?.dateTime(lastRefresh, {timeStyle: "medium"})}
         </div>        
       </CardContent>
     </>

@@ -176,7 +176,7 @@ export function AddWidgetDialog({ open, onOpenChange, onAddWidget, userPermissio
           <div className="flex flex-col h-[60vh]">
             <div className="space-y-4 pb-4 border-b">
               <div className='space-y-2'>
-                <Label htmlFor="widget-title">{ t('titleField') }</Label>
+                <Label htmlFor="widget-title">{t('titleField')}</Label>
                 <Input
                   id="widget-title"
                   value={widgetTitle}
@@ -188,7 +188,7 @@ export function AddWidgetDialog({ open, onOpenChange, onAddWidget, userPermissio
             </div>
             
             <div className="flex-1 flex flex-col overflow-hidden pt-4">
-              <h4 className="font-medium mb-3">t('configTitle')</h4>
+              <h4 className="font-medium mb-3">{t('configTitle')}</h4>
               <div className="flex-1 min-h-0">
                 <DynamicScreenWidgetConfigForm
                   schema={selectedWidget.configSchema}

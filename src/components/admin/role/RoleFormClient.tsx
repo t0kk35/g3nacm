@@ -19,7 +19,6 @@ import { UserRoleRequest } from "@/app/api/action/role/user-role"
 import { UserRevokeEntityTable } from "../UserRevokeEntityTable"
 import { useValidationForm, FormFieldInput } from "@/components/ui/custom/form-field"
 import { clientFetch } from "@/lib/client-api-connection"
-import { ur } from "zod/v4/locales"
 
 // Update the Permission interface
 type FormUserPermission =  {

@@ -1,4 +1,5 @@
 const REGEX = /-/g
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * Generate a human readable identifier. PREFIX-YYYYMMDD-XXXX (last 4 hex chars of the UUID, uppercased)
@@ -11,4 +12,8 @@ export function generateIdentifier(prefix: string, uuid: string, now: Date): str
     const date = now.toISOString().slice(0, 10).replace(REGEX, '');
     const suffix = uuid.replace(REGEX, '').slice(-4).toUpperCase();
     return `${prefix}-${date}-${suffix}`;
+}
+
+export function validUuid(uuid: string): boolean {
+    return UUID_REGEX.test(uuid);
 }

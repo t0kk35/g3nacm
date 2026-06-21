@@ -5,5 +5,4 @@ export type PerformWorkflowAction = {
     actionCode: string;
     data: any;
     entityData: any; // Complete entity data from the screen
-    files?: Record<string, File>; // Optional files mapped by field name
 }

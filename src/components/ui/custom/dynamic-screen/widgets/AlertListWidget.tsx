@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useWidgetData } from './helpers/useWidgetData'
 import { ComponentSection } from "@/app/api/data/entity/types"
 import { ComponentSectionRenderer } from "@/components/ui/custom/component-section/ComponentSectionRenderer"
 import { Alert } from '@/lib/data/queries/alert/alert'
@@ -20,6 +22,7 @@ import Link from "next/link"
 import { TanStackTable, tanStackColumnHelper } from "@/components/ui/custom/tanstack-table"
 import { cn } from "@/lib/utils"
 import { useFormatter } from "next-intl"
+import { useTranslations } from 'next-intl'
 
 const HEADER_SIZE = 60;
 const SUMMARY_SIZE = 45;
@@ -42,37 +45,21 @@ export function AlertListWidget({
   height
 }: AlertAssignmentWidgetProps) {
 
-  const [alertList, setAlertList] = useState<Alert[] | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const tc = useTranslations('Common')
+  const format = useFormatter();
+  const router = useRouter();
+
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
-  
+
+  const { data: alertList, loading, error, lastRefresh, refresh: fetchAlertList } = useWidgetData<Alert[]>(
+    `/api/data/alert/list?assigned_to_user_name=${userName}`,
+    refreshInterval,
+    () => router.push('/'),
+  )
+
   // Calculate the available height for the scrollarea
   const scrollAreaHeight = height - HEADER_SIZE - SUMMARY_SIZE - FOOTER_SIZE;
-  const scrollAreaGridCols = Math.max(Math.trunc(width / ALERT_CARD_WIDTH), 1);
-
-  const fetchAlertList = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const response = await fetch(`/api/data/alert/list?assigned_to_user_name=${userName}`)
-      if (!response.ok) throw new Error(`Failed to fetch alert list: ${response.status}`)
-      const data = await response.json();
-      setAlertList(data);
-      setLastRefresh(new Date());      
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load alert list');
-    } finally {
-      setLoading(false);
-    }
-  }
-  
-  useEffect(() => {
-    fetchAlertList();
-    const interval = setInterval(fetchAlertList, refreshInterval);
-    return () => clearInterval(interval);
-  }, [refreshInterval])  
+  const scrollAreaGridCols = Math.max(Math.trunc(width / ALERT_CARD_WIDTH), 1);  
 
   if (error) return <DynamicScreenError title={title} error={error} onClick={fetchAlertList} />
 
@@ -134,7 +121,7 @@ export function AlertListWidget({
         {/* Last Updated */}
         <Separator className="mt-4" />
         <div className="mt-6 text-xs text-muted-foreground text-center">
-          Last updated: {lastRefresh.toLocaleTimeString()}
+          {tc('lastUpdated')}: {format?.dateTime(lastRefresh, {timeStyle: "medium"})}
         </div>    
       </CardContent>
     </>

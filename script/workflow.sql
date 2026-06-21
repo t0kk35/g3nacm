@@ -1,4 +1,4 @@
-CREATE TYPE function_parameter_type AS ENUM ('string', 'number', 'boolean', 'object');
+CREATE TYPE function_parameter_type AS ENUM ('string', 'number', 'boolean', 'object', 'fileuploadarray');
 CREATE TYPE function_parameter_direction as ENUM('Input', 'Output');
 CREATE TYPE form_field_type as ENUM('select', 'textarea', 'checkbox', 'text', 'radio', 'userselect', 'datedatetime');
 CREATE TYPE workflow_lock_action as ENUM('aquire', 'release');

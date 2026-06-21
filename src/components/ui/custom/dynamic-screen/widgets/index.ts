@@ -10,6 +10,7 @@ import { NotificationWidget } from './NotificationWidget'
 import { TeamAssignmentChartWidget } from './TeamAssignmentChartWigdet'
 import { AgentUsageChartWidget } from './AgentUsageChartWidget'
 import { RfiAssignmentWidget } from './RfiAssignmentWidget'
+import { CalendarWidget } from './CalendarWidget'
 
 widgetRegistry.register({
   code: 'alert-assignment',
@@ -215,6 +216,32 @@ widgetRegistry.register({
   tags: ['rfi', 'list']
 })
 
+widgetRegistry.register({
+  code: 'calendar',
+  name: 'My Calendar',
+  description: 'Shows calendar events (tasks and reminders) for a configurable time period',
+  component: CalendarWidget,
+  defaultConfig: {
+    title: 'My Calendar',
+    period: 'next7d',
+    refreshInterval: 300000,
+  },
+  configSchema: z.object({
+    title: CommonWidgetSchemas.title.default('My Calendar'),
+    period: z.enum(['past30d', 'past7d', 'today', 'next7d', 'next14d', 'next30d']).default('next7d'),
+    refreshInterval: CommonWidgetSchemas.refreshInterval.default(300000),
+  }),
+  responsiveConstraints: {
+    lg: { minW: 3, minH: 4, maxW: 8, maxH: 14 },
+    md: { minW: 3, minH: 4, maxW: 7, maxH: 12 },
+    sm: { minW: 2, minH: 3, maxW: 6, maxH: 10 },
+    xs: { minW: 2, minH: 3, maxW: 4, maxH: 8 },
+  },
+  permissions: [],
+  category: WIDGET_CATEGORIES.DATA,
+  tags: ['calendar', 'tasks', 'reminders', 'schedule'],
+})
+
 // Export widget registry for use in other components
 export { widgetRegistry } from '../widget-registry'
 
@@ -226,7 +253,8 @@ export {
   NotificationWidget,
   TeamAssignmentChartWidget,
   AgentUsageChartWidget,
-  RfiAssignmentWidget
+  RfiAssignmentWidget,
+  CalendarWidget,
 }
 
 // Utility function to get all available widgets

@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useWidgetData } from './helpers/useWidgetData'
 import { CardHeader, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -9,6 +10,8 @@ import { RefreshCw } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { DynamicScreenError } from '../DynamicScreenError'
+import { useTranslations } from 'next-intl'
+import { useFormatter } from "next-intl"
 
 const HEADER_SIZE = 60;
 const SUMMARY_SIZE = 45;
@@ -28,32 +31,16 @@ export function TeamAssignmentChartWidget({
   height
 }: TeamAssignmentChartWidgetProps) {
  
-  const [data, setData] = useState<TeamAssignment[] | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [lastRefresh, setLastRefresh] = useState<Date>(new Date())    
+  const t = useTranslations('DynamicScreen.Widgets.TeamAssignmentChart')  
+  const tc = useTranslations('Common')
+  const format = useFormatter();
+  const router = useRouter();
 
-  const fetchData = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const response = await fetch(`/api/data/team/assignment`)
-      if (!response.ok) throw new Error(`Failed to fetch team assignment: ${response.status}`)
-        const data = await response.json();
-        setData(data);
-        setLastRefresh(new Date());  
-      } catch (err) {
-        setError('Failed to load team assingment data')
-      } finally {
-        setLoading(false)
-      }
-  }
-
-  useEffect(() => {
-    fetchData()
-    const interval = setInterval(fetchData, refreshInterval)
-    return () => clearInterval(interval)
-  }, [refreshInterval])
+  const { data: data, loading, error, lastRefresh, refresh: fetchData } = useWidgetData<TeamAssignment[]>(
+    `/api/data/team/assignment`,
+    refreshInterval,
+    () => router.push('/'),
+  )
 
   const chartConfig:ChartConfig = {
     high_priority: {
@@ -128,9 +115,9 @@ export function TeamAssignmentChartWidget({
             
             {/* Summary */}
             <div className='flex flex-col gap-1 items-center'>
-              <div className="text-xs text-muted-foreground">Total Alert Count</div>
+              <div className="text-xs text-muted-foreground">{t('SummaryAlertCount')}</div>
               <div className="text-sm font-bold">
-                {data.length > 0 ? data.reduce((sum,d) => sum + d.total, 0).toLocaleString() : '0'}
+                {data.length > 0 ? format?.number(data.reduce((sum,d) => sum + d.total, 0)) : '0'}
               </div>
             </div>
           </div>  
@@ -138,7 +125,7 @@ export function TeamAssignmentChartWidget({
 
         <Separator className="mt-4" />
         <div className="mt-4 text-xs text-muted-foreground text-center">
-          Last updated: {lastRefresh.toLocaleTimeString()}
+          {tc('lastUpdated')}: {format?.dateTime(lastRefresh, {timeStyle: "medium"})}
         </div>
 
       </CardContent>

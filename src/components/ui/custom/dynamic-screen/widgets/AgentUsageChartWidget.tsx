@@ -1,6 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useWidgetData } from './helpers/useWidgetData'
 import { CardHeader, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'
@@ -10,6 +12,8 @@ import { DynamicScreenError } from '../DynamicScreenError'
 import { ChartTrendIndicator } from './helpers/ChartTrendIndicator'
 import { TimeRangeSelector } from './helpers/TimeRangeSelector'
 import { uniqueBy } from '@/lib/json'
+import { useTranslations } from 'next-intl'
+import { useFormatter } from "next-intl"
 
 const HEADER_SIZE = 60;
 const SUMMARY_SIZE = 45;
@@ -31,42 +35,27 @@ export function AgentUsageChartWidget({
   height
 }: AgentUsageChartWidgetProps) {
   
-  const [data, setData] = useState<AgentUsage[] | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [lastRefresh, setLastRefresh] = useState<Date>(new Date())
+  const t = useTranslations('DynamicScreen.Widgets.AlertUsageChart')  
+  const tc = useTranslations('Common')
+  const format = useFormatter();
+  const router = useRouter();
+
   const [selectedTimeRange, setSelectedTimeRange] = useState(timeRange)
 
-  const fetchData = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const response = await fetch(`/api/data/agent/usage?time_range=${selectedTimeRange}`)
-      if (!response.ok) throw new Error(`Failed to fetch alert handled: ${response.status}`)
-      const data:AgentUsage[] = await response.json();
-      setData(data);
-      setLastRefresh(new Date());  
-    } catch (err) {
-      setError('Failed to load alert handled data')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchData()
-    const interval = setInterval(fetchData, refreshInterval)
-    return () => clearInterval(interval)
-  }, [selectedTimeRange, refreshInterval])
+  const { data: data, loading, error, lastRefresh, refresh: fetchData } = useWidgetData<AgentUsage[]>(
+    `/api/data/agent/usage?time_range=${selectedTimeRange}`,
+    refreshInterval,
+    () => router.push('/'),
+  )
 
   const options = [
-    { key: '24h', value: 'Last 24 Hours' },
-    { key: '7d', value: 'Last 7 Days' },
-    { key: '30d', value: 'Last 30 Days' },
-    { key: '90d', value: 'Last 90 Days' },
-    { key: '6w', value: 'Last 6 Weeks' },
-    { key: '12w', value: 'Last 12 Weeks' },
-    { key: '6m', value: 'Last 6 Months' }
+    { key: '24h', value: tc('dateTimeLast24Hours') },
+    { key: '7d', value: tc('dateTimeLast7Days')},
+    { key: '30d', value: tc('dateTimeLast30Days')},
+    { key: '90d', value: tc('dateTimeLast90Days')},
+    { key: '6w', value: tc('dateTimeLast6Weeks')},
+    { key: '12w', value: tc('dateTimeLast12Weeks')},
+    { key: '6m', value: tc('dateTimeLast6Months')}
   ] as const
 
   // Calculate the available height for the chart
@@ -159,9 +148,9 @@ export function AgentUsageChartWidget({
 
             {/* Summary */}
             <div className='flex flex-col gap-1 items-center'>
-              <div className="text-xs text-muted-foreground">Total Token Cost</div>
+              <div className="text-xs text-muted-foreground">{t('SummaryTokenCost')}</div>
               <div className="text-sm font-bold">
-                {chartData.length > 0 ? data.reduce((sum,d) => sum + d.total_token_cost, 0).toLocaleString() : '0'}
+                {chartData.length > 0 ? format?.number(data.reduce((sum,d) => sum + d.total_token_cost, 0)) : '0'}
               </div>
             </div>
           </div>
@@ -169,7 +158,7 @@ export function AgentUsageChartWidget({
 
         {/* Last Updated */}
         <div className="text-xs text-muted-foreground text-center mt-2 pt-2 border-t">
-          Last updated: {lastRefresh.toLocaleTimeString()}
+          {tc('lastUpdated')}: {format?.dateTime(lastRefresh, {timeStyle: "medium"})}
         </div>
 
       </CardContent>

@@ -13,9 +13,7 @@ import { sectionRegistry } from '@/lib/component-section/section-registry';
 import { ApiOrchestrator } from '@/lib/entity-template/api-orchestrator';
 import type { TemplateContext } from '@/lib/component-section/types';
 import { ComponentSection } from '../types';
-
-// UUID validation regex
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import { validUuid } from '@/lib/helpers';
 
 /**
  * Shared handler for GET and POST requests.
@@ -38,7 +36,7 @@ async function handleRequest(
 
   if (!entity_id) return ErrorCreators.param.urlMissing(origin, 'entity_id');
   if (!section_code) return ErrorCreators.param.urlMissing(origin, 'section_code');
-  if (!UUID_REGEX.test(entity_id)) return ErrorCreators.param.typeInvalid(origin, 'entity_id', 'UUID', typeof entity_id);
+  if (!validUuid(entity_id)) return ErrorCreators.param.typeInvalid(origin, 'entity_id', 'UUID', typeof entity_id);
 
   try {
     const sectionDefinition = await sectionRegistry.getSectionForVersion(section_code, schema_version);

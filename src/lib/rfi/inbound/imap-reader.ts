@@ -87,6 +87,15 @@ async function doRead(
             const toObjects = parsed.to ? (Array.isArray(parsed.to) ? parsed.to : [parsed.to]) : [];
             const toAddresses = toObjects.flatMap((obj) => obj.value).map((a) => a.address ?? '').filter(Boolean);
 
+            const attachments = (parsed.attachments ?? [])
+                .filter(a => a.contentDisposition === 'attachment' && Buffer.isBuffer(a.content))
+                .map(a => ({
+                    filename: a.filename ?? 'attachment',
+                    content: a.content as Buffer,
+                    contentType: a.contentType,
+                    size: a.size,
+                }));
+
             const email: InboundRfiEmail = {
                 uid: msg.uid,
                 messageId: parsed.messageId,
@@ -96,6 +105,7 @@ async function doRead(
                 subject: parsed.subject ?? '',
                 date: parsed.date,
                 body_text: parsed.text ?? '',
+                attachments,
             };
 
             results.push(email);

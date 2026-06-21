@@ -1,6 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useWidgetData } from './helpers/useWidgetData'
 import { CardHeader, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
@@ -38,43 +40,20 @@ export function RfiAssignmentWidget({
   width,
   height
 }: RfiAssignmentWidgetProps) {
+
   const t = useTranslations('DynamicScreen.Widgets.RfiAssignment')
   const tc = useTranslations('Common')
   const format = useFormatter();
+  const router = useRouter();
   
-  const [rfis, setRfis] = useState<RfiRequest[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [lastRefresh, setLastRefresh] = useState<Date>(new Date())
   const [selectedTimeRange, setSelectedTimeRange] = useState(timeRange)
   const [onlyShowActive, setOnlyShowActive] = useState(false)
 
-  const fetchRfis = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-
-      const response = await fetch(`/api/data/rfi/rfi_request?time_range=${selectedTimeRange}`)
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch rfi_requests: ${response.status}`)
-      }
-
-      const data = await response.json()
-      setRfis(data)
-      setLastRefresh(new Date())
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load RFI Requests')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => { 
-    fetchRfis()
-    const interval = setInterval(fetchRfis, refreshInterval)
-    return () => clearInterval(interval)
-  }, [selectedTimeRange, refreshInterval])
+  const { data: rfis, loading, error, lastRefresh, refresh: fetchRfis } = useWidgetData<RfiRequest[]>(
+    `/api/data/rfi/rfi_request?time_range=${selectedTimeRange}`,
+    refreshInterval,
+    () => router.push('/'),
+  )
 
   const options = [
     { key: "1h", value: tc('dateTimeLast1Hour') },
@@ -84,8 +63,8 @@ export function RfiAssignmentWidget({
     { key: "90d", value: tc('dateTimeLast90Days') }
   ] as const
   
-  const activeCount = rfis.filter(r => r.entity_state.to_state_is_active).length
-  const displayRfis = onlyShowActive ? rfis.filter(r => r.entity_state.to_state_is_active) : rfis
+  const activeCount = rfis ? rfis.filter(r => r.entity_state.to_state_is_active).length : 0
+  const displayRfis = rfis ? onlyShowActive ? rfis?.filter(r => r.entity_state.to_state_is_active) : rfis : []
   const scrollSize = height - HEADER_SIZE - FOOTER_SIZE
 
   if (error) return <DynamicScreenError title={title} error={error} onClick={fetchRfis} />
@@ -124,7 +103,7 @@ export function RfiAssignmentWidget({
       </CardHeader>
       <Separator />
       <CardContent className="pt-4 pb-2 flex flex-col">
-        { loading && !rfis.length ? (
+        { !rfis ? (
           <div className="h-48 flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
@@ -195,7 +174,7 @@ export function RfiAssignmentWidget({
         )}
         {/* Last Updated */}
         <div className="text-xs text-muted-foreground text-center mt-2 pt-2 border-t">
-          Last updated: {format?.dateTime(lastRefresh, {timeStyle: "medium"})}
+          {tc('lastUpdated')}: {format?.dateTime(lastRefresh, {timeStyle: "medium"})}
         </div>
       </CardContent>
     </div>

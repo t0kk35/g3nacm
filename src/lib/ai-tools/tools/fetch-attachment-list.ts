@@ -12,7 +12,7 @@ const TOOL_NAME = 'fetch-attachment-list';
 
 export const fetchAttachmentListTool: AIToolDefinition = {
   name: TOOL_NAME,
-  description: 'Provides a list and description of files attached to the entity, not the file content. The files may provide additional data on the subject or the alert/case',
+  description: 'Provides a list and description of files attached to the entity, not the file content. The files may provide additional data on the subject or the alert/case/rfi_request/rfi_response',
   inputSchema: schema,
   handler: async (params): Promise<ToolResult> => {
     const { entityCode, entityId } = params;

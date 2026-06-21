@@ -28,7 +28,7 @@ export const fetchNextWorkflowAction: AIToolDefinition = {
       url.searchParams.append('org_unit_code', orgUnitCode);
       url.searchParams.append('entity_code', entityCode);
       
-      // Make the API call to fetch subject history
+      // Make the API call to fetch workflow
       const response = await authorizedFetch(url.toString());
       
       if (!response.ok) {

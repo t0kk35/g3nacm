@@ -81,7 +81,21 @@ export const TEMPLATE_VARIABLES: TemplateVariable[] = [
     category: 'Entity Data',
     type: 'object',
     example: '{ "id": "T-001", "amount": 10000, ... }'
-  }
+  },
+  {
+    name: 'rfi_request',
+    description: 'Original RFI Requsest (JSON)',
+    category: 'Entity Data',
+    type: 'object',
+    example: '{ "id": "A-001", "type": "TM", ... }'
+  },
+  {
+    name: 'rfi_responses',
+    description: 'Array of received RFI responses (JSON) [Could be empty]',
+    category: 'Entity Data',
+    type: 'object',
+    example: '{ "id": "A-001", "type": "TM", ... }'
+  },
 ];
 
 // Efficient lookup set for validation

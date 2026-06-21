@@ -85,7 +85,7 @@ export type RfiTemplate = {
 export type RfiRequest = {
   id: string;
   identifier: string;
-  entity_code: string;
+  entity_code: string;   // consider removing this is in the entity state also.
   org_unit_code: string;
   entity_display_url: string;
   direction: RfiDirection;
@@ -147,6 +147,7 @@ export type RfiQuestion = {
 export interface RfiResponse {
   id: string;
   entity_code: string;
+  org_unit_code: string;
   rfi_request_id: string;
   rfi_message_id?: string;
   repsonse_text?: string;
@@ -168,4 +169,5 @@ export interface RfiResponse {
   ai_structured_extraction?: Record<string, any>;
   create_datetime: string;
   update_datetime: string;
+  attachment_count:number;
 }

@@ -12,6 +12,8 @@ export interface TemplateContext {
   alert?: Record<string, any>;
   case?: Record<string, any>;
   transaction?: Record<string, any>;
+  rfi_request?: Record<string, any>;
+  rfi_responses?:Record<string, any>[];
   
   // Custom context - can be anything
   [key: string]: any;

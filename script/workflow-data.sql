@@ -67,9 +67,9 @@ INSERT INTO workflow_function_parameter
   ("code", "function_code", "name", "parameter_type", "direction") 
 VALUES 
   -- Input parameters
-  ('function.document.upload.org_unit_code', 'function.document.upload', 'Organisational Unit Code', 'string', 'Input'),
-  ('function.document.upload.file_data', 'function.document.upload', 'File Data', 'object', 'Input'),
-  ('function.document.upload.description', 'function.document.upload', 'Description', 'string', 'Input'),
+  ('function.document.upload.entity_code', 'function.document.upload', 'Entity code of the entity to which to document will be linked', 'string', 'Input'), 
+  ('function.document.upload.entity_id', 'function.document.upload', 'ID of the entity to which the document will be linked', 'string', 'Input'),
+  ('function.document.upload.files', 'function.document.upload', 'The files to be attached. This is an array of file + description + org_unit', 'fileuploadarray', 'Input'),
   -- Output parameters
   ('function.document.upload.document_id', 'function.document.upload', 'Document ID', 'string', 'Output'),
   ('function.document.upload.upload_date_time', 'function.document.upload', 'Upload Date Time', 'string', 'Output'),

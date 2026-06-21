@@ -15,9 +15,9 @@ import { ErrorCreators } from '@/lib/api-error-handling';
 import { requirePermissions } from '@/lib/permissions/check';
 import { getTemplateByEntityCode } from '@/lib/entity-template/registry';
 import { renderEntityTemplate } from '@/lib/entity-template/renderer';
+import { validUuid } from '@/lib/helpers';
 
 const origin = 'api/data/entity/rendered_detail';
-const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * GET handler for rendered entity detail
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
   if (!entityCode) return ErrorCreators.param.urlMissing(origin, 'entity_code');
 
   // Validate UUID format for entity_id
-  if (!uuidRegex.test(entityId)) {
+  if (!validUuid(entityId)) {
     return ErrorCreators.param.typeInvalid(
       origin,
       'entity_id',
